@@ -1,1 +1,1879 @@
-<!DOCTYPE html><html><body><h1>Test</h1></body></html>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestione Fattorini</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--surf:#ffffff;--surf2:#f0f1f4;--surf3:#e4e6eb;
+  --brd:#dde0e8;--brd2:#c8ccd6;
+  --acc:#2563eb;--acc2:#0891b2;--acc3:#dc2626;--acc4:#d97706;
+  --txt:#1a1d23;--mut:#6b7280;--dim:#9ca3af;
+  --grn:#16a34a;--cash:#b45309;--pur:#7c3aed;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+header{background:var(--surf);border-bottom:1px solid var(--brd);height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+.logo em{background:var(--acc);color:#000;padding:2px 8px;border-radius:5px;font-style:normal}
+.hfile{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);border:1px solid var(--brd2);padding:3px 11px;border-radius:20px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbtn{background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;color:var(--mut);font-size:11px;font-family:'DM Mono',monospace;padding:5px 12px;cursor:pointer;transition:all .15s}
+.hbtn:hover{color:var(--txt);border-color:var(--mut)}
+
+.layout{display:flex;min-height:calc(100vh - 56px)}
+aside{width:195px;min-width:195px;background:var(--surf);border-right:1px solid var(--brd);padding:14px 8px;display:flex;flex-direction:column;gap:3px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.aside-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;padding:0 8px;margin-bottom:6px}
+.drv-btn{padding:8px 10px;border-radius:7px;border:none;background:transparent;color:var(--mut);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:left;transition:all .15s;display:flex;align-items:center;gap:8px;width:100%}
+.drv-btn:hover{background:var(--surf2);color:var(--txt)}
+.drv-btn.on{background:var(--acc);color:#000;font-weight:600}
+.drv-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.drv-btn.on .drv-av{background:rgba(0,0,0,.15)!important}
+
+main{flex:1;padding:22px 26px;overflow-x:hidden}
+
+/* UPLOAD */
+.up-wrap{max-width:560px;margin:70px auto;text-align:center}
+.up-zone{border:2px dashed var(--brd2);border-radius:14px;padding:50px 30px;cursor:pointer;position:relative;background:var(--surf);transition:all .2s}
+.up-zone:hover,.up-zone.drag{border-color:var(--acc);background:rgba(200,255,71,.03)}
+.up-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-icon{font-size:40px;margin-bottom:12px}
+.up-h{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.up-s{font-size:13px;color:var(--mut)}
+.up-s strong{color:var(--acc)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:16px}
+.sc{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sy::after{background:var(--acc)}.sb::after{background:var(--acc2)}.so::after{background:var(--acc4)}
+.sg::after{background:var(--grn)}.sr::after{background:var(--acc3)}.sca::after{background:var(--cash)}.sp::after{background:var(--pur)}
+.sc-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.sc-v{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1;margin-bottom:2px}
+.sy .sc-v{color:var(--acc)}.sb .sc-v{color:var(--acc2)}.so .sc-v{color:var(--acc4)}
+.sg .sc-v{color:var(--grn)}.sr .sc-v{color:var(--acc3)}.sca .sc-v{color:var(--cash)}.sp .sc-v{color:var(--pur)}
+.sc-s{font-size:9px;color:var(--mut)}
+
+/* BANNERS */
+.banners{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.bnr{border-radius:12px;padding:13px 16px;border:1.5px solid;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bnr-bonus{background:linear-gradient(135deg,rgba(200,255,71,.07),transparent);border-color:rgba(200,255,71,.25)}
+.bnr-bonus.neg{background:linear-gradient(135deg,rgba(255,107,107,.06),transparent);border-color:rgba(255,107,107,.25)}
+.bnr-cash{background:linear-gradient(135deg,rgba(255,212,71,.07),transparent);border-color:rgba(255,212,71,.3)}
+.bnr-comp{background:linear-gradient(135deg,rgba(196,123,255,.07),transparent);border-color:rgba(196,123,255,.25)}
+.bnr-l{display:flex;align-items:center;gap:10px}
+.bnr-ico{font-size:20px}
+.bnr-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:800}
+.bnr-bonus .bnr-title{color:var(--acc)}.bnr-bonus.neg .bnr-title{color:var(--acc3)}
+.bnr-cash .bnr-title{color:var(--cash)}.bnr-comp .bnr-title{color:var(--pur)}
+.bnr-desc{font-size:10px;color:var(--mut);margin-top:2px}
+.bnr-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;white-space:nowrap}
+.bnr-bonus .bnr-val{color:var(--acc)}.bnr-bonus.neg .bnr-val{color:var(--acc3)}
+.bnr-cash .bnr-val{color:var(--cash)}.bnr-comp .bnr-val{color:var(--pur)}
+
+/* PANEL generico */
+.panel{background:var(--surf);border:1px solid var(--brd);border-radius:11px;padding:16px;margin-bottom:16px}
+.panel-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:var(--mut)}
+.inp{background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:6px 9px;outline:none;width:100%;transition:border-color .15s}
+.inp:focus{border-color:var(--acc)}
+select.inp{cursor:pointer}
+.btn{border:none;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .15s}
+.btn-acc{background:var(--acc);color:#000}
+.btn-acc:hover{opacity:.9}
+.btn-ghost{background:var(--surf2);border:1px solid var(--brd2);color:var(--mut)}
+.btn-ghost:hover{color:var(--txt);border-color:var(--mut)}
+.btn-red{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--acc3)}
+.btn-red:hover{background:rgba(255,107,107,.2)}
+
+/* TABS */
+.tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--surf);border:1px solid var(--brd);border-radius:9px;padding:3px;width:fit-content}
+.tab{padding:5px 14px;border-radius:6px;border:none;background:transparent;color:var(--mut);font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s}
+.tab:hover{color:var(--txt)}.tab.on{background:var(--surf3);color:var(--txt)}
+
+/* PILLS */
+.pills{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.pill{padding:4px 11px;border-radius:20px;border:1px solid var(--brd2);background:var(--surf);color:var(--mut);font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .15s}
+.pill:hover{color:var(--txt);border-color:var(--mut)}
+.pill.on{background:var(--surf3);border-color:var(--acc);color:var(--acc)}
+
+/* TABLE */
+.tw{background:var(--surf);border:1px solid var(--brd);border-radius:11px;overflow:hidden;margin-bottom:16px}
+.th{padding:10px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tt{font-family:'Syne',sans-serif;font-size:12px;font-weight:700}
+.ts{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:7px 10px;text-align:left;background:var(--surf2);border-bottom:1px solid var(--brd);white-space:nowrap}
+tbody td{padding:7px 10px;font-size:11px;border-bottom:1px solid rgba(37,37,41,.5);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.01)}
+.tr-tot td{background:var(--surf2)!important;font-weight:600;border-top:1px solid var(--brd2)!important}
+.tr-cash td{background:rgba(255,212,71,.03)!important}
+.tr-edit td{background:rgba(200,255,71,.04)!important}
+
+/* MONTH CARDS */
+.mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+.mc{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:13px;cursor:pointer;transition:all .15s}
+.mc:hover{border-color:var(--brd2)}.mc.on{border-color:var(--acc);background:rgba(200,255,71,.02)}
+.mc-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--dim);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px}
+.mc.on .mc-name{color:var(--acc)}
+.mc-rows{display:flex;flex-direction:column;gap:4px}
+.mc-row{display:flex;justify-content:space-between;font-size:10px}
+.mc-row span:first-child{color:var(--mut)}
+.mc-row span:last-child{font-family:'DM Mono',monospace}
+.mc-bar{height:2px;background:var(--brd2);border-radius:2px;overflow:hidden;margin-top:7px}
+.mc-fill{height:100%;border-radius:2px}
+.mc-cash{background:rgba(255,212,71,.07);border:1px solid rgba(255,212,71,.15);border-radius:5px;padding:5px 7px;margin-top:7px}
+.mc-comp{background:rgba(196,123,255,.07);border:1px solid rgba(196,123,255,.15);border-radius:5px;padding:5px 7px;margin-top:5px}
+
+/* MEZZO */
+.mday-row{display:grid;grid-template-columns:100px 125px 125px;gap:7px;align-items:center;background:var(--surf2);border-radius:6px;padding:6px 9px}
+.mday-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--mut)}
+.mday-sel{background:var(--surf3);border:1px solid var(--brd2);border-radius:5px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:3px 6px;outline:none;cursor:pointer;width:100%}
+.mday-sel:focus{border-color:var(--acc)}
+
+/* BADGES */
+.b{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-family:'DM Mono',monospace}
+.by{background:rgba(200,255,71,.1);color:var(--acc)}
+.bb{background:rgba(71,184,255,.1);color:var(--acc2)}
+.bg{background:rgba(94,234,141,.1);color:var(--grn)}
+.bo{background:rgba(255,159,71,.1);color:var(--acc4)}
+.br{background:rgba(255,107,107,.1);color:var(--acc3)}
+.bca{background:rgba(255,212,71,.15);color:var(--cash)}
+.bpur{background:rgba(196,123,255,.1);color:var(--pur)}
+.sm{font-size:10px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:3px}
+.sm-m{background:rgba(255,220,71,.1);color:#ffdc47}
+.sm-s{background:rgba(71,184,255,.1);color:var(--acc2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:transparent;border:none;color:var(--mut);font-size:20px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--txt)}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd)}
+
+/* PROGBAR */
+.progbar{height:3px;background:var(--brd2);border-radius:3px;overflow:hidden;margin-top:5px}
+.progfill{height:100%;border-radius:3px}
+
+.obj-rows{display:flex;flex-direction:column;gap:4px;width:100%}
+.obj-row{display:flex;justify-content:space-between;font-size:11px}
+.obj-row span:first-child{color:var(--mut)}
+.obj-row span:last-child{font-family:'DM Mono',monospace}
+
+.hidden{display:none!important}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><em>📦</em> Fattorini Dashboard</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="hfile" id="fileTag">nessun file caricato</div>
+    <button class="hbtn" onclick="document.getElementById('fileInput2').click()">+ Carica file</button>
+    <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none" onchange="loadFile(this.files[0])">
+    <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
+    <button class="hbtn" onclick="saveSession()" title="Salva tutti i dati in un file JSON" style="background:rgba(37,99,235,.1);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
+    <button class="hbtn" onclick="showLoadModal()" title="Carica una sessione salvata">📂 Carica sessione</button>
+    <input type="file" id="sessionInput" accept=".json" style="display:none" onchange="loadSession(this.files[0])">
+    <div style="width:1px;height:20px;background:var(--brd2)"></div>
+    <button class="hbtn" id="cloudBtn" onclick="showCloudModal()" title="Sincronizzazione cloud multi-PC (Firebase)" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.3);color:var(--pur)">☁️ Cloud Sync</button>
+    <div id="cloudDot" title="Stato cloud — clicca per dettagli" onclick="showCloudModal()" style="display:none;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut);cursor:pointer;padding:3px 7px;border-radius:12px;border:1px solid transparent;transition:all .15s">
+      <div style="width:7px;height:7px;border-radius:50%;background:#9ca3af;transition:background .4s" id="cloudDotCircle"></div>
+      <span id="cloudDotLabel">cloud</span>
+    </div>
+    <div style="width:1px;height:20px;background:var(--brd2)"></div>
+    <div id="autoSaveDot" title="Salvataggio automatico locale" style="display:none;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">
+      <div style="width:7px;height:7px;border-radius:50%;background:#9ca3af;transition:background .3s" id="autoSaveDotCircle"></div>
+      <span id="autoSaveDotLabel">locale</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen" style="position:fixed;inset:0;background:#f4f5f7;z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border:1px solid #dde0e8;border-radius:16px;padding:40px 36px;width:380px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.08)">
+    <div style="font-size:36px;margin-bottom:12px">📦</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;color:#1a1d23">Fattorini Dashboard</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:28px">Inserisci la password per accedere</div>
+    <input type="password" id="loginPwd" placeholder="Password"
+      style="width:100%;background:#f0f1f4;border:1.5px solid #dde0e8;border-radius:8px;color:#1a1d23;font-family:'DM Mono',monospace;font-size:14px;padding:11px 14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:3px"
+      onkeydown="if(event.key==='Enter')checkLogin()"
+      oninput="document.getElementById('loginErr').textContent=''">
+    <div id="loginErr" style="color:#dc2626;font-size:12px;margin-bottom:10px;height:16px"></div>
+    <button onclick="checkLogin()"
+      style="width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+      Accedi →
+    </button>
+    <div style="margin-top:20px;font-size:11px;color:#9ca3af">Accesso protetto — solo utenti autorizzati</div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside>
+    <div class="aside-title">Fattorini</div>
+    <button class="drv-btn" id="btnGlobal" onclick="selectGlobal()" style="margin-bottom:6px;border:1px solid var(--brd2)">
+      <div class="drv-av" style="background:rgba(37,99,235,.15);color:var(--acc)">📊</div>
+      <span>Riepilogo totale</span>
+    </button>
+    <div style="height:1px;background:var(--brd);margin:4px 0"></div>
+    <div id="drvList"><div style="color:var(--dim);font-size:11px;padding:8px">Carica un file Excel</div></div>
+  </aside>
+
+  <main>
+    <!-- UPLOAD -->
+    <div id="upWrap" class="hidden">
+      <div class="up-wrap">
+        <div class="up-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <div class="up-icon">📊</div>
+          <div class="up-h">Carica il report ordini</div>
+          <div class="up-s">Trascina o clicca · <strong>Extended_order_report.xlsx</strong></div>
+          <div class="up-s" style="margin-top:6px;color:var(--acc2)">Puoi caricare più file — i dati si accumulano</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dash" class="hidden">
+
+      <!-- DRIVER HEADER -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800" id="drvName">—</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:2px" id="drvSub">—</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-ghost" onclick="openEconPanel()">💼 Condizioni economiche</button>
+          <button class="btn btn-ghost" onclick="openSettingsPanel()">⚙ Impostazioni tecniche</button>
+        </div>
+      </div>
+
+      <!-- CONDIZIONI ECONOMICHE PANEL -->
+      <div class="panel hidden" id="econPanel">
+        <div class="panel-title">💼 Condizioni economiche — <span id="econDriverName"></span></div>
+        <div class="grid2" style="margin-bottom:12px">
+          <div class="field">
+            <label>Modalità di pagamento</label>
+            <select class="inp" id="econMode">
+              <option value="giornata">A giornata (importo fisso × giorni lavorati)</option>
+              <option value="mese">Al mese (importo fisso mensile)</option>
+              <option value="consegna">A consegna (tariffa × n° consegne)</option>
+            </select>
+          </div>
+          <div class="field" id="econImportoField">
+            <label id="econImportoLabel">Importo (€)</label>
+            <input class="inp" type="number" id="econImporto" value="0" step="0.5">
+          </div>
+        </div>
+        <div class="grid2" style="margin-bottom:12px">
+          <div class="field">
+            <label>Soglia cons. mattina (per bonus)</label>
+            <input class="inp" type="number" id="econSogliaMat" value="12.5" step="0.5">
+          </div>
+          <div class="field">
+            <label>Soglia cons. sera (per bonus)</label>
+            <input class="inp" type="number" id="econSogliaSer" value="14" step="0.5">
+          </div>
+          <div class="field">
+            <label>€ per consegna extra (bonus)</label>
+            <input class="inp" type="number" id="econBonusEuro" value="1.00" step="0.25">
+          </div>
+          <div class="field">
+            <label>Note contrattuali</label>
+            <input class="inp" type="text" id="econNote" placeholder="es. contratto part-time...">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-acc" onclick="saveEcon()">✓ Salva condizioni</button>
+          <button class="btn btn-ghost" onclick="closeEconPanel()">Annulla</button>
+        </div>
+      </div>
+
+      <!-- IMPOSTAZIONI TECNICHE PANEL -->
+      <div class="panel hidden" id="settPanel">
+        <div class="panel-title">⚙ Impostazioni tecniche — <span id="settDriverName"></span></div>
+        <div class="grid3">
+          <div class="field"><label>Soglia fuori paese (km)</label><input class="inp" type="number" id="cfgKmThresh" value="5" step="0.5"></div>
+          <div class="field"><label>Km max GPS valido</label><input class="inp" type="number" id="cfgKmMax" value="50" step="5"></div>
+          <div class="field"><label>Ora taglio mattina/sera</label><input class="inp" type="number" id="cfgCutHour" value="14" min="10" max="18"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-acc" onclick="saveSettings()">✓ Salva</button>
+          <button class="btn btn-ghost" onclick="closeSettPanel()">Annulla</button>
+        </div>
+      </div>
+
+      <!-- MEZZO PER TURNO -->
+      <div class="panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="panel-title" style="margin-bottom:0">🚗 Mezzo per turno — <span id="mezzoPeriodLabel"></span></div>
+          <div class="pills" id="mezzoPills" style="margin-bottom:0"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:100px 125px 125px;gap:7px;margin-bottom:6px">
+          <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Data</div>
+          <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">🌅 Mattina</div>
+          <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">🌙 Sera</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto" id="mezzoDayGrid"></div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats">
+        <div class="sc sy"><div class="sc-l">Consegne</div><div class="sc-v" id="stC">—</div><div class="sc-s" id="stCSub">—</div></div>
+        <div class="sc sr"><div class="sc-l">di cui Fuori Paese</div><div class="sc-v" id="stFP">—</div><div class="sc-s">incluse nel totale</div></div>
+        <div class="sc so"><div class="sc-l">Gg Mattina</div><div class="sc-v" id="stMat">—</div><div class="sc-s" id="stMatSub">—</div></div>
+        <div class="sc sb"><div class="sc-l">Gg Sera</div><div class="sc-v" id="stSer">—</div><div class="sc-s" id="stSerSub">—</div></div>
+        <div class="sc sg"><div class="sc-l">Cons. Extra</div><div class="sc-v" id="stExtra">—</div><div class="sc-s">sopra soglia</div></div>
+        <div class="sc sb"><div class="sc-l">🎫 Ticket</div><div class="sc-v" id="stTick">—</div><div class="sc-s">asterischi (*)</div></div>
+        <div class="sc sca"><div class="sc-l">💵 Cash</div><div class="sc-v" id="stCash">—</div><div class="sc-s" id="stCashSub">—</div></div>
+        <div class="sc sp"><div class="sc-l">Compenso Tot.</div><div class="sc-v" id="stComp">—</div><div class="sc-s">base + bonus</div></div>
+      </div>
+
+      <!-- BANNERS -->
+      <div class="banners">
+        <div class="bnr bnr-bonus" id="bnrBonus">
+          <div class="bnr-l">
+            <div class="bnr-ico" id="bIco">🏆</div>
+            <div><div class="bnr-title" id="bTitle">—</div><div class="bnr-desc" id="bDesc">—</div></div>
+          </div>
+          <div class="bnr-val" id="bVal">—</div>
+        </div>
+        <div class="bnr bnr-cash">
+          <div class="bnr-l">
+            <div class="bnr-ico">💵</div>
+            <div><div class="bnr-title">Incasso trattenuto CASH</div><div class="bnr-desc" id="cashDesc">—</div></div>
+          </div>
+          <div class="bnr-val" id="cashVal">—</div>
+        </div>
+        <div class="bnr bnr-comp">
+          <div class="bnr-l">
+            <div class="bnr-ico">💼</div>
+            <div><div class="bnr-title">Compenso mensile</div><div class="bnr-desc" id="compDesc">—</div></div>
+          </div>
+          <div class="bnr-val" id="compVal">—</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="tabs">
+          <button class="tab on" id="tabM" onclick="setTab('M')">Mensile</button>
+          <button class="tab" id="tabW" onclick="setTab('W')">Settimanale</button>
+          <button class="tab" id="tabD" onclick="setTab('D')">Giornaliero</button>
+          <button class="tab" id="tabO" onclick="setTab('O')">Ordini</button>
+        </div>
+        <div id="tabObjInfo" style="font-size:11px;color:var(--mut)"></div>
+      </div>
+
+      <!-- MONTHLY -->
+      <div id="viewM"><div class="mcards" id="mCards"></div></div>
+
+      <!-- WEEKLY -->
+      <div id="viewW" class="hidden">
+        <div class="pills" id="wPills"></div>
+        <div class="tw">
+          <div class="th"><div class="tt" id="wTitle">—</div></div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th>Settimana</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
+              <th>Cons. (tot.)</th><th>di cui F.P.</th><th>🌅</th><th>🌙</th>
+              <th>Attese</th><th>Extra</th><th>Bonus €</th><th>Cash ord.</th><th>💵 Cash €</th>
+            </tr></thead>
+            <tbody id="wBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- DAILY -->
+      <div id="viewD" class="hidden">
+        <div class="pills" id="dPills"></div>
+        <div class="tw">
+          <div class="th"><div class="tt" id="dSumTitle">—</div></div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th>Data</th><th>Giorno</th><th>Turno</th>
+              <th>Cons. (tot.)</th><th>di cui F.P.</th><th>🎫 Ticket</th><th>Attese</th><th>Extra</th><th>Bonus €</th>
+              <th>Cash ord.</th><th>💵 Cash €</th><th>Tariffa €</th><th>Compenso base €</th>
+            </tr></thead>
+            <tbody id="dSumBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ORDINI (edit/delete) -->
+      <div id="viewO" class="hidden">
+        <div class="pills" id="oPills"></div>
+        <div class="tw">
+          <div class="th">
+            <div class="tt" id="oTitle">—</div>
+            <div style="display:flex;gap:6px">
+              <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:200px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
+              <button class="btn btn-ghost" onclick="openAddOrder()">+ Aggiungi ordine</button>
+            </div>
+          </div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th>Data</th><th>Ora</th><th>Turno</th><th>N° Ordine</th>
+              <th>Ritiro da</th><th>Consegna a</th>
+              <th>Km</th><th>F.P. (>soglia)</th>
+              <th>Pagam.</th><th>Totale €</th><th>Tariffa €</th><th>Mezzo</th><th>Status</th>
+              <th>Azioni</th>
+            </tr></thead>
+            <tbody id="oBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- GLOBAL OVERVIEW -->
+      <div id="viewGlobal" class="hidden">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px">📊 Riepilogo totale — tutti i fattorini</div>
+        <!-- Month selector -->
+        <div class="pills" id="globalPills"></div>
+        <!-- Per-driver monthly table -->
+        <div class="tw" style="margin-bottom:20px">
+          <div class="th"><div class="tt" id="globalMonthTitle">Confronto mensile</div></div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th>Fattorino</th><th>Modalità pag.</th>
+              <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+              <th>🌅 Mat</th><th>🌙 Sera</th>
+              <th>Attese</th><th>Extra</th><th>Bonus €</th>
+              <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
+            </tr></thead>
+            <tbody id="globalMonthBody"></tbody>
+          </table></div>
+        </div>
+        <!-- Annual summary per driver -->
+        <div class="tw">
+          <div class="th"><div class="tt">Riepilogo annuale — tutti i fattorini</div></div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th>Fattorino</th><th>Modalità pag.</th>
+              <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+              <th>Mesi lav.</th><th>Media cons./mese</th>
+              <th>Bonus tot. €</th><th>💵 Cash tot. €</th>
+              <th>Tariffa tot. €</th><th>Compenso tot. €</th>
+            </tr></thead>
+            <tbody id="globalAnnualBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- EDIT/ADD ORDER MODAL -->
+<div class="modal-overlay hidden" id="orderModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitle">Modifica ordine</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field"><label>Data consegna</label><input class="inp" type="date" id="mDate"></div>
+      <div class="field"><label>Ora posizionamento</label><input class="inp" type="text" id="mTime" placeholder="es. 9:30 am"></div>
+      <div class="field"><label>N° Ordine</label><input class="inp" type="text" id="mOrderNum"></div>
+      <div class="field"><label>Metodo pagamento</label>
+        <select class="inp" id="mPayMethod">
+          <option value="CASH">CASH</option>
+          <option value="CARD">CARD</option>
+          <option value="N/A">N/A</option>
+        </select>
+      </div>
+      <div class="field"><label>Ritiro da</label><input class="inp" type="text" id="mRitiro"></div>
+      <div class="field"><label>Consegna a</label><input class="inp" type="text" id="mConsegna"></div>
+      <div class="field"><label>Km</label><input class="inp" type="number" id="mKm" step="0.01"></div>
+      <div class="field"><label>Totale ordine €</label><input class="inp" type="number" id="mTotal" step="0.01"></div>
+      <div class="field"><label>Tariffa consegna €</label><input class="inp" type="number" id="mFee" step="0.01"></div>
+      <div class="field"><label>Status</label>
+        <select class="inp" id="mStatus">
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Pending">Pending</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0"><label>Note</label><input class="inp" type="text" id="mNote" placeholder="Note opzionali"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+      <button class="btn btn-acc" onclick="saveOrder()">✓ Salva</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const GEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const GIT=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+const MEZZI=['—','Auto aziendale','Ford','Citroen','Scooter','Moto','Auto propria','Bici','Altro'];
+const COLORS=['#c8ff47','#47b8ff','#ff9f47','#5eea8d','#ff6b6b','#c47bff','#ffd447'];
+
+// D[name] = { orders[], mezzo{}, settings{}, econ{} }
+let D={}, cur=null, curMon=null, curTab='M';
+let editingOrderIdx=null; // index in D[cur].orders or null for new
+
+// ── UPLOAD ──
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+
+function loadFile(file){
+  document.getElementById('fileTag').textContent=file.name;
+  // Blocca il listener Firebase durante il caricamento
+  cloudPaused = true;
+  const r=new FileReader();
+  r.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));
+    // Forza upload immediato al cloud con i nuovi dati, poi riattiva il listener
+    if(cloudConnected && fbRef){
+      cloudSaving = true;
+      updateCloudStatus('saving');
+      fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D)})
+        .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ Excel caricato e sincronizzato sul cloud'); })
+        .catch(e=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('⚠️ Excel caricato ma errore cloud: '+e.message); });
+    } else {
+      cloudPaused = false;
+    }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+function parseTimeHour(str){
+  if(!str) return null;
+  const s=String(str).trim().toLowerCase();
+  const m=s.match(/(\d+):(\d+)\s*(am|pm)/);
+  if(!m) return null;
+  let h=parseInt(m[1]),mi=parseInt(m[2]),ap=m[3];
+  if(ap==='pm'&&h!==12)h+=12;
+  if(ap==='am'&&h===12)h=0;
+  return h+mi/60;
+}
+
+function parseRows(rows){
+  for(let i=2;i<rows.length;i++){
+    const r=rows[i];
+    if(!r||!r[7]) continue;
+    const name=String(r[7]).trim();
+    // Col S (idx 18) = Requested Delivery Date
+    const dateRaw=r[18]?String(r[18]).trim():(r[0]?String(r[0]).trim():null);
+    if(!dateRaw) continue;
+    const dateObj=new Date(dateRaw);
+    if(isNaN(dateObj)) continue;
+
+    if(!D[name]) D[name]={
+      orders:[],
+      mezzo:{},
+      settings:{kmThresh:5,kmMax:50,cutHour:14},
+      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:''}
+    };
+
+    const dateStr=fmtDate(dateObj);
+    const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
+    const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
+    // Count asterisks in order number field — each * = 1 ticket
+    const ticketCount = (orderNumRaw.match(/\*/g)||[]).length;
+    const isTicket = ticketCount > 0;
+
+    const order={
+      id: Date.now()+'_'+i+'_'+Math.random(),
+      date:dateObj, dateStr,
+      timeRaw:r[16]?String(r[16]).trim():'—',
+      timeHour:parseTimeHour(r[16]?String(r[16]):''),
+      dayEn:r[1]?String(r[1]).trim():'',
+      orderNum:orderNumRaw,
+      isTicket, ticketCount,
+      ritiroDa:r[3]?String(r[3]).trim():'—',
+      consegnaA:r[5]?String(r[5]).trim():'—',
+      payMethod, isCash:payMethod==='CASH',
+      total:parseFloat(r[9])||0,
+      fee:parseFloat(r[11])||0,
+      km:parseFloat(r[14])||0,
+      status:r[38]?String(r[38]).trim():'—',
+      monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
+      weekNum:getWeekOfMonth(dateObj),
+      deleted:false, note:''
+    };
+
+    // Deduplicate only for real order numbers (not tickets/special rows)
+    const isRealOrderNum = orderNumRaw && !isTicket && orderNumRaw !== '€ NS' && !isNaN(orderNumRaw);
+    const exists = isRealOrderNum && D[name].orders.some(o=>!o.deleted&&o.orderNum===orderNumRaw&&o.dateStr===order.dateStr);
+    if(!exists) D[name].orders.push(order);
+    if(!D[name].mezzo[dateStr]) D[name].mezzo[dateStr]={mat:'—',ser:'—'};
+  }
+  renderSidebar();
+  document.getElementById('upWrap').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  if(!cur||!D[cur]) cur=Object.keys(D)[0];
+  selectDriver(cur);
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+}
+
+// ── HELPERS ──
+function getWeekOfMonth(d){
+  const fd=new Date(d.getFullYear(),d.getMonth(),1);
+  // getDay(): 0=Sun..6=Sat → convert to Mon-based: Mon=0..Sun=6
+  const fdDow=(fd.getDay()+6)%7; // offset of first day from Monday
+  const dDow=(d.getDay()+6)%7;   // day of week Mon-based
+  return Math.ceil((d.getDate()+fdDow)/7);
+}
+function fmtDate(d){return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`}
+function parseDateStr(s){const[dd,mm,yyyy]=s.split('/');return new Date(yyyy,mm-1,dd)}
+function mlabel(mk){const[y,m]=mk.split('-');return MESI[parseInt(m)-1]+' '+y}
+function dayIt(en){const i=GEN.indexOf(en);return i>=0?GIT[i]:en}
+function vKm(km,mx){return km>0&&km<=mx}
+function getShift(o,ch){if(o.timeHour===null)return null;return o.timeHour<ch?'mat':'ser'}
+function activeOrders(name){return (D[name]?.orders||[]).filter(o=>!o.deleted)}
+function getMonths(name){return[...new Set(activeOrders(name).map(o=>o.monthKey))].sort()}
+function getDays(name,mk){return[...new Set(activeOrders(name).filter(o=>o.monthKey===mk).map(o=>o.dateStr))].sort((a,b)=>parseDateStr(a)-parseDateStr(b))}
+
+// ── SIDEBAR ──
+function renderSidebar(){
+  const list=document.getElementById('drvList');
+  list.innerHTML='';
+  Object.keys(D).forEach((name,i)=>{
+    const btn=document.createElement('button');
+    btn.className='drv-btn'+(name===cur?' on':'');
+    const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const col=COLORS[i%COLORS.length];
+    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>`;
+    btn.onclick=()=>selectDriver(name);
+    list.appendChild(btn);
+  });
+}
+
+function selectDriver(name){
+  cur=name;
+  document.getElementById('viewGlobal').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('upWrap').classList.add('hidden');
+  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span').textContent===name));
+  const months=getMonths(name);
+  if(!months.includes(curMon)) curMon=months[0]||null;
+  renderDriver();
+}
+
+// ── PANELS ──
+function openEconPanel(){
+  const e=D[cur].econ;
+  document.getElementById('econDriverName').textContent=cur;
+  document.getElementById('econMode').value=e.mode;
+  document.getElementById('econImporto').value=e.importo;
+  document.getElementById('econSogliaMat').value=e.sogliaMat;
+  document.getElementById('econSogliaSer').value=e.sogliaSer;
+  document.getElementById('econBonusEuro').value=e.bonusEuro;
+  document.getElementById('econNote').value=e.note||'';
+  updateEconLabel();
+  document.getElementById('econPanel').classList.remove('hidden');
+  document.getElementById('settPanel').classList.add('hidden');
+}
+function closeEconPanel(){document.getElementById('econPanel').classList.add('hidden')}
+function updateEconLabel(){
+  const mode=document.getElementById('econMode').value;
+  const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Tariffa per consegna (€)'};
+  document.getElementById('econImportoLabel').textContent=labels[mode]||'Importo (€)';
+}
+document.getElementById('econMode').addEventListener('change',updateEconLabel);
+function saveEcon(){
+  const e=D[cur].econ;
+  e.mode=document.getElementById('econMode').value;
+  e.importo=parseFloat(document.getElementById('econImporto').value)||0;
+  e.sogliaMat=parseFloat(document.getElementById('econSogliaMat').value)||12.5;
+  e.sogliaSer=parseFloat(document.getElementById('econSogliaSer').value)||14;
+  e.bonusEuro=parseFloat(document.getElementById('econBonusEuro').value)||1;
+  e.note=document.getElementById('econNote').value;
+  closeEconPanel();
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+}
+function openSettingsPanel(){
+  const s=D[cur].settings;
+  document.getElementById('settDriverName').textContent=cur;
+  document.getElementById('cfgKmThresh').value=s.kmThresh;
+  document.getElementById('cfgKmMax').value=s.kmMax;
+  document.getElementById('cfgCutHour').value=s.cutHour;
+  document.getElementById('settPanel').classList.remove('hidden');
+  document.getElementById('econPanel').classList.add('hidden');
+}
+function closeSettPanel(){document.getElementById('settPanel').classList.add('hidden')}
+function saveSettings(){
+  const s=D[cur].settings;
+  s.kmThresh=parseFloat(document.getElementById('cfgKmThresh').value)||5;
+  s.kmMax=parseFloat(document.getElementById('cfgKmMax').value)||50;
+  s.cutHour=parseFloat(document.getElementById('cfgCutHour').value)||14;
+  closeSettPanel();
+  renderDriver();
+  autoSaveToLocalStorage();
+}
+
+// ── MEZZO ──
+function renderMezzo(){
+  const months=getMonths(cur);
+  const pills=document.getElementById('mezzoPills');
+  pills.innerHTML='';
+  months.forEach(mk=>{
+    const p=document.createElement('button');
+    p.className='pill'+(mk===curMon?' on':'');
+    p.textContent=mlabel(mk);
+    p.onclick=()=>{curMon=mk;renderMezzo();renderCurrentTab()};
+    pills.appendChild(p);
+  });
+  document.getElementById('mezzoPeriodLabel').textContent=curMon?mlabel(curMon):'—';
+  const grid=document.getElementById('mezzoDayGrid');
+  grid.innerHTML='';
+  if(!curMon) return;
+  getDays(cur,curMon).forEach(ds=>{
+    if(!D[cur].mezzo[ds]) D[cur].mezzo[ds]={mat:'—',ser:'—'};
+    const mz=D[cur].mezzo[ds];
+    const row=document.createElement('div');
+    row.className='mday-row';
+    const lbl=document.createElement('div');lbl.className='mday-label';lbl.textContent=ds;
+    const selM=mkSel(mz.mat,v=>{D[cur].mezzo[ds].mat=v;autoSaveToLocalStorage();debouncedCloudSave();});
+    const selS=mkSel(mz.ser,v=>{D[cur].mezzo[ds].ser=v;autoSaveToLocalStorage();debouncedCloudSave();});
+    row.appendChild(lbl);row.appendChild(selM);row.appendChild(selS);
+    grid.appendChild(row);
+  });
+}
+function mkSel(current,onChange){
+  const sel=document.createElement('select');sel.className='mday-sel';
+  MEZZI.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;if(m===current)o.selected=true;sel.appendChild(o)});
+  sel.addEventListener('change',e=>onChange(e.target.value));
+  return sel;
+}
+
+// ── COMPUTE MONTH ──
+function computeMonth(name,mk){
+  const d=D[name];
+  const s=d.settings;
+  const e=d.econ;
+  const orders=activeOrders(name).filter(o=>o.monthKey===mk);
+  const byDay={};
+  orders.forEach(o=>{if(!byDay[o.dateStr])byDay[o.dateStr]=[];byDay[o.dateStr].push(o)});
+
+  let totC=0,totFP=0,totFee=0,totCash=0,cashOrds=0,daysWithMat=0,daysWithSer=0,totDays=0,totTickets=0;
+  const days=[];
+
+  Object.entries(byDay).sort((a,b)=>parseDateStr(a[0])-parseDateStr(b[0])).forEach(([ds,dayOrds])=>{
+    const vOrds=dayOrds.filter(o=>vKm(o.km,s.kmMax));
+    const fp=vOrds.filter(o=>o.km>s.kmThresh&&!o.isTicket).length;
+    const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
+    const cashN=dayOrds.filter(o=>o.isCash).length;
+    const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
+    // Tickets: count asterisks; Deliveries: non-ticket orders
+    const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
+    const deliveries=dayOrds.filter(o=>!o.isTicket);
+    const c=deliveries.length; // consegne (esclusi ticket)
+    const hasMat=deliveries.some(o=>getShift(o,s.cutHour)==='mat');
+    const hasSer=deliveries.some(o=>getShift(o,s.cutHour)==='ser');
+    if(hasMat)daysWithMat++;
+    if(hasSer)daysWithSer++;
+    totDays++;
+    const matC=deliveries.filter(o=>getShift(o,s.cutHour)==='mat').length;
+    const serC=deliveries.filter(o=>getShift(o,s.cutHour)==='ser').length;
+    const domShift=matC>0&&serC===0?'mat':serC>0&&matC===0?'ser':matC>0&&serC>0?'both':null;
+    totC+=c;totFP+=fp;totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;
+    days.push({ds,dayOrds,c,fp,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
+  });
+
+  // Bonus logic
+  const attesa=daysWithMat*e.sogliaMat+daysWithSer*e.sogliaSer;
+  const extra=Math.max(0,totC-attesa);
+  const bonus=extra*e.bonusEuro;
+
+  // Compenso base
+  let compBase=0;
+  if(e.mode==='giornata') compBase=totDays*e.importo;
+  else if(e.mode==='mese') compBase=e.importo;
+  else if(e.mode==='consegna') compBase=totC*e.importo;
+  const compTot=compBase+bonus;
+
+  return{orders,days,totC,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,attesa,extra,bonus,compBase,compTot,s,e};
+}
+
+// ── RENDER DRIVER ──
+function renderDriver(){
+  if(!cur||!D[cur]) return;
+  const months=getMonths(cur);
+  const d=D[cur];
+  const e=d.econ;
+
+  document.getElementById('drvName').textContent=cur;
+  document.getElementById('drvSub').textContent=`${activeOrders(cur).length} ordini · ${months.length} mesi · modalità: ${e.mode}${e.note?' · '+e.note:''}`;
+
+  renderMezzo();
+
+  // Aggregate
+  let aC=0,aFP=0,aFee=0,aCash=0,aCashO=0,aMat=0,aSer=0,aAtt=0,aExtra=0,aBonus=0,aCompBase=0,aCompTot=0,aDays=0,aTick=0,mesiOk=0;
+  const allMS={};
+  months.forEach(mk=>{
+    const ms=computeMonth(cur,mk);
+    allMS[mk]=ms;
+    if(ms.totC>0){
+      mesiOk++;aC+=ms.totC;aFP+=ms.totFP;aFee+=ms.totFee;aCash+=ms.totCash;aCashO+=ms.cashOrds;
+      aMat+=ms.daysWithMat;aSer+=ms.daysWithSer;aAtt+=ms.attesa;aExtra+=ms.extra;
+      aBonus+=ms.bonus;aCompBase+=ms.compBase;aCompTot+=ms.compTot;aDays+=ms.totDays;aTick+=ms.totTickets;
+    }
+  });
+
+  document.getElementById('stC').textContent=aC;
+  document.getElementById('stCSub').textContent=`${mesiOk} ${mesiOk===1?'mese':'mesi'} · incl. ${aFP} f.p.`;
+  document.getElementById('stFP').textContent=aFP;
+  document.getElementById('stMat').textContent=aMat;
+  document.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
+  document.getElementById('stSer').textContent=aSer;
+  document.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/giorno`;
+  document.getElementById('stExtra').textContent=aExtra>0?'+'+aExtra.toFixed(1):0;
+  document.getElementById('stTick').textContent=aTick;
+  document.getElementById('stCash').textContent='€'+aCash.toFixed(2);
+  document.getElementById('stCashSub').textContent=`${aCashO} ord. cash`;
+  document.getElementById('stComp').textContent='€'+aCompTot.toFixed(2);
+
+  // Bonus banner
+  const bnr=document.getElementById('bnrBonus');
+  if(aBonus>0){
+    bnr.classList.remove('neg');
+    document.getElementById('bIco').textContent='🏆';
+    document.getElementById('bTitle').textContent='Bonus maturato 🎉';
+    document.getElementById('bDesc').textContent=`${aExtra.toFixed(1)} cons. extra × €${e.bonusEuro}`;
+    document.getElementById('bVal').textContent='€'+aBonus.toFixed(2);
+  } else {
+    bnr.classList.add('neg');
+    document.getElementById('bIco').textContent='🎯';
+    document.getElementById('bTitle').textContent='Bonus non maturato';
+    document.getElementById('bDesc').textContent=`Reali: ${aC} · Attese: ${aAtt.toFixed(1)}`;
+    document.getElementById('bVal').textContent='€0.00';
+  }
+
+  // Cash banner
+  document.getElementById('cashDesc').textContent=`${aCashO} ordini pagati in contanti`;
+  document.getElementById('cashVal').textContent='€'+aCash.toFixed(2);
+
+  // Compenso banner
+  const modeLabel={giornata:`${aDays} gg × €${e.importo}`,mese:`fisso mensile × ${mesiOk} mesi`,consegna:`${aC} cons. × €${e.importo}`}[e.mode];
+  document.getElementById('compDesc').textContent=`${modeLabel} + bonus €${aBonus.toFixed(2)}`;
+  document.getElementById('compVal').textContent='€'+aCompTot.toFixed(2);
+
+  // Tab info
+  const pct=aAtt>0?Math.min(200,aC/aAtt*100):0;
+  document.getElementById('tabObjInfo').textContent=`Obiettivo: ${pct.toFixed(0)}% (${aC}/${aAtt.toFixed(0)} consegne)`;
+
+  renderMonthly(allMS,months);
+  renderCurrentTab();
+}
+
+function renderCurrentTab(){
+  if(curTab==='W')renderWeekly();
+  else if(curTab==='D')renderDaily();
+  else if(curTab==='O')renderOrders();
+}
+
+// ── MONTHLY ──
+function renderMonthly(allMS,months){
+  const grid=document.getElementById('mCards');
+  grid.innerHTML='';
+  months.forEach(mk=>{
+    const ms=allMS[mk]||computeMonth(cur,mk);
+    const e=ms.e;
+    const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
+    const bc=pct>=100?'#5eea8d':'#ff6b6b';
+    const mz=D[cur].mezzo;
+    const card=document.createElement('div');
+    card.className='mc'+(mk===curMon?' on':'');
+    const modeStr={giornata:`${ms.totDays} gg × €${e.importo}`,mese:`€${e.importo}/mese`,consegna:`${ms.totC} × €${e.importo}`}[e.mode];
+    card.innerHTML=`
+      <div class="mc-name">${mlabel(mk)}</div>
+      <div class="mc-rows">
+        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC} <span style="font-size:9px;color:var(--mut)">(f.p.: ${ms.totFP})</span></span></div>
+        <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
+        <div class="mc-row"><span>Extra / Bonus</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)} / €${ms.bonus.toFixed(2)}</span></div>
+        <div class="mc-row"><span>🌅 Mat / 🌙 Sera</span><span>${ms.daysWithMat} / ${ms.daysWithSer}</span></div>
+        <div class="mc-row"><span>Tariffa tot.</span><span>€${ms.totFee.toFixed(2)}</span></div>
+      </div>
+      <div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
+      <div style="font-size:9px;color:var(--mut);text-align:right;margin-top:3px">${pct.toFixed(0)}% obiettivo</div>
+      <div class="mc-cash">
+        <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--cash)">💵 Cash trattenuto</span><span style="font-family:'DM Mono',monospace;color:var(--cash);font-weight:600">€${ms.totCash.toFixed(2)}</span></div>
+        <div style="font-size:10px;color:var(--mut)">${ms.cashOrds} ordini cash</div>
+      </div>
+      <div class="mc-comp">
+        <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--pur)">💼 Compenso</span><span style="font-family:'DM Mono',monospace;color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</span></div>
+        <div style="font-size:10px;color:var(--mut)">${modeStr} + bonus</div>
+      </div>`;
+    card.onclick=()=>{curMon=mk;setTab('D')};
+    grid.appendChild(card);
+  });
+}
+
+// ── PILLS ──
+function makePills(id,months,cb){
+  const c=document.getElementById(id);if(!c)return;
+  c.innerHTML='';
+  months.forEach(mk=>{
+    const p=document.createElement('button');
+    p.className='pill'+(mk===curMon?' on':'');
+    p.textContent=mlabel(mk);
+    p.onclick=()=>{curMon=mk;cb()};
+    c.appendChild(p);
+  });
+}
+
+// ── WEEKLY ──
+function renderWeekly(){
+  const months=getMonths(cur);
+  makePills('wPills',months,()=>renderWeekly());
+  if(!curMon)return;
+  document.getElementById('wTitle').textContent=mlabel(curMon)+' — Settimanale';
+  const ms=computeMonth(cur,curMon);
+  const s=ms.s,e=ms.e;
+
+  const byWeek={};
+  ms.days.forEach(day=>{
+    const wk=activeOrders(cur).find(o=>o.dateStr===day.ds)?.weekNum||1;
+    if(!byWeek[wk])byWeek[wk]=[];byWeek[wk].push(day);
+  });
+
+  const tb=document.getElementById('wBody');tb.innerHTML='';
+  let rtC=0,rtFP=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
+
+  Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
+    const wd=byWeek[wk];
+    const wAtt=wd.reduce((a,d)=>{let x=0;if(d.hasMat)x+=e.sogliaMat;if(d.hasSer)x+=e.sogliaSer;return a+x},0);
+    const wC=wd.reduce((a,d)=>a+d.c,0);
+    const wFP=wd.reduce((a,d)=>a+d.fp,0);
+    const wM=wd.filter(d=>d.hasMat).length,wS=wd.filter(d=>d.hasSer).length;
+    const wEx=Math.max(0,wC-wAtt),wBn=wEx*e.bonusEuro;
+    const wCO=wd.reduce((a,d)=>a+d.cashOrds,0),wCa=wd.reduce((a,d)=>a+d.cash,0);
+    const cnt=[1,2,3,4,5,6,0].map(dow=>wd.filter(d=>{
+      const o=activeOrders(cur).find(o=>o.dateStr===d.ds);return o?.date.getDay()===dow;
+    }).reduce((a,d)=>a+d.c,0));
+    rtC+=wC;rtFP+=wFP;rtM+=wM;rtS+=wS;rtAt+=wAtt;rtEx+=wEx;rtBn+=wBn;rtCO+=wCO;rtCa+=wCa;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="b bb">Sett.${wk}</span></td>
+      ${cnt.map(c=>c>0?`<td><span class="b bg">${c}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
+      <td><span class="b by">${wC}</span></td>
+      <td>${wFP>0?`<span class="b br">${wFP}</span>`:'—'}</td>
+      <td><span class="sm sm-m">${wM}</span></td><td><span class="sm sm-s">${wS}</span></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${wAtt.toFixed(1)}</td>
+      <td style="color:${wEx>0?'var(--grn)':'var(--dim)'}">+${wEx.toFixed(1)}</td>
+      <td style="color:${wBn>0?'var(--grn)':'var(--dim)'}">${wBn>0?'€'+wBn.toFixed(2):'—'}</td>
+      <td>${wCO>0?`<span class="b bca">${wCO}</span>`:'—'}</td>
+      <td style="color:var(--cash)">${wCa>0?'€'+wCa.toFixed(2):'—'}</td>`;
+    tb.appendChild(tr);
+  });
+  const tot=document.createElement('tr');tot.className='tr-tot';
+  tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace">TOTALE</td><td colspan="7"></td>
+    <td><span class="b by">${rtC}</span></td><td>${rtFP>0?`<span class="b br">${rtFP}</span>`:'—'}</td>
+    <td><span class="sm sm-m">${rtM}</span></td><td><span class="sm sm-s">${rtS}</span></td>
+    <td style="font-family:'DM Mono',monospace">${rtAt.toFixed(1)}</td>
+    <td style="color:${rtEx>0?'var(--grn)':'var(--dim)'}">+${rtEx.toFixed(1)}</td>
+    <td style="color:${rtBn>0?'var(--grn)':'var(--dim)'}">${rtBn>0?'€'+rtBn.toFixed(2):'—'}</td>
+    <td>${rtCO>0?`<span class="b bca">${rtCO}</span>`:'—'}</td>
+    <td style="color:var(--cash)">${rtCa>0?'€'+rtCa.toFixed(2):'—'}</td>`;
+  tb.appendChild(tot);
+}
+
+// ── DAILY ──
+function renderDaily(){
+  const months=getMonths(cur);
+  makePills('dPills',months,()=>renderDaily());
+  if(!curMon)return;
+  document.getElementById('dSumTitle').textContent=mlabel(curMon)+' — Giornaliero';
+  const ms=computeMonth(cur,curMon);
+  const e=ms.e;
+  const tb=document.getElementById('dSumBody');tb.innerHTML='';
+  let rC=0,rFP=0,rAt=0,rEx=0,rBn=0,rCO=0,rCa=0,rFee=0,rCmp=0,rTick=0;
+
+  ms.days.forEach(day=>{
+    const att=(day.hasMat?e.sogliaMat:0)+(day.hasSer?e.sogliaSer:0);
+    const ext=Math.max(0,day.c-att),bon=ext*e.bonusEuro;
+    let cmpBase=0;
+    if(e.mode==='giornata')cmpBase=e.importo;
+    else if(e.mode==='consegna')cmpBase=day.c*e.importo;
+    else cmpBase=e.importo/30; // mese: approssimazione giornaliera
+    rC+=day.c;rFP+=day.fp;rAt+=att;rEx+=ext;rBn+=bon;rCO+=day.cashOrds;rCa+=day.cash;rFee+=day.fee;rCmp+=cmpBase;rTick+=day.dayTickets||0;
+    const sb=day.domShift==='mat'?'<span class="sm sm-m">🌅 Mattina</span>':
+      day.domShift==='ser'?'<span class="sm sm-s">🌙 Sera</span>':
+      day.domShift==='both'?'<span class="sm sm-m">🌅</span> <span class="sm sm-s">🌙</span>':
+      '<span style="color:var(--dim)">—</span>';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
+      <td>${dayIt(activeOrders(cur).find(o=>o.dateStr===day.ds)?.dayEn||'')}</td>
+      <td>${sb}</td>
+      <td><span class="b by">${day.c}</span></td>
+      <td>${day.fp>0?`<span class="b br">${day.fp}</span>`:'—'}</td>
+      <td>${day.dayTickets>0?`<span class="b bb">${day.dayTickets}</span>`:'—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${att.toFixed(1)}</td>
+      <td style="color:${ext>0?'var(--grn)':'var(--dim)'}">+${ext.toFixed(1)}</td>
+      <td style="color:${bon>0?'var(--grn)':'var(--dim)'}">${bon>0?'€'+bon.toFixed(2):'—'}</td>
+      <td>${day.cashOrds>0?`<span class="b bca">${day.cashOrds}</span>`:'—'}</td>
+      <td style="color:var(--cash)">${day.cash>0?'€'+day.cash.toFixed(2):'—'}</td>
+      <td>€${day.fee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>`;
+    tb.appendChild(tr);
+  });
+  const tot=document.createElement('tr');tot.className='tr-tot';
+  tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace" colspan="3">TOTALE</td>
+    <td><span class="b by">${rC}</span></td><td>${rFP>0?`<span class="b br">${rFP}</span>`:'—'}</td>
+    <td style="font-family:'DM Mono',monospace;color:var(--acc2)">${rTick>0?rTick:'—'}</td>
+    <td style="font-family:'DM Mono',monospace">${rAt.toFixed(1)}</td>
+    <td style="color:${rEx>0?'var(--grn)':'var(--dim)'}">+${rEx.toFixed(1)}</td>
+    <td style="color:${rBn>0?'var(--grn)':'var(--dim)'}">${rBn>0?'€'+rBn.toFixed(2):'—'}</td>
+    <td>${rCO>0?`<span class="b bca">${rCO}</span>`:'—'}</td>
+    <td style="color:var(--cash)">${rCa>0?'€'+rCa.toFixed(2):'—'}</td>
+    <td>€${rFee.toFixed(2)}</td>
+    <td style="color:var(--pur)">€${rCmp.toFixed(2)}</td>`;
+  tb.appendChild(tot);
+}
+
+// ── ORDINI (edit/delete) ──
+function renderOrders(){
+  if(!cur||!D[cur])return;
+  const months=getMonths(cur);
+  makePills('oPills',months,()=>renderOrders());
+  if(!curMon||!months.includes(curMon))curMon=months[0]||null;
+  if(!curMon)return;
+  document.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
+  const s=D[cur].settings,e=D[cur].econ;
+  const search=(document.getElementById('oSearch').value||'').toLowerCase();
+  const orders=activeOrders(cur).filter(o=>o.monthKey===curMon)
+    .filter(o=>!search||o.orderNum.toString().includes(search)||o.ritiroDa.toLowerCase().includes(search)||o.consegnaA.toLowerCase().includes(search))
+    .sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0));
+
+  const tb=document.getElementById('oBody');tb.innerHTML='';
+  orders.forEach((o,i)=>{
+    const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
+    const shift=getShift(o,s.cutHour);
+    const shiftB=shift==='mat'?'<span class="sm sm-m">🌅</span>':shift==='ser'?'<span class="sm sm-s">🌙</span>':'<span style="color:var(--dim)">?</span>';
+    const payB=o.isCash?'<span class="b bca">CASH</span>':o.payMethod==='CARD'?'<span class="b bb">CARD</span>':`<span style="color:var(--dim)">${o.payMethod}</span>`;
+    const mz=D[cur].mezzo[o.dateStr]||{};
+    const mezzoVal=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
+    const realIdx=D[cur].orders.indexOf(o);
+    const tr=document.createElement('tr');
+    if(o.isCash)tr.classList.add('tr-cash');
+    tr.innerHTML=`
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${o.dateStr}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${o.timeRaw}</td>
+      <td>${shiftB}</td>
+      <td>${o.isTicket?`<span class="b bg">🎫 ${o.orderNum}</span>`:`<span class="b bb">#${o.orderNum}</span>`}</td>
+      <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa}</td>
+      <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':kmV?'var(--txt)':'var(--dim)'}">${kmV?o.km.toFixed(2)+'km':'n/d'}</td>
+      <td>${isFP?'<span class="b br">✓</span>':'—'}</td>
+      <td>${payB}</td>
+      <td>€${o.total.toFixed(2)}</td>
+      <td>€${o.fee.toFixed(2)}</td>
+      <td><span class="b bo">${mezzoVal}</span></td>
+      <td><span class="b ${o.status==='Delivered'?'bg':'br'}">${o.status}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder(${realIdx})">✏ Modifica</button>
+        <button class="btn btn-red" style="padding:3px 8px;font-size:10px;margin-left:3px" onclick="deleteOrder(${realIdx})">✕</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+  if(!orders.length){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="14" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+// ── ORDER MODAL ──
+function openAddOrder(){
+  editingOrderIdx=null;
+  document.getElementById('modalTitle').textContent='Nuovo ordine';
+  document.getElementById('mDate').value='';
+  document.getElementById('mTime').value='';
+  document.getElementById('mOrderNum').value='';
+  document.getElementById('mPayMethod').value='CASH';
+  document.getElementById('mRitiro').value='';
+  document.getElementById('mConsegna').value='';
+  document.getElementById('mKm').value='';
+  document.getElementById('mTotal').value='';
+  document.getElementById('mFee').value='';
+  document.getElementById('mStatus').value='Delivered';
+  document.getElementById('mNote').value='';
+  document.getElementById('orderModal').classList.remove('hidden');
+}
+
+function openEditOrder(idx){
+  const o=D[cur].orders[idx];
+  if(!o)return;
+  editingOrderIdx=idx;
+  document.getElementById('modalTitle').textContent='Modifica ordine #'+o.orderNum;
+  // Convert dateStr DD/MM/YYYY → YYYY-MM-DD for input[type=date]
+  const[dd,mm,yyyy]=o.dateStr.split('/');
+  document.getElementById('mDate').value=`${yyyy}-${mm}-${dd}`;
+  document.getElementById('mTime').value=o.timeRaw==='—'?'':o.timeRaw;
+  document.getElementById('mOrderNum').value=o.orderNum;
+  document.getElementById('mPayMethod').value=o.payMethod==='N/A'?'N/A':o.payMethod;
+  document.getElementById('mRitiro').value=o.ritiroDa==='—'?'':o.ritiroDa;
+  document.getElementById('mConsegna').value=o.consegnaA==='—'?'':o.consegnaA;
+  document.getElementById('mKm').value=o.km||'';
+  document.getElementById('mTotal').value=o.total||'';
+  document.getElementById('mFee').value=o.fee||'';
+  document.getElementById('mStatus').value=o.status;
+  document.getElementById('mNote').value=o.note||'';
+  document.getElementById('orderModal').classList.remove('hidden');
+}
+
+function closeModal(){document.getElementById('orderModal').classList.add('hidden');editingOrderIdx=null}
+
+function saveOrder(){
+  const dateVal=document.getElementById('mDate').value;
+  if(!dateVal){alert('Inserisci una data');return}
+  const dateObj=new Date(dateVal);
+  const dateStr=fmtDate(dateObj);
+  const payMethod=document.getElementById('mPayMethod').value;
+  const timeRaw=document.getElementById('mTime').value||'—';
+
+  const orderNumRaw2 = document.getElementById('mOrderNum').value||'MANUAL';
+  const ticketCount2 = (orderNumRaw2.match(/\*/g)||[]).length;
+  const orderData={
+    id: editingOrderIdx!==null ? D[cur].orders[editingOrderIdx].id : Date.now()+'_'+Math.random(),
+    date:dateObj, dateStr,
+    timeRaw,
+    timeHour:parseTimeHour(timeRaw),
+    dayEn:GEN[dateObj.getDay()],
+    orderNum:orderNumRaw2,
+    isTicket: ticketCount2 > 0,
+    ticketCount: ticketCount2,
+    ritiroDa:document.getElementById('mRitiro').value||'—',
+    consegnaA:document.getElementById('mConsegna').value||'—',
+    payMethod, isCash:payMethod==='CASH',
+    total:parseFloat(document.getElementById('mTotal').value)||0,
+    fee:parseFloat(document.getElementById('mFee').value)||0,
+    km:parseFloat(document.getElementById('mKm').value)||0,
+    status:document.getElementById('mStatus').value,
+    monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
+    weekNum:getWeekOfMonth(dateObj),
+    deleted:false,
+    note:document.getElementById('mNote').value
+  };
+
+  if(editingOrderIdx!==null){
+    D[cur].orders[editingOrderIdx]=orderData;
+  } else {
+    D[cur].orders.push(orderData);
+  }
+  if(!D[cur].mezzo[dateStr]) D[cur].mezzo[dateStr]={mat:'—',ser:'—'};
+  curMon=orderData.monthKey;
+  closeModal();
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+}
+
+function deleteOrder(idx){
+  const o=D[cur].orders[idx];
+  if(!o)return;
+  if(!confirm(`Eliminare l'ordine #${o.orderNum} del ${o.dateStr}?`))return;
+  D[cur].orders[idx].deleted=true;
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+}
+
+// ── TABS ──
+function setTab(t){
+  curTab=t;
+  ['M','W','D','O'].forEach(x=>{
+    document.getElementById('tab'+x).classList.toggle('on',x===t);
+    document.getElementById('view'+x).classList.toggle('hidden',x!==t);
+  });
+  // Ensure curMon is valid before rendering
+  if(cur&&D[cur]){
+    const months=getMonths(cur);
+    if(!curMon||!months.includes(curMon))curMon=months[0]||null;
+  }
+  renderCurrentTab();
+}
+
+// ── GLOBAL OVERVIEW ──
+let globalMonth = null;
+
+function selectGlobal(){
+  cur = null;
+  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
+  // Hide driver dashboard, show global
+  document.getElementById('dash').classList.add('hidden');
+  document.getElementById('viewGlobal').classList.remove('hidden');
+  // Collect all months across all drivers
+  const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
+  if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
+  renderGlobal();
+}
+
+function renderGlobal(){
+  const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
+  // Pills
+  const pills = document.getElementById('globalPills');
+  pills.innerHTML = '';
+  allMonths.forEach(mk=>{
+    const p = document.createElement('button');
+    p.className = 'pill'+(mk===globalMonth?' on':'');
+    p.textContent = mlabel(mk);
+    p.onclick = ()=>{ globalMonth=mk; renderGlobal(); };
+    pills.appendChild(p);
+  });
+
+  document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
+
+  // Monthly table
+  const mBody = document.getElementById('globalMonthBody');
+  mBody.innerHTML = '';
+  let mTotC=0,mTotFP=0,mTotTick=0,mTotMat=0,mTotSer=0,mTotAtt=0,mTotEx=0,mTotBn=0,mTotCash=0,mTotFee=0,mTotComp=0;
+
+  Object.keys(D).forEach(name=>{
+    const months = getMonths(name);
+    if(!months.includes(globalMonth)) return;
+    const ms = computeMonth(name, globalMonth);
+    mTotC+=ms.totC;mTotFP+=ms.totFP;mTotTick+=ms.totTickets;mTotMat+=ms.daysWithMat;mTotSer+=ms.daysWithSer;
+    mTotAtt+=ms.attesa;mTotEx+=ms.extra;mTotBn+=ms.bonus;mTotCash+=ms.totCash;mTotFee+=ms.totFee;mTotComp+=ms.compTot;
+    const e=ms.e;
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
+    const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${name}</strong></td>
+      <td><span class="b bo">${modeStr}</span></td>
+      <td><span class="b by">${ms.totC}</span></td>
+      <td>${ms.totFP>0?`<span class="b br">${ms.totFP}</span>`:'—'}</td>
+      <td>${ms.totTickets>0?`<span class="b bb">🎫 ${ms.totTickets}</span>`:'—'}</td>
+      <td><span class="sm sm-m">${ms.daysWithMat}</span></td>
+      <td><span class="sm sm-s">${ms.daysWithSer}</span></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${ms.attesa.toFixed(1)}</td>
+      <td style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)}</td>
+      <td style="color:${ms.bonus>0?'var(--grn)':'var(--dim)'}">${ms.bonus>0?'€'+ms.bonus.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${ms.totCash>0?'€'+ms.totCash.toFixed(2):'—'}</td>
+      <td>€${ms.totFee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</td>`;
+    mBody.appendChild(tr);
+  });
+
+  // Monthly totals row
+  const mTot = document.createElement('tr');
+  mTot.className = 'tr-tot';
+  mTot.innerHTML=`
+    <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE MESE</td>
+    <td><span class="b by">${mTotC}</span></td>
+    <td>${mTotFP>0?`<span class="b br">${mTotFP}</span>`:'—'}</td>
+    <td>${mTotTick>0?`<span class="b bb">🎫 ${mTotTick}</span>`:'—'}</td>
+    <td><span class="sm sm-m">${mTotMat}</span></td>
+    <td><span class="sm sm-s">${mTotSer}</span></td>
+    <td style="font-family:'DM Mono',monospace">${mTotAtt.toFixed(1)}</td>
+    <td style="color:${mTotEx>0?'var(--grn)':'var(--dim)'}">+${mTotEx.toFixed(1)}</td>
+    <td style="color:${mTotBn>0?'var(--grn)':'var(--dim)'}">${mTotBn>0?'€'+mTotBn.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${mTotCash>0?'€'+mTotCash.toFixed(2):'—'}</td>
+    <td>€${mTotFee.toFixed(2)}</td>
+    <td style="color:var(--pur);font-weight:600">€${mTotComp.toFixed(2)}</td>`;
+  mBody.appendChild(mTot);
+
+  // Annual table
+  const aBody = document.getElementById('globalAnnualBody');
+  aBody.innerHTML = '';
+  let aTotC=0,aTotFP=0,aTotTick=0,aTotBn=0,aTotCash=0,aTotFee=0,aTotComp=0;
+
+  Object.keys(D).forEach(name=>{
+    const months = getMonths(name);
+    if(!months.length) return;
+    let tC=0,tFP=0,tTick=0,tBn=0,tCash=0,tFee=0,tComp=0,mesiOk=0;
+    months.forEach(mk=>{
+      const ms=computeMonth(name,mk);
+      if(ms.totC>0){ tC+=ms.totC;tFP+=ms.totFP;tTick+=ms.totTickets;tBn+=ms.bonus;tCash+=ms.totCash;tFee+=ms.totFee;tComp+=ms.compTot;mesiOk++; }
+    });
+    const media = mesiOk>0?(tC/mesiOk).toFixed(1):0;
+    const e=D[name].econ;
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
+    aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${name}</strong></td>
+      <td><span class="b bo">${modeStr}</span></td>
+      <td><span class="b by">${tC}</span></td>
+      <td>${tFP>0?`<span class="b br">${tFP}</span>`:'—'}</td>
+      <td>${tTick>0?`<span class="b bb">🎫 ${tTick}</span>`:'—'}</td>
+      <td>${mesiOk}</td>
+      <td style="font-family:'DM Mono',monospace">${media}</td>
+      <td style="color:${tBn>0?'var(--grn)':'var(--dim)'}">${tBn>0?'€'+tBn.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${tCash>0?'€'+tCash.toFixed(2):'—'}</td>
+      <td>€${tFee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-weight:600">€${tComp.toFixed(2)}</td>`;
+    aBody.appendChild(tr);
+  });
+
+  // Annual totals row
+  const aTot = document.createElement('tr');
+  aTot.className = 'tr-tot';
+  aTot.innerHTML=`
+    <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE ANNUALE</td>
+    <td><span class="b by">${aTotC}</span></td>
+    <td>${aTotFP>0?`<span class="b br">${aTotFP}</span>`:'—'}</td>
+    <td>${aTotTick>0?`<span class="b bb">🎫 ${aTotTick}</span>`:'—'}</td>
+    <td colspan="2"></td>
+    <td colspan="1"></td>
+    <td style="color:${aTotBn>0?'var(--grn)':'var(--dim)'}">${aTotBn>0?'€'+aTotBn.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${aTotCash>0?'€'+aTotCash.toFixed(2):'—'}</td>
+    <td>€${aTotFee.toFixed(2)}</td>
+    <td style="color:var(--pur);font-weight:600">€${aTotComp.toFixed(2)}</td>`;
+  aBody.appendChild(aTot);
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  if(!cur||!D[cur])return;
+  const s=D[cur].settings,e=D[cur].econ;
+  const rows=[['Fattorino','Modalità pag.','Mese','Data','Giorno','Turno','N.Ordine','Km','FuoriPaese','Pagamento','Totale','Tariffa','CashTrattenuto','Mezzo','Status','Note']];
+  activeOrders(cur).sort((a,b)=>a.date-b.date).forEach(o=>{
+    const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
+    const shift=getShift(o,s.cutHour);
+    const mz=D[cur].mezzo[o.dateStr]||{};
+    const mezzo=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
+    rows.push([cur,e.mode,mlabel(o.monthKey),o.dateStr,dayIt(o.dayEn),shift==='mat'?'Mattina':shift==='ser'?'Sera':'N/A',o.orderNum,kmV?o.km.toFixed(2):'',isFP?'SI':'NO',o.payMethod,o.total.toFixed(2),o.fee.toFixed(2),o.isCash?o.fee.toFixed(2):'0',mezzo,o.status,o.note||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`fattorino_${cur.replace(/\s+/g,'_')}.csv`;
+  a.click();
+} // fine exportCSV
+
+// ── SESSIONE: SALVA/CARICA ──
+
+// Serializza D in modo sicuro (Date → string)
+function serializeD(data){
+  const out={};
+  Object.keys(data).forEach(name=>{
+    out[name]={
+      mezzo: data[name].mezzo,
+      settings: data[name].settings,
+      econ: data[name].econ,
+      orders: data[name].orders.map(o=>({
+        ...o,
+        date: o.date ? o.date.toISOString() : null
+      }))
+    };
+  });
+  return out;
+}
+
+// Deserializza: ricostruisce Date dagli ISO string
+function deserializeD(raw){
+  const out={};
+  Object.keys(raw).forEach(name=>{
+    out[name]={
+      mezzo: raw[name].mezzo||{},
+      settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:14},
+      econ: raw[name].econ||{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:''},
+      orders: (raw[name].orders||[]).map(o=>{
+        const dateObj = o.date ? new Date(o.date) : new Date();
+        return {
+          ...o,
+          date: dateObj,
+          dateStr: o.dateStr || fmtDate(dateObj),
+          monthKey: o.monthKey || `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
+          weekNum: o.weekNum || getWeekOfMonth(dateObj)
+        };
+      })
+    };
+  });
+  return out;
+}
+
+// ── SALVA SESSIONE (file JSON) ──
+function saveSession(){
+  if(!Object.keys(D).length){ alert('Nessun dato da salvare.'); return; }
+  const payload = { version:1, savedAt: new Date().toISOString(), data: serializeD(D) };
+  const json = JSON.stringify(payload, null, 2);
+
+  // Try standard download first
+  try {
+    const blob = new Blob([json], {type:'application/json;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'fattorini_sessione_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1500);
+  } catch(e){}
+
+  // Always show the save modal as fallback
+  showSaveModal(json);
+}
+
+function showSaveModal(json){
+  // Remove existing if any
+  const existing = document.getElementById('saveModal');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'saveModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+
+  overlay.innerHTML = `
+    <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">💾 Salva sessione</div>
+        <button onclick="document.getElementById('saveModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--mut);line-height:1.6">
+        <strong style="color:var(--txt)">Come salvare:</strong><br>
+        1. Clicca <strong>Copia tutto</strong> qui sotto<br>
+        2. Apri il <strong>Blocco Note</strong> (cerca "Notepad" nel menu Start)<br>
+        3. Incolla con <strong>CTRL+V</strong><br>
+        4. Salva il file con nome <strong>sessione.json</strong> (File → Salva con nome → tipo: "Tutti i file")
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="
+          navigator.clipboard.writeText(document.getElementById('sessionJsonText').value)
+            .then(()=>{ this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); })
+            .catch(()=>{ document.getElementById('sessionJsonText').select(); document.execCommand('copy'); this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); });
+        " style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;font-weight:600">📋 Copia tutto</button>
+        <span style="font-size:11px;color:var(--mut);line-height:2.2">${Object.keys(D).length} fattorini · ${Object.values(D).reduce((a,d)=>a+d.orders.filter(o=>!o.deleted).length,0)} ordini</span>
+      </div>
+      <textarea id="sessionJsonText" readonly style="flex:1;min-height:280px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:none;outline:none;line-height:1.4">${json.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+    </div>`;
+
+  // Fix textarea: set value directly (not via innerHTML to avoid escaping issues)
+  document.body.appendChild(overlay);
+  document.getElementById('sessionJsonText').value = json;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
+// ── MODALE CARICA SESSIONE ──
+function showLoadModal(){
+  const existing = document.getElementById('loadModal');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'loadModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  overlay.innerHTML = `
+    <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:680px;max-width:95vw;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">📂 Carica sessione</div>
+        <button onclick="document.getElementById('loadModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--mut)">Incolla qui il contenuto del file sessione salvato, oppure carica il file .json direttamente.</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('sessionInput').click()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">📁 Scegli file .json</button>
+      </div>
+      <textarea id="pasteJsonText" placeholder="Oppure incolla qui il JSON copiato (CTRL+V)..." style="height:220px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:none;outline:none"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="document.getElementById('loadModal').remove()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--mut)">Annulla</button>
+        <button onclick="loadFromPastedJSON()" style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:7px 18px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:600">✓ Carica sessione</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
+function loadFromPastedJSON(){
+  const text = document.getElementById('pasteJsonText')?.value?.trim();
+  if(!text){ alert('Incolla prima il JSON della sessione.'); return; }
+  try {
+    const payload = JSON.parse(text);
+    if(!payload.data) throw new Error('Formato non valido');
+    D = deserializeD(payload.data);
+    cur=null; curMon=null;
+    renderSidebar();
+    document.getElementById('upWrap').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    document.getElementById('viewGlobal').classList.add('hidden');
+    document.getElementById('loadModal')?.remove();
+    const first=Object.keys(D)[0];
+    if(first) selectDriver(first);
+    autoSaveToLocalStorage();
+    showToast('✅ Sessione caricata — ' + Object.keys(D).length + ' fattorini');
+  } catch(err){
+    alert('Errore: ' + err.message + '\nAssicurati di aver copiato tutto il testo.');
+  }
+}
+
+// ── CARICA SESSIONE (file JSON) ──
+function loadSession(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if(!payload.data) throw new Error('File non valido');
+      D = deserializeD(payload.data);
+      cur = null; curMon = null;
+      renderSidebar();
+      document.getElementById('upWrap').classList.add('hidden');
+      document.getElementById('dash').classList.remove('hidden');
+      document.getElementById('viewGlobal').classList.add('hidden');
+      const first = Object.keys(D)[0];
+      if(first) selectDriver(first);
+      document.getElementById('fileTag').textContent = file.name;
+      autoSaveToLocalStorage();
+      showToast('✅ Sessione caricata — ' + Object.keys(D).length + ' fattorini');
+    } catch(err){
+      alert('Errore nel caricamento della sessione: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── AUTO-SAVE localStorage ──
+const LS_KEY = 'fattorini_session_v1';
+
+function autoSaveToLocalStorage(){
+  try {
+    const payload = { version:1, savedAt: new Date().toISOString(), data: serializeD(D) };
+    const serialized = JSON.stringify(payload);
+    localStorage.setItem(LS_KEY, serialized);
+    // ☁️ Sync cloud (debounced)
+    if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
+    // Show green dot
+    const dot = document.getElementById('autoSaveDot');
+    if(dot){
+      dot.style.display = 'flex';
+      const circle = document.getElementById('autoSaveDotCircle');
+      const label = document.getElementById('autoSaveDotLabel');
+      if(circle) circle.style.background = '#16a34a';
+      if(label) label.textContent = 'salvato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+      clearTimeout(dot._t);
+      dot._t = setTimeout(()=>{ if(circle) circle.style.background = '#9ca3af'; }, 3000);
+    }
+  } catch(e){
+    console.warn('localStorage non disponibile:', e);
+    showToast('⚠️ Salvataggio automatico non disponibile in questo browser');
+  }
+}
+
+function loadFromLocalStorage(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const payload = JSON.parse(raw);
+    if(!payload.data || !Object.keys(payload.data).length) return false;
+    D = deserializeD(payload.data);
+    cur = null; curMon = null;
+    renderSidebar();
+    document.getElementById('upWrap').classList.add('hidden');
+    document.getElementById('dash').classList.remove('hidden');
+    const first = Object.keys(D)[0];
+    if(first) selectDriver(first);
+    document.getElementById('fileTag').textContent = 'Sessione del ' + new Date(payload.savedAt).toLocaleDateString('it-IT');
+    const lsDot=document.getElementById('autoSaveDot'); if(lsDot) lsDot.style.display='flex';
+    showToast('✅ Sessione precedente ripristinata (' + Object.keys(D).length + ' fattorini)');
+    return true;
+  } catch(e){
+    console.warn('Errore caricamento localStorage:', e);
+    return false;
+  }
+}
+
+// Intercetta ogni modifica ai dati e autosalva
+function withAutoSave(fn){
+  return function(...args){
+    const result = fn.apply(this, args);
+    if(Object.keys(D).length) autoSaveToLocalStorage();
+    return result;
+  };
+}
+
+// ── TOAST NOTIFICATION ──
+function showToast(msg){
+  let t = document.getElementById('toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--surf);border:1px solid var(--brd2);color:var(--txt);font-size:13px;font-family:DM Sans,sans-serif;padding:10px 18px;border-radius:8px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.style.opacity='0'; }, 3000);
+}
+
+
+
+// ── AUTO-LOAD AL AVVIO ──
+window.addEventListener('load', ()=>{
+  const restored = loadFromLocalStorage();
+  if(!restored){
+    document.getElementById('upWrap').classList.remove('hidden');
+    document.getElementById('dash').classList.add('hidden');
+  }
+  initCloudFromSaved();
+});
+
+// ═══════════════════════════════════════════════════════════
+// ── LOGIN ──
+const APP_PWD_KEY = 'fattorini_pwd_v1';
+const DEFAULT_PWD = 'fattorini2026'; // password di default — cambiala dal pannello Cloud
+
+function checkLogin(){
+  const pwd = document.getElementById('loginPwd')?.value?.trim();
+  const savedPwd = localStorage.getItem(APP_PWD_KEY) || DEFAULT_PWD;
+  if(pwd === savedPwd){
+    document.getElementById('loginScreen').style.display = 'none';
+    sessionStorage.setItem('fattorini_auth', '1');
+    initApp();
+  } else {
+    const err = document.getElementById('loginErr');
+    if(err){ err.textContent = '❌ Password errata'; }
+    const inp = document.getElementById('loginPwd');
+    if(inp){ inp.value=''; inp.focus(); inp.style.borderColor='#dc2626'; setTimeout(()=>inp.style.borderColor='#dde0e8',1500); }
+  }
+}
+
+function setNewPassword(newPwd){
+  if(!newPwd||newPwd.length<4){ showToast('⚠️ Password troppo corta (min 4 caratteri)'); return; }
+  localStorage.setItem(APP_PWD_KEY, newPwd);
+  showToast('✅ Password aggiornata');
+}
+
+function initApp(){
+  // Init cloud from saved config
+  initCloudFromSaved();
+  // Load localStorage session
+  const restored = loadFromLocalStorage();
+  if(!restored){
+    document.getElementById('upWrap').classList.remove('hidden');
+    document.getElementById('dash').classList.add('hidden');
+  }
+}
+
+// On page load: check if already authenticated this session
+window.addEventListener('load', ()=>{
+  if(sessionStorage.getItem('fattorini_auth')==='1'){
+    document.getElementById('loginScreen').style.display='none';
+    initApp();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    setTimeout(()=>document.getElementById('loginPwd')?.focus(), 100);
+  }
+});
+
+// ☁️  CLOUD SYNC — Firebase Realtime Database (gratuito)
+// ═══════════════════════════════════════════════════════════
+
+const CLOUD_CFG_KEY = 'fattorini_cloud_cfg_v1';
+let fbApp = null, fbDb = null, fbRef = null;
+let cloudConnected = false;
+let cloudSaving = false;
+let cloudSaveTimer = null;
+let cloudPaused = false;   // true durante caricamento Excel — blocca sovrascrittura
+
+function initCloudFromSaved(){
+  try{
+    const raw=localStorage.getItem(CLOUD_CFG_KEY);
+    if(!raw) return;
+    const cfg=JSON.parse(raw);
+    if(cfg&&cfg.firebase&&cfg.workspace) connectToFirebase(cfg);
+  }catch(e){ console.warn('Cloud cfg:',e); }
+}
+
+function connectToFirebase(cfg){
+  try{
+    if(fbApp){try{fbApp.delete();}catch(e){} fbApp=null;fbDb=null;fbRef=null;cloudConnected=false;}
+    fbApp=firebase.initializeApp(cfg.firebase,'fatt_'+Date.now());
+    fbDb=firebase.database(fbApp);
+    const key=cfg.workspace.trim().replace(/[^a-zA-Z0-9_-]/g,'_').toLowerCase();
+    fbRef=fbDb.ref('fattorini_ws/'+key);
+    fbRef.on('value',snapshot=>{
+      if(cloudSaving||cloudPaused) return;
+      const remote=snapshot.val();
+      if(!remote||!remote.data) return;
+      const remoteAt=remote.savedAt?new Date(remote.savedAt).getTime():0;
+      let localAt=0;
+      try{const lr=localStorage.getItem(LS_KEY);if(lr)localAt=new Date(JSON.parse(lr).savedAt).getTime();}catch(e){}
+      if(remoteAt>localAt+2000){
+        D=deserializeD(remote.data);
+        autoSaveToLocalStorage();
+        renderSidebar();
+        const keys=Object.keys(D);
+        if(keys.length){
+          document.getElementById('upWrap').classList.add('hidden');
+          document.getElementById('dash').classList.remove('hidden');
+          if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
+        }
+        showToast('☁️ Dati aggiornati da un altro dispositivo');
+      }
+    });
+    cloudConnected=true;
+    localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cfg));
+    updateCloudStatus('connected');
+    const btn=document.getElementById('cloudBtn');
+    if(btn){btn.style.background='rgba(22,163,74,.1)';btn.style.borderColor='rgba(22,163,74,.3)';btn.style.color='#16a34a';}
+    return true;
+  }catch(e){
+    console.error('Firebase:',e);
+    cloudConnected=false;
+    updateCloudStatus('error');
+    return false;
+  }
+}
+
+function debouncedCloudSave(){
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(cloudSave,700);
+}
+function cloudSave(){
+  if(!fbRef||!cloudConnected||!Object.keys(D).length) return;
+  cloudSaving=true;
+  updateCloudStatus('saving');
+  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D)})
+    .then(()=>{cloudSaving=false;updateCloudStatus('synced');})
+    .catch(e=>{cloudSaving=false;updateCloudStatus('error');showToast('⚠️ Errore cloud: '+e.message);});
+}
+
+function updateCloudStatus(s){
+  const dot=document.getElementById('cloudDot');
+  const circle=document.getElementById('cloudDotCircle');
+  const label=document.getElementById('cloudDotLabel');
+  if(!dot) return;
+  dot.style.display='flex';
+  const st={connected:{c:'#9ca3af',t:'cloud connesso'},saving:{c:'#f59e0b',t:'sync...'},synced:{c:'#16a34a',t:'sincronizzato'},error:{c:'#dc2626',t:'errore cloud'},disconnected:{c:'#6b7280',t:'cloud off'}};
+  const v=st[s]||st.disconnected;
+  if(circle) circle.style.background=v.c;
+  if(label)  label.textContent=v.t;
+  if(s==='synced'){
+    clearTimeout(dot._ct);
+    dot._ct=setTimeout(()=>{if(circle)circle.style.background='#9ca3af';if(label)label.textContent='cloud connesso';},3000);
+  }
+}
+
+function disconnectCloud(){
+  if(fbRef){try{fbRef.off();}catch(e){}}
+  if(fbApp){try{fbApp.delete();}catch(e){}}
+  fbApp=null;fbDb=null;fbRef=null;cloudConnected=false;
+  localStorage.removeItem(CLOUD_CFG_KEY);
+  const dot=document.getElementById('cloudDot');if(dot)dot.style.display='none';
+  const btn=document.getElementById('cloudBtn');
+  if(btn){btn.style.background='rgba(124,58,237,.08)';btn.style.borderColor='rgba(124,58,237,.3)';btn.style.color='var(--pur)';}
+  document.getElementById('cloudModal')?.remove();
+  showToast('☁️ Cloud disconnesso');
+}
+
+function parseFirebaseCfg(raw){
+  // 1) Tentativo JSON diretto
+  try{return JSON.parse(raw);}catch(e){}
+  // 2) Estrai il primo oggetto { } bilanciato (ignora codice extra dopo)
+  const start=raw.indexOf('{');
+  if(start===-1) return null;
+  let depth=0,end=-1;
+  for(let i=start;i<raw.length;i++){
+    if(raw[i]==='{') depth++;
+    else if(raw[i]==='}'){depth--;if(depth===0){end=i;break;}}
+  }
+  if(end===-1) return null;
+  let obj=raw.slice(start,end+1)
+    .replace(/,(\s*})/g,'$1')
+    .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*):/g,'$1"$2"$3:');
+  try{return JSON.parse(obj);}catch(e){}
+  return null;
+}
+
+function tryConnectCloud(){
+  const raw=document.getElementById('cloudConfigText')?.value?.trim();
+  const ws=document.getElementById('cloudWorkspace')?.value?.trim();
+  const res=document.getElementById('cloudTestResult');
+  if(!raw||!ws){if(res){res.textContent='⚠️ Compila entrambi i campi';res.style.color='var(--acc4)';}return;}
+  const fbCfg=parseFirebaseCfg(raw);
+  if(!fbCfg){if(res){res.textContent='❌ JSON non valido';res.style.color='var(--acc3)';}return;}
+  if(!fbCfg.apiKey){if(res){res.textContent='❌ Manca apiKey — copia l\'intero firebaseConfig dal passo 4';res.style.color='var(--acc3)';}return;}
+  if(!fbCfg.databaseURL){if(res){res.textContent='❌ Manca databaseURL — vai su Firebase → Realtime Database e verifica di averlo creato, poi ricopia il config';res.style.color='var(--acc3)';}return;}
+  if(res){res.textContent='⏳ Connessione...';res.style.color='var(--acc4)';}
+  const ok=connectToFirebase({firebase:fbCfg,workspace:ws});
+  if(ok){
+    if(res){res.textContent='✅ Connesso!';res.style.color='var(--grn)';}
+    setTimeout(()=>{
+      document.getElementById('cloudModal')?.remove();
+      if(Object.keys(D).length){cloudSave();showToast('☁️ Cloud connesso — dati sincronizzati');}
+      else showToast('☁️ Cloud connesso — carica dati o attendi sync da altro PC');
+    },900);
+  }else{
+    if(res){res.textContent='❌ Connessione fallita — controlla config e regole database';res.style.color='var(--acc3)';}
+  }
+}
+
+function showCloudModal(){
+  document.getElementById('cloudModal')?.remove();
+  let cfg=null;
+  try{const r=localStorage.getItem(CLOUD_CFG_KEY);if(r)cfg=JSON.parse(r);}catch(e){}
+  const ov=document.createElement('div');
+  ov.id='cloudModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)';
+  const connBanner=cloudConnected?`
+    <div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-size:12px;color:#16a34a">&#x2705; <strong>Connesso</strong> &mdash; workspace: <code style="background:rgba(22,163,74,.1);padding:2px 7px;border-radius:4px">${cfg&&cfg.workspace?cfg.workspace:'&mdash;'}</code></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="cloudSave();showToast('&#x2601;&#xFE0F; Upload inviato');document.getElementById('cloudModal').remove();" style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#16a34a;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2B06; Forza upload</button>
+        <button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2715; Disconnetti</button>
+      </div>
+    </div>`:'';
+  const disconnBtn=cloudConnected?`<button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">&#x2715; Disconnetti</button>`:'';
+  ov.innerHTML=`
+  <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:16px;padding:28px;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800">&#x2601;&#xFE0F; Cloud Sync &mdash; Multi-PC</div>
+      <button onclick="document.getElementById('cloudModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">&#x2715;</button>
+    </div>
+    ${connBanner}
+    <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.12);border-radius:10px;padding:16px">
+      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--acc);margin-bottom:10px">&#x1F4CB; Setup Firebase gratuito &mdash; 3 minuti</div>
+      <div style="display:grid;grid-template-columns:22px 1fr;gap:5px 10px;font-size:12px;color:var(--mut);line-height:1.75">
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">1.</b><span>Vai su <a href="https://console.firebase.google.com" target="_blank" style="color:var(--acc);font-weight:600">console.firebase.google.com</a> &rarr; <strong style="color:var(--txt)">Crea un progetto</strong></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">2.</b><span>Menu sinistro &rarr; <strong style="color:var(--txt)">Build &rarr; Realtime Database</strong> &rarr; "Crea database" &rarr; scegli <strong style="color:var(--txt)">Modalit&agrave; test</strong></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">3.</b><span>Icona &#x2699;&#xFE0F; &rarr; <strong style="color:var(--txt)">Impostazioni progetto &rarr; Generale</strong> &rarr; scorri fino a "Le tue app"</span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">4.</b><span>Clicca <strong style="color:var(--txt)">"&lt;/&gt; Aggiungi app"</strong> &rarr; Web &rarr; Registra &rarr; copia il blocco <code style="background:var(--surf3);padding:1px 5px;border-radius:3px">firebaseConfig</code></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">5.</b><span>Incolla qui sotto e clicca <strong style="color:var(--txt)">Connetti</strong></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace">FIREBASE CONFIG <span style="color:var(--dim)">(dal passo 4 &mdash; incolla l'intero blocco)</span></label>
+      <textarea id="cloudConfigText" spellcheck="false" placeholder="Incolla SOLO il blocco firebaseConfig = { ... }&#10;Non includere il codice sotto (initializeApp ecc.)&#10;&#10;Esempio:&#10;{&#10;  apiKey: &quot;AIzaSy...&quot;,&#10;  authDomain: &quot;...&quot;,&#10;  databaseURL: &quot;https://NOME-default-rtdb.firebaseio.com&quot;,&#10;  projectId: &quot;...&quot;,&#10;  storageBucket: &quot;...&quot;,&#10;  messagingSenderId: &quot;...&quot;,&#10;  appId: &quot;...&quot;&#10;}" style="height:140px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10.5px;padding:10px 12px;resize:vertical;outline:none;line-height:1.5">${cfg&&cfg.firebase?JSON.stringify(cfg.firebase,null,2):''}</textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace">NOME WORKSPACE <span style="color:var(--dim)">(uguale su tutti i PC)</span></label>
+      <input id="cloudWorkspace" type="text" value="${cfg&&cfg.workspace?cfg.workspace:''}" placeholder="es. fattorini-rossi-k7x2" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:8px 10px;outline:none;width:100%">
+      <div style="font-size:10px;color:var(--dim)">&#x1F4A1; Il workspace funge da chiave condivisa &mdash; scegli un nome non ovvio</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button onclick="tryConnectCloud()" style="background:var(--pur);color:#fff;border:none;border-radius:8px;padding:9px 24px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;font-weight:600">&#x2601;&#xFE0F; Connetti</button>
+      ${disconnBtn}
+      <span id="cloudTestResult" style="font-size:11px;color:var(--mut)"></span>
+    </div>
+    <div style="border-top:1px solid var(--brd);padding-top:14px">
+      <div style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔐 Cambia password di accesso</div>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="newPwdInput" placeholder="Nuova password (min 4 caratteri)" style="flex:1;background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:7px 10px;outline:none">
+        <button onclick="setNewPassword(document.getElementById('newPwdInput').value);document.getElementById('newPwdInput').value=''" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">✓ Imposta</button>
+      </div>
+      <div style="font-size:10px;color:var(--dim);margin-top:5px">Password default: <code style="font-family:'DM Mono',monospace;background:var(--surf3);padding:1px 5px;border-radius:3px">fattorini2026</code> — cambiala subito dopo il primo accesso</div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</body>
+</html>
