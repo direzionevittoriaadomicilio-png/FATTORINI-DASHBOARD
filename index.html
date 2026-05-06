@@ -419,11 +419,13 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
             <div class="tt" id="oTitle">—</div>
             <div style="display:flex;gap:6px">
               <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:200px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
+              <button id="oBulkDelete" class="btn btn-red" style="display:none;padding:4px 12px;font-size:11px;margin-left:8px" onclick="deleteSelected()">✕ Elimina selezionati</button>
               <button class="btn btn-ghost" onclick="openAddOrder()">+ Aggiungi ordine</button>
             </div>
           </div>
           <div class="ts"><table>
             <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="oSelectAll" onchange="toggleSelectAll()" title="Seleziona tutti"></th>
               <th>Data</th><th>Ora</th><th>Turno</th><th>N° Ordine</th>
               <th>Ritiro da</th><th>Consegna a</th>
               <th>Km</th><th>F.P. (>soglia)</th>
@@ -1053,14 +1055,22 @@ function renderOrders(){
   makePills('oPills',months,()=>renderOrders());
   if(!curMon||!months.includes(curMon))curMon=months[0]||null;
   if(!curMon)return;
-  document.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
+  window.document.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
   const s=D[cur].settings,e=D[cur].econ;
-  const search=(document.getElementById('oSearch').value||'').toLowerCase();
+  const search=(window.document.getElementById('oSearch').value||'').toLowerCase();
   const orders=activeOrders(cur).filter(o=>o.monthKey===curMon)
-    .filter(o=>!search||o.orderNum.toString().includes(search)||o.ritiroDa.toLowerCase().includes(search)||o.consegnaA.toLowerCase().includes(search))
+    .filter(o=>!search||o.orderNum.toString().includes(search)||(o.ritiroDa||'').toLowerCase().includes(search)||(o.consegnaA||'').toLowerCase().includes(search))
     .sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0));
 
-  const tb=document.getElementById('oBody');tb.innerHTML='';
+  // Update select-all checkbox state
+  const selAll=window.document.getElementById('oSelectAll');
+  if(selAll) selAll.checked=false;
+
+  // Update bulk delete button
+  const bulkBtn=window.document.getElementById('oBulkDelete');
+  if(bulkBtn) bulkBtn.style.display='none';
+
+  const tb=window.document.getElementById('oBody');tb.innerHTML='';
   orders.forEach((o,i)=>{
     const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
     const shift=getShift(o,s.cutHour);
@@ -1069,15 +1079,16 @@ function renderOrders(){
     const mz=D[cur].mezzo[o.dateStr]||{};
     const mezzoVal=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
     const realIdx=D[cur].orders.indexOf(o);
-    const tr=document.createElement('tr');
+    const tr=window.document.createElement('tr');
     if(o.isCash)tr.classList.add('tr-cash');
     tr.innerHTML=`
+      <td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="${realIdx}" onchange="updateBulkBtn()"></td>
       <td style="font-family:'DM Mono',monospace;font-size:10px">${o.dateStr}</td>
       <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${o.timeRaw}</td>
       <td>${shiftB}</td>
       <td>${o.isTicket?`<span class="b bg">🎫 ${o.orderNum}</span>`:`<span class="b bb">#${o.orderNum}</span>`}</td>
-      <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa}</td>
-      <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA}</td>
+      <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa||'—'}</td>
+      <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA||'—'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':kmV?'var(--txt)':'var(--dim)'}">${kmV?o.km.toFixed(2)+'km':'n/d'}</td>
       <td>${isFP?'<span class="b br">✓</span>':'—'}</td>
       <td>${payB}</td>
@@ -1086,16 +1097,44 @@ function renderOrders(){
       <td><span class="b bo">${mezzoVal}</span></td>
       <td><span class="b ${o.status==='Delivered'?'bg':'br'}">${o.status}</span></td>
       <td style="white-space:nowrap">
-        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder(${realIdx})">✏ Modifica</button>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder(${realIdx})">✏</button>
         <button class="btn btn-red" style="padding:3px 8px;font-size:10px;margin-left:3px" onclick="deleteOrder(${realIdx})">✕</button>
       </td>`;
     tb.appendChild(tr);
   });
   if(!orders.length){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td colspan="14" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
+    const tr=window.document.createElement('tr');
+    tr.innerHTML=`<td colspan="15" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
     tb.appendChild(tr);
   }
+}
+
+function updateBulkBtn(){
+  const checked=window.document.querySelectorAll('.o-chk:checked').length;
+  const btn=window.document.getElementById('oBulkDelete');
+  if(btn){ btn.style.display=checked>0?'inline-flex':'none'; btn.textContent='✕ Elimina selezionati ('+checked+')'; }
+  const selAll=window.document.getElementById('oSelectAll');
+  const all=window.document.querySelectorAll('.o-chk').length;
+  if(selAll) selAll.checked=checked===all&&all>0;
+}
+
+function toggleSelectAll(){
+  const selAll=window.document.getElementById('oSelectAll');
+  window.document.querySelectorAll('.o-chk').forEach(chk=>chk.checked=selAll.checked);
+  updateBulkBtn();
+}
+
+function deleteSelected(){
+  const checked=[...window.document.querySelectorAll('.o-chk:checked')];
+  if(!checked.length)return;
+  if(!confirm('Eliminare '+checked.length+' ordini selezionati?'))return;
+  checked.forEach(chk=>{
+    const idx=parseInt(chk.dataset.idx);
+    if(D[cur]&&D[cur].orders[idx]) D[cur].orders[idx].deleted=true;
+  });
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
 }
 
 // ── ORDER MODAL ──
@@ -1214,10 +1253,10 @@ let globalMonth = null;
 
 function selectGlobal(){
   cur = null;
-  window.document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
+  window.window.document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
   // Hide driver dashboard, show global
-  window.document.getElementById('dash').classList.add('hidden');
-  window.document.getElementById('viewGlobal').classList.remove('hidden');
+  window.window.document.getElementById('dash').classList.add('hidden');
+  window.window.document.getElementById('viewGlobal').classList.remove('hidden');
   // Collect all months across all drivers
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
@@ -1227,20 +1266,20 @@ function selectGlobal(){
 function renderGlobal(){
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   // Pills
-  const pills = window.document.getElementById('globalPills');
+  const pills = window.window.document.getElementById('globalPills');
   pills.innerHTML = '';
   allMonths.forEach(mk=>{
-    const p = window.document.createElement('button');
+    const p = window.window.document.createElement('button');
     p.className = 'pill'+(mk===globalMonth?' on':'');
     p.textContent = mlabel(mk);
     p.onclick = ()=>{ globalMonth=mk; renderGlobal(); };
     pills.appendChild(p);
   });
 
-  window.document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
+  window.window.document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
 
   // Monthly table
-  const mBody = window.document.getElementById('globalMonthBody');
+  const mBody = window.window.document.getElementById('globalMonthBody');
   mBody.innerHTML = '';
   let mTotC=0,mTotFP=0,mTotTick=0,mTotMat=0,mTotSer=0,mTotAtt=0,mTotEx=0,mTotBn=0,mTotCash=0,mTotFee=0,mTotComp=0;
 
@@ -1253,7 +1292,7 @@ function renderGlobal(){
     const e=ms.e;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
-    const tr = window.document.createElement('tr');
+    const tr = window.window.document.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1272,7 +1311,7 @@ function renderGlobal(){
   });
 
   // Monthly totals row
-  const mTot = window.document.createElement('tr');
+  const mTot = window.window.document.createElement('tr');
   mTot.className = 'tr-tot';
   mTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE MESE</td>
@@ -1290,7 +1329,7 @@ function renderGlobal(){
   mBody.appendChild(mTot);
 
   // Annual table
-  const aBody = window.document.getElementById('globalAnnualBody');
+  const aBody = window.window.document.getElementById('globalAnnualBody');
   aBody.innerHTML = '';
   let aTotC=0,aTotFP=0,aTotTick=0,aTotBn=0,aTotCash=0,aTotFee=0,aTotComp=0;
 
@@ -1306,7 +1345,7 @@ function renderGlobal(){
     const e=D[name].econ;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
-    const tr = window.document.createElement('tr');
+    const tr = window.window.document.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1323,7 +1362,7 @@ function renderGlobal(){
   });
 
   // Annual totals row
-  const aTot = window.document.createElement('tr');
+  const aTot = window.window.document.createElement('tr');
   aTot.className = 'tr-tot';
   aTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE ANNUALE</td>
