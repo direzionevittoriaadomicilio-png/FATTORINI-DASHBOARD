@@ -438,7 +438,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
       </div>
 
       <!-- GLOBAL OVERVIEW -->
-      <div id="viewGlobal" class="hidden">
+      <div id="viewGlobal" class="hidden" style="position:relative;z-index:10;background:var(--bg);min-height:100%;padding-bottom:40px">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px">📊 Riepilogo totale — tutti i fattorini</div>
         <!-- Month selector -->
         <div class="pills" id="globalPills"></div>
@@ -1257,7 +1257,9 @@ function selectGlobal(){
   doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
   // Hide driver dashboard, show global
   doc.getElementById('dash').classList.add('hidden');
-  doc.getElementById('viewGlobal').classList.remove('hidden');
+  const vg=doc.getElementById('viewGlobal');
+  vg.classList.remove('hidden');
+  vg.scrollIntoView({behavior:'smooth',block:'start'});
   // Collect all months across all drivers
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
