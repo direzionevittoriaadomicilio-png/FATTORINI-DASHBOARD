@@ -660,7 +660,9 @@ function renderSidebar(){
     btn.className='drv-btn'+(name===cur?' on':'');
     const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const col=COLORS[i%COLORS.length];
-    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>`;
+    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}</span><span class="drv-del" title="Elimina fattorino" onclick="event.stopPropagation();deleteDriver('${name}')" style="opacity:0;font-size:13px;padding:0 2px;color:var(--acc3);line-height:1">✕</span>`;
+    btn.onmouseenter=()=>btn.querySelector('.drv-del').style.opacity='1';
+    btn.onmouseleave=()=>btn.querySelector('.drv-del').style.opacity='0';
     btn.onclick=()=>selectDriver(name);
     list.appendChild(btn);
   });
@@ -923,6 +925,9 @@ function renderMonthly(allMS,months){
       <div class="mc-comp">
         <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--pur)">💼 Compenso</span><span style="font-family:'DM Mono',monospace;color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</span></div>
         <div style="font-size:10px;color:var(--mut)">${modeStr} + bonus</div>
+      </div>
+      <div style="text-align:right;margin-top:8px">
+        <button onclick="event.stopPropagation();deleteMonth('${mk}')" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:3px 10px;font-size:10px;color:var(--acc3);cursor:pointer;font-family:'DM Mono',monospace">🗑 Elimina mese</button>
       </div>`;
     card.onclick=()=>{curMon=mk;setTab('D')};
     grid.appendChild(card);
@@ -1035,7 +1040,8 @@ function renderDaily(){
       <td>${day.cashOrds>0?`<span class="b bca">${day.cashOrds}</span>`:'—'}</td>
       <td style="color:var(--cash)">${day.cash>0?'€'+day.cash.toFixed(2):'—'}</td>
       <td>€${day.fee.toFixed(2)}</td>
-      <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>`;
+      <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>
+      <td><button onclick="deleteDay('${day.ds}')" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:5px;padding:2px 8px;font-size:9px;color:var(--acc3);cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap">🗑 Giorno</button></td>`;
     tb.appendChild(tr);
   });
   const tot=doc.createElement('tr');tot.className='tr-tot';
@@ -1225,6 +1231,38 @@ function saveOrder(){
   renderDriver();
   autoSaveToLocalStorage();
   debouncedCloudSave();
+}
+
+function deleteDriver(name){
+  if(!confirm('Eliminare il fattorino "'+name+'" e tutti i suoi dati?')) return;
+  delete D[name];
+  if(cur===name){ cur=null; curMon=null; doc.getElementById('dash').classList.add('hidden'); doc.getElementById('upWrap').classList.remove('hidden'); }
+  renderSidebar();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Fattorino eliminato');
+}
+
+function deleteDay(dateStr){
+  if(!cur||!D[cur]) return;
+  const count = D[cur].orders.filter(o=>!o.deleted&&o.dateStr===dateStr).length;
+  if(!confirm('Eliminare tutti i '+count+' ordini del '+dateStr+'?')) return;
+  D[cur].orders.forEach(o=>{ if(o.dateStr===dateStr) o.deleted=true; });
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Giorno '+dateStr+' eliminato');
+}
+
+function deleteMonth(mk){
+  if(!cur||!D[cur]) return;
+  const count = D[cur].orders.filter(o=>!o.deleted&&o.monthKey===mk).length;
+  if(!confirm('Eliminare tutti i '+count+' ordini del mese '+mlabel(mk)+'?')) return;
+  D[cur].orders.forEach(o=>{ if(o.monthKey===mk) o.deleted=true; });
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Mese '+mlabel(mk)+' eliminato');
 }
 
 function deleteOrder(idx){
