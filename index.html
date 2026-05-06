@@ -437,43 +437,46 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
         </div>
       </div>
 
-      <!-- GLOBAL OVERVIEW -->
-      <div id="viewGlobal" class="hidden" style="position:relative;z-index:10;background:var(--bg);min-height:100%;padding-bottom:40px">
-        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px">📊 Riepilogo totale — tutti i fattorini</div>
-        <!-- Month selector -->
-        <div class="pills" id="globalPills"></div>
-        <!-- Per-driver monthly table -->
-        <div class="tw" style="margin-bottom:20px">
-          <div class="th"><div class="tt" id="globalMonthTitle">Confronto mensile</div></div>
-          <div class="ts"><table>
-            <thead><tr>
-              <th>Fattorino</th><th>Modalità pag.</th>
-              <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
-              <th>🌅 Mat</th><th>🌙 Sera</th>
-              <th>Attese</th><th>Extra</th><th>Bonus €</th>
-              <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
-            </tr></thead>
-            <tbody id="globalMonthBody"></tbody>
-          </table></div>
-        </div>
-        <!-- Annual summary per driver -->
-        <div class="tw">
-          <div class="th"><div class="tt">Riepilogo annuale — tutti i fattorini</div></div>
-          <div class="ts"><table>
-            <thead><tr>
-              <th>Fattorino</th><th>Modalità pag.</th>
-              <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
-              <th>Mesi lav.</th><th>Media cons./mese</th>
-              <th>Bonus tot. €</th><th>💵 Cash tot. €</th>
-              <th>Tariffa tot. €</th><th>Compenso tot. €</th>
-            </tr></thead>
-            <tbody id="globalAnnualBody"></tbody>
-          </table></div>
-        </div>
-      </div>
+
 
     </div>
-  </main>
+    <!-- GLOBAL OVERVIEW (sibling of dash) -->
+    <!-- GLOBAL OVERVIEW -->
+    <div id="viewGlobal" class="hidden" style="position:relative;z-index:10;background:var(--bg);min-height:100%;padding-bottom:40px">
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px">📊 Riepilogo totale — tutti i fattorini</div>
+      <!-- Month selector -->
+      <div class="pills" id="globalPills"></div>
+      <!-- Per-driver monthly table -->
+      <div class="tw" style="margin-bottom:20px">
+        <div class="th"><div class="tt" id="globalMonthTitle">Confronto mensile</div></div>
+        <div class="ts"><table>
+        <thead><tr>
+          <th>Fattorino</th><th>Modalità pag.</th>
+          <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+          <th>🌅 Mat</th><th>🌙 Sera</th>
+          <th>Attese</th><th>Extra</th><th>Bonus €</th>
+          <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
+        </tr></thead>
+        <tbody id="globalMonthBody"></tbody>
+        </table></div>
+      </div>
+      <!-- Annual summary per driver -->
+      <div class="tw">
+        <div class="th"><div class="tt">Riepilogo annuale — tutti i fattorini</div></div>
+        <div class="ts"><table>
+        <thead><tr>
+          <th>Fattorino</th><th>Modalità pag.</th>
+          <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+          <th>Mesi lav.</th><th>Media cons./mese</th>
+          <th>Bonus tot. €</th><th>💵 Cash tot. €</th>
+          <th>Tariffa tot. €</th><th>Compenso tot. €</th>
+        </tr></thead>
+        <tbody id="globalAnnualBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    </main>
 </div>
 
 <!-- EDIT/ADD ORDER MODAL -->
