@@ -516,6 +516,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 </div>
 
 <script>
+const doc = window.document;
 const MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const GEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const GIT=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
@@ -527,14 +528,14 @@ let D={}, cur=null, curMon=null, curTab='M';
 let editingOrderIdx=null; // index in D[cur].orders or null for new
 
 // ── UPLOAD ──
-const dz=document.getElementById('dropZone');
+const dz=doc.getElementById('dropZone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
-document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+doc.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
 
 function loadFile(file){
-  document.getElementById('fileTag').textContent=file.name;
+  doc.getElementById('fileTag').textContent=file.name;
   // Blocca il listener Firebase durante il caricamento
   cloudPaused = true;
   const r=new FileReader();
@@ -621,8 +622,8 @@ function parseRows(rows){
     if(!D[name].mezzo[dateStr]) D[name].mezzo[dateStr]={mat:'—',ser:'—'};
   }
   renderSidebar();
-  document.getElementById('upWrap').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
+  doc.getElementById('upWrap').classList.add('hidden');
+  doc.getElementById('dash').classList.remove('hidden');
   if(!cur||!D[cur]) cur=Object.keys(D)[0];
   selectDriver(cur);
   autoSaveToLocalStorage();
@@ -649,10 +650,10 @@ function getDays(name,mk){return[...new Set(activeOrders(name).filter(o=>o.month
 
 // ── SIDEBAR ──
 function renderSidebar(){
-  const list=document.getElementById('drvList');
+  const list=doc.getElementById('drvList');
   list.innerHTML='';
   Object.keys(D).forEach((name,i)=>{
-    const btn=document.createElement('button');
+    const btn=doc.createElement('button');
     btn.className='drv-btn'+(name===cur?' on':'');
     const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const col=COLORS[i%COLORS.length];
@@ -664,10 +665,10 @@ function renderSidebar(){
 
 function selectDriver(name){
   cur=name;
-  document.getElementById('viewGlobal').classList.add('hidden');
-  document.getElementById('dash').classList.remove('hidden');
-  document.getElementById('upWrap').classList.add('hidden');
-  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span').textContent===name));
+  doc.getElementById('viewGlobal').classList.add('hidden');
+  doc.getElementById('dash').classList.remove('hidden');
+  doc.getElementById('upWrap').classList.add('hidden');
+  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span').textContent===name));
   const months=getMonths(name);
   if(!months.includes(curMon)) curMon=months[0]||null;
   renderDriver();
@@ -676,32 +677,32 @@ function selectDriver(name){
 // ── PANELS ──
 function openEconPanel(){
   const e=D[cur].econ;
-  document.getElementById('econDriverName').textContent=cur;
-  document.getElementById('econMode').value=e.mode;
-  document.getElementById('econImporto').value=e.importo;
-  document.getElementById('econSogliaMat').value=e.sogliaMat;
-  document.getElementById('econSogliaSer').value=e.sogliaSer;
-  document.getElementById('econBonusEuro').value=e.bonusEuro;
-  document.getElementById('econNote').value=e.note||'';
+  doc.getElementById('econDriverName').textContent=cur;
+  doc.getElementById('econMode').value=e.mode;
+  doc.getElementById('econImporto').value=e.importo;
+  doc.getElementById('econSogliaMat').value=e.sogliaMat;
+  doc.getElementById('econSogliaSer').value=e.sogliaSer;
+  doc.getElementById('econBonusEuro').value=e.bonusEuro;
+  doc.getElementById('econNote').value=e.note||'';
   updateEconLabel();
-  document.getElementById('econPanel').classList.remove('hidden');
-  document.getElementById('settPanel').classList.add('hidden');
+  doc.getElementById('econPanel').classList.remove('hidden');
+  doc.getElementById('settPanel').classList.add('hidden');
 }
-function closeEconPanel(){document.getElementById('econPanel').classList.add('hidden')}
+function closeEconPanel(){doc.getElementById('econPanel').classList.add('hidden')}
 function updateEconLabel(){
-  const mode=document.getElementById('econMode').value;
+  const mode=doc.getElementById('econMode').value;
   const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Tariffa per consegna (€)'};
-  document.getElementById('econImportoLabel').textContent=labels[mode]||'Importo (€)';
+  doc.getElementById('econImportoLabel').textContent=labels[mode]||'Importo (€)';
 }
-document.getElementById('econMode').addEventListener('change',updateEconLabel);
+doc.getElementById('econMode').addEventListener('change',updateEconLabel);
 function saveEcon(){
   const e=D[cur].econ;
-  e.mode=document.getElementById('econMode').value;
-  e.importo=parseFloat(document.getElementById('econImporto').value)||0;
-  e.sogliaMat=parseFloat(document.getElementById('econSogliaMat').value)||12.5;
-  e.sogliaSer=parseFloat(document.getElementById('econSogliaSer').value)||14;
-  e.bonusEuro=parseFloat(document.getElementById('econBonusEuro').value)||1;
-  e.note=document.getElementById('econNote').value;
+  e.mode=doc.getElementById('econMode').value;
+  e.importo=parseFloat(doc.getElementById('econImporto').value)||0;
+  e.sogliaMat=parseFloat(doc.getElementById('econSogliaMat').value)||12.5;
+  e.sogliaSer=parseFloat(doc.getElementById('econSogliaSer').value)||14;
+  e.bonusEuro=parseFloat(doc.getElementById('econBonusEuro').value)||1;
+  e.note=doc.getElementById('econNote').value;
   closeEconPanel();
   renderDriver();
   autoSaveToLocalStorage();
@@ -709,19 +710,19 @@ function saveEcon(){
 }
 function openSettingsPanel(){
   const s=D[cur].settings;
-  document.getElementById('settDriverName').textContent=cur;
-  document.getElementById('cfgKmThresh').value=s.kmThresh;
-  document.getElementById('cfgKmMax').value=s.kmMax;
-  document.getElementById('cfgCutHour').value=s.cutHour;
-  document.getElementById('settPanel').classList.remove('hidden');
-  document.getElementById('econPanel').classList.add('hidden');
+  doc.getElementById('settDriverName').textContent=cur;
+  doc.getElementById('cfgKmThresh').value=s.kmThresh;
+  doc.getElementById('cfgKmMax').value=s.kmMax;
+  doc.getElementById('cfgCutHour').value=s.cutHour;
+  doc.getElementById('settPanel').classList.remove('hidden');
+  doc.getElementById('econPanel').classList.add('hidden');
 }
-function closeSettPanel(){document.getElementById('settPanel').classList.add('hidden')}
+function closeSettPanel(){doc.getElementById('settPanel').classList.add('hidden')}
 function saveSettings(){
   const s=D[cur].settings;
-  s.kmThresh=parseFloat(document.getElementById('cfgKmThresh').value)||5;
-  s.kmMax=parseFloat(document.getElementById('cfgKmMax').value)||50;
-  s.cutHour=parseFloat(document.getElementById('cfgCutHour').value)||14;
+  s.kmThresh=parseFloat(doc.getElementById('cfgKmThresh').value)||5;
+  s.kmMax=parseFloat(doc.getElementById('cfgKmMax').value)||50;
+  s.cutHour=parseFloat(doc.getElementById('cfgCutHour').value)||14;
   closeSettPanel();
   renderDriver();
   autoSaveToLocalStorage();
@@ -730,25 +731,25 @@ function saveSettings(){
 // ── MEZZO ──
 function renderMezzo(){
   const months=getMonths(cur);
-  const pills=document.getElementById('mezzoPills');
+  const pills=doc.getElementById('mezzoPills');
   pills.innerHTML='';
   months.forEach(mk=>{
-    const p=document.createElement('button');
+    const p=doc.createElement('button');
     p.className='pill'+(mk===curMon?' on':'');
     p.textContent=mlabel(mk);
     p.onclick=()=>{curMon=mk;renderMezzo();renderCurrentTab()};
     pills.appendChild(p);
   });
-  document.getElementById('mezzoPeriodLabel').textContent=curMon?mlabel(curMon):'—';
-  const grid=document.getElementById('mezzoDayGrid');
+  doc.getElementById('mezzoPeriodLabel').textContent=curMon?mlabel(curMon):'—';
+  const grid=doc.getElementById('mezzoDayGrid');
   grid.innerHTML='';
   if(!curMon) return;
   getDays(cur,curMon).forEach(ds=>{
     if(!D[cur].mezzo[ds]) D[cur].mezzo[ds]={mat:'—',ser:'—'};
     const mz=D[cur].mezzo[ds];
-    const row=document.createElement('div');
+    const row=doc.createElement('div');
     row.className='mday-row';
-    const lbl=document.createElement('div');lbl.className='mday-label';lbl.textContent=ds;
+    const lbl=doc.createElement('div');lbl.className='mday-label';lbl.textContent=ds;
     const selM=mkSel(mz.mat,v=>{D[cur].mezzo[ds].mat=v;autoSaveToLocalStorage();debouncedCloudSave();});
     const selS=mkSel(mz.ser,v=>{D[cur].mezzo[ds].ser=v;autoSaveToLocalStorage();debouncedCloudSave();});
     row.appendChild(lbl);row.appendChild(selM);row.appendChild(selS);
@@ -756,8 +757,8 @@ function renderMezzo(){
   });
 }
 function mkSel(current,onChange){
-  const sel=document.createElement('select');sel.className='mday-sel';
-  MEZZI.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;if(m===current)o.selected=true;sel.appendChild(o)});
+  const sel=doc.createElement('select');sel.className='mday-sel';
+  MEZZI.forEach(m=>{const o=doc.createElement('option');o.value=m;o.textContent=m;if(m===current)o.selected=true;sel.appendChild(o)});
   sel.addEventListener('change',e=>onChange(e.target.value));
   return sel;
 }
@@ -818,8 +819,8 @@ function renderDriver(){
   const d=D[cur];
   const e=d.econ;
 
-  document.getElementById('drvName').textContent=cur;
-  document.getElementById('drvSub').textContent=`${activeOrders(cur).length} ordini · ${months.length} mesi · modalità: ${e.mode}${e.note?' · '+e.note:''}`;
+  doc.getElementById('drvName').textContent=cur;
+  doc.getElementById('drvSub').textContent=`${activeOrders(cur).length} ordini · ${months.length} mesi · modalità: ${e.mode}${e.note?' · '+e.note:''}`;
 
   renderMezzo();
 
@@ -836,47 +837,47 @@ function renderDriver(){
     }
   });
 
-  document.getElementById('stC').textContent=aC;
-  document.getElementById('stCSub').textContent=`${mesiOk} ${mesiOk===1?'mese':'mesi'} · incl. ${aFP} f.p.`;
-  document.getElementById('stFP').textContent=aFP;
-  document.getElementById('stMat').textContent=aMat;
-  document.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
-  document.getElementById('stSer').textContent=aSer;
-  document.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/giorno`;
-  document.getElementById('stExtra').textContent=aExtra>0?'+'+aExtra.toFixed(1):0;
-  document.getElementById('stTick').textContent=aTick;
-  document.getElementById('stCash').textContent='€'+aCash.toFixed(2);
-  document.getElementById('stCashSub').textContent=`${aCashO} ord. cash`;
-  document.getElementById('stComp').textContent='€'+aCompTot.toFixed(2);
+  doc.getElementById('stC').textContent=aC;
+  doc.getElementById('stCSub').textContent=`${mesiOk} ${mesiOk===1?'mese':'mesi'} · incl. ${aFP} f.p.`;
+  doc.getElementById('stFP').textContent=aFP;
+  doc.getElementById('stMat').textContent=aMat;
+  doc.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
+  doc.getElementById('stSer').textContent=aSer;
+  doc.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/giorno`;
+  doc.getElementById('stExtra').textContent=aExtra>0?'+'+aExtra.toFixed(1):0;
+  doc.getElementById('stTick').textContent=aTick;
+  doc.getElementById('stCash').textContent='€'+aCash.toFixed(2);
+  doc.getElementById('stCashSub').textContent=`${aCashO} ord. cash`;
+  doc.getElementById('stComp').textContent='€'+aCompTot.toFixed(2);
 
   // Bonus banner
-  const bnr=document.getElementById('bnrBonus');
+  const bnr=doc.getElementById('bnrBonus');
   if(aBonus>0){
     bnr.classList.remove('neg');
-    document.getElementById('bIco').textContent='🏆';
-    document.getElementById('bTitle').textContent='Bonus maturato 🎉';
-    document.getElementById('bDesc').textContent=`${aExtra.toFixed(1)} cons. extra × €${e.bonusEuro}`;
-    document.getElementById('bVal').textContent='€'+aBonus.toFixed(2);
+    doc.getElementById('bIco').textContent='🏆';
+    doc.getElementById('bTitle').textContent='Bonus maturato 🎉';
+    doc.getElementById('bDesc').textContent=`${aExtra.toFixed(1)} cons. extra × €${e.bonusEuro}`;
+    doc.getElementById('bVal').textContent='€'+aBonus.toFixed(2);
   } else {
     bnr.classList.add('neg');
-    document.getElementById('bIco').textContent='🎯';
-    document.getElementById('bTitle').textContent='Bonus non maturato';
-    document.getElementById('bDesc').textContent=`Reali: ${aC} · Attese: ${aAtt.toFixed(1)}`;
-    document.getElementById('bVal').textContent='€0.00';
+    doc.getElementById('bIco').textContent='🎯';
+    doc.getElementById('bTitle').textContent='Bonus non maturato';
+    doc.getElementById('bDesc').textContent=`Reali: ${aC} · Attese: ${aAtt.toFixed(1)}`;
+    doc.getElementById('bVal').textContent='€0.00';
   }
 
   // Cash banner
-  document.getElementById('cashDesc').textContent=`${aCashO} ordini pagati in contanti`;
-  document.getElementById('cashVal').textContent='€'+aCash.toFixed(2);
+  doc.getElementById('cashDesc').textContent=`${aCashO} ordini pagati in contanti`;
+  doc.getElementById('cashVal').textContent='€'+aCash.toFixed(2);
 
   // Compenso banner
   const modeLabel={giornata:`${aDays} gg × €${e.importo}`,mese:`fisso mensile × ${mesiOk} mesi`,consegna:`${aC} cons. × €${e.importo}`}[e.mode];
-  document.getElementById('compDesc').textContent=`${modeLabel} + bonus €${aBonus.toFixed(2)}`;
-  document.getElementById('compVal').textContent='€'+aCompTot.toFixed(2);
+  doc.getElementById('compDesc').textContent=`${modeLabel} + bonus €${aBonus.toFixed(2)}`;
+  doc.getElementById('compVal').textContent='€'+aCompTot.toFixed(2);
 
   // Tab info
   const pct=aAtt>0?Math.min(200,aC/aAtt*100):0;
-  document.getElementById('tabObjInfo').textContent=`Obiettivo: ${pct.toFixed(0)}% (${aC}/${aAtt.toFixed(0)} consegne)`;
+  doc.getElementById('tabObjInfo').textContent=`Obiettivo: ${pct.toFixed(0)}% (${aC}/${aAtt.toFixed(0)} consegne)`;
 
   renderMonthly(allMS,months);
   renderCurrentTab();
@@ -890,7 +891,7 @@ function renderCurrentTab(){
 
 // ── MONTHLY ──
 function renderMonthly(allMS,months){
-  const grid=document.getElementById('mCards');
+  const grid=doc.getElementById('mCards');
   grid.innerHTML='';
   months.forEach(mk=>{
     const ms=allMS[mk]||computeMonth(cur,mk);
@@ -898,7 +899,7 @@ function renderMonthly(allMS,months){
     const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
     const bc=pct>=100?'#5eea8d':'#ff6b6b';
     const mz=D[cur].mezzo;
-    const card=document.createElement('div');
+    const card=doc.createElement('div');
     card.className='mc'+(mk===curMon?' on':'');
     const modeStr={giornata:`${ms.totDays} gg × €${e.importo}`,mese:`€${e.importo}/mese`,consegna:`${ms.totC} × €${e.importo}`}[e.mode];
     card.innerHTML=`
@@ -927,10 +928,10 @@ function renderMonthly(allMS,months){
 
 // ── PILLS ──
 function makePills(id,months,cb){
-  const c=document.getElementById(id);if(!c)return;
+  const c=doc.getElementById(id);if(!c)return;
   c.innerHTML='';
   months.forEach(mk=>{
-    const p=document.createElement('button');
+    const p=doc.createElement('button');
     p.className='pill'+(mk===curMon?' on':'');
     p.textContent=mlabel(mk);
     p.onclick=()=>{curMon=mk;cb()};
@@ -943,7 +944,7 @@ function renderWeekly(){
   const months=getMonths(cur);
   makePills('wPills',months,()=>renderWeekly());
   if(!curMon)return;
-  document.getElementById('wTitle').textContent=mlabel(curMon)+' — Settimanale';
+  doc.getElementById('wTitle').textContent=mlabel(curMon)+' — Settimanale';
   const ms=computeMonth(cur,curMon);
   const s=ms.s,e=ms.e;
 
@@ -953,7 +954,7 @@ function renderWeekly(){
     if(!byWeek[wk])byWeek[wk]=[];byWeek[wk].push(day);
   });
 
-  const tb=document.getElementById('wBody');tb.innerHTML='';
+  const tb=doc.getElementById('wBody');tb.innerHTML='';
   let rtC=0,rtFP=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
 
   Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
@@ -968,7 +969,7 @@ function renderWeekly(){
       const o=activeOrders(cur).find(o=>o.dateStr===d.ds);return o?.date.getDay()===dow;
     }).reduce((a,d)=>a+d.c,0));
     rtC+=wC;rtFP+=wFP;rtM+=wM;rtS+=wS;rtAt+=wAtt;rtEx+=wEx;rtBn+=wBn;rtCO+=wCO;rtCa+=wCa;
-    const tr=document.createElement('tr');
+    const tr=doc.createElement('tr');
     tr.innerHTML=`
       <td><span class="b bb">Sett.${wk}</span></td>
       ${cnt.map(c=>c>0?`<td><span class="b bg">${c}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
@@ -982,7 +983,7 @@ function renderWeekly(){
       <td style="color:var(--cash)">${wCa>0?'€'+wCa.toFixed(2):'—'}</td>`;
     tb.appendChild(tr);
   });
-  const tot=document.createElement('tr');tot.className='tr-tot';
+  const tot=doc.createElement('tr');tot.className='tr-tot';
   tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace">TOTALE</td><td colspan="7"></td>
     <td><span class="b by">${rtC}</span></td><td>${rtFP>0?`<span class="b br">${rtFP}</span>`:'—'}</td>
     <td><span class="sm sm-m">${rtM}</span></td><td><span class="sm sm-s">${rtS}</span></td>
@@ -999,10 +1000,10 @@ function renderDaily(){
   const months=getMonths(cur);
   makePills('dPills',months,()=>renderDaily());
   if(!curMon)return;
-  document.getElementById('dSumTitle').textContent=mlabel(curMon)+' — Giornaliero';
+  doc.getElementById('dSumTitle').textContent=mlabel(curMon)+' — Giornaliero';
   const ms=computeMonth(cur,curMon);
   const e=ms.e;
-  const tb=document.getElementById('dSumBody');tb.innerHTML='';
+  const tb=doc.getElementById('dSumBody');tb.innerHTML='';
   let rC=0,rFP=0,rAt=0,rEx=0,rBn=0,rCO=0,rCa=0,rFee=0,rCmp=0,rTick=0;
 
   ms.days.forEach(day=>{
@@ -1017,7 +1018,7 @@ function renderDaily(){
       day.domShift==='ser'?'<span class="sm sm-s">🌙 Sera</span>':
       day.domShift==='both'?'<span class="sm sm-m">🌅</span> <span class="sm sm-s">🌙</span>':
       '<span style="color:var(--dim)">—</span>';
-    const tr=document.createElement('tr');
+    const tr=doc.createElement('tr');
     tr.innerHTML=`
       <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
       <td>${dayIt(activeOrders(cur).find(o=>o.dateStr===day.ds)?.dayEn||'')}</td>
@@ -1034,7 +1035,7 @@ function renderDaily(){
       <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>`;
     tb.appendChild(tr);
   });
-  const tot=document.createElement('tr');tot.className='tr-tot';
+  const tot=doc.createElement('tr');tot.className='tr-tot';
   tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace" colspan="3">TOTALE</td>
     <td><span class="b by">${rC}</span></td><td>${rFP>0?`<span class="b br">${rFP}</span>`:'—'}</td>
     <td style="font-family:'DM Mono',monospace;color:var(--acc2)">${rTick>0?rTick:'—'}</td>
@@ -1055,22 +1056,22 @@ function renderOrders(){
   makePills('oPills',months,()=>renderOrders());
   if(!curMon||!months.includes(curMon))curMon=months[0]||null;
   if(!curMon)return;
-  window.document.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
+  doc.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
   const s=D[cur].settings,e=D[cur].econ;
-  const search=(window.document.getElementById('oSearch').value||'').toLowerCase();
+  const search=(doc.getElementById('oSearch').value||'').toLowerCase();
   const orders=activeOrders(cur).filter(o=>o.monthKey===curMon)
     .filter(o=>!search||o.orderNum.toString().includes(search)||(o.ritiroDa||'').toLowerCase().includes(search)||(o.consegnaA||'').toLowerCase().includes(search))
     .sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0));
 
   // Update select-all checkbox state
-  const selAll=window.document.getElementById('oSelectAll');
+  const selAll=doc.getElementById('oSelectAll');
   if(selAll) selAll.checked=false;
 
   // Update bulk delete button
-  const bulkBtn=window.document.getElementById('oBulkDelete');
+  const bulkBtn=doc.getElementById('oBulkDelete');
   if(bulkBtn) bulkBtn.style.display='none';
 
-  const tb=window.document.getElementById('oBody');tb.innerHTML='';
+  const tb=doc.getElementById('oBody');tb.innerHTML='';
   orders.forEach((o,i)=>{
     const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
     const shift=getShift(o,s.cutHour);
@@ -1079,7 +1080,7 @@ function renderOrders(){
     const mz=D[cur].mezzo[o.dateStr]||{};
     const mezzoVal=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
     const realIdx=D[cur].orders.indexOf(o);
-    const tr=window.document.createElement('tr');
+    const tr=doc.createElement('tr');
     if(o.isCash)tr.classList.add('tr-cash');
     tr.innerHTML=`
       <td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="${realIdx}" onchange="updateBulkBtn()"></td>
@@ -1103,29 +1104,29 @@ function renderOrders(){
     tb.appendChild(tr);
   });
   if(!orders.length){
-    const tr=window.document.createElement('tr');
+    const tr=doc.createElement('tr');
     tr.innerHTML=`<td colspan="15" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
     tb.appendChild(tr);
   }
 }
 
 function updateBulkBtn(){
-  const checked=window.document.querySelectorAll('.o-chk:checked').length;
-  const btn=window.document.getElementById('oBulkDelete');
+  const checked=doc.querySelectorAll('.o-chk:checked').length;
+  const btn=doc.getElementById('oBulkDelete');
   if(btn){ btn.style.display=checked>0?'inline-flex':'none'; btn.textContent='✕ Elimina selezionati ('+checked+')'; }
-  const selAll=window.document.getElementById('oSelectAll');
-  const all=window.document.querySelectorAll('.o-chk').length;
+  const selAll=doc.getElementById('oSelectAll');
+  const all=doc.querySelectorAll('.o-chk').length;
   if(selAll) selAll.checked=checked===all&&all>0;
 }
 
 function toggleSelectAll(){
-  const selAll=window.document.getElementById('oSelectAll');
-  window.document.querySelectorAll('.o-chk').forEach(chk=>chk.checked=selAll.checked);
+  const selAll=doc.getElementById('oSelectAll');
+  doc.querySelectorAll('.o-chk').forEach(chk=>chk.checked=selAll.checked);
   updateBulkBtn();
 }
 
 function deleteSelected(){
-  const checked=[...window.document.querySelectorAll('.o-chk:checked')];
+  const checked=[...doc.querySelectorAll('.o-chk:checked')];
   if(!checked.length)return;
   if(!confirm('Eliminare '+checked.length+' ordini selezionati?'))return;
   checked.forEach(chk=>{
@@ -1140,53 +1141,53 @@ function deleteSelected(){
 // ── ORDER MODAL ──
 function openAddOrder(){
   editingOrderIdx=null;
-  document.getElementById('modalTitle').textContent='Nuovo ordine';
-  document.getElementById('mDate').value='';
-  document.getElementById('mTime').value='';
-  document.getElementById('mOrderNum').value='';
-  document.getElementById('mPayMethod').value='CASH';
-  document.getElementById('mRitiro').value='';
-  document.getElementById('mConsegna').value='';
-  document.getElementById('mKm').value='';
-  document.getElementById('mTotal').value='';
-  document.getElementById('mFee').value='';
-  document.getElementById('mStatus').value='Delivered';
-  document.getElementById('mNote').value='';
-  document.getElementById('orderModal').classList.remove('hidden');
+  doc.getElementById('modalTitle').textContent='Nuovo ordine';
+  doc.getElementById('mDate').value='';
+  doc.getElementById('mTime').value='';
+  doc.getElementById('mOrderNum').value='';
+  doc.getElementById('mPayMethod').value='CASH';
+  doc.getElementById('mRitiro').value='';
+  doc.getElementById('mConsegna').value='';
+  doc.getElementById('mKm').value='';
+  doc.getElementById('mTotal').value='';
+  doc.getElementById('mFee').value='';
+  doc.getElementById('mStatus').value='Delivered';
+  doc.getElementById('mNote').value='';
+  doc.getElementById('orderModal').classList.remove('hidden');
 }
 
 function openEditOrder(idx){
   const o=D[cur].orders[idx];
   if(!o)return;
   editingOrderIdx=idx;
-  document.getElementById('modalTitle').textContent='Modifica ordine #'+o.orderNum;
+  doc.getElementById('modalTitle').textContent='Modifica ordine #'+o.orderNum;
   // Convert dateStr DD/MM/YYYY → YYYY-MM-DD for input[type=date]
   const[dd,mm,yyyy]=o.dateStr.split('/');
-  document.getElementById('mDate').value=`${yyyy}-${mm}-${dd}`;
-  document.getElementById('mTime').value=o.timeRaw==='—'?'':o.timeRaw;
-  document.getElementById('mOrderNum').value=o.orderNum;
-  document.getElementById('mPayMethod').value=o.payMethod==='N/A'?'N/A':o.payMethod;
-  document.getElementById('mRitiro').value=o.ritiroDa==='—'?'':o.ritiroDa;
-  document.getElementById('mConsegna').value=o.consegnaA==='—'?'':o.consegnaA;
-  document.getElementById('mKm').value=o.km||'';
-  document.getElementById('mTotal').value=o.total||'';
-  document.getElementById('mFee').value=o.fee||'';
-  document.getElementById('mStatus').value=o.status;
-  document.getElementById('mNote').value=o.note||'';
-  document.getElementById('orderModal').classList.remove('hidden');
+  doc.getElementById('mDate').value=`${yyyy}-${mm}-${dd}`;
+  doc.getElementById('mTime').value=o.timeRaw==='—'?'':o.timeRaw;
+  doc.getElementById('mOrderNum').value=o.orderNum;
+  doc.getElementById('mPayMethod').value=o.payMethod==='N/A'?'N/A':o.payMethod;
+  doc.getElementById('mRitiro').value=o.ritiroDa==='—'?'':o.ritiroDa;
+  doc.getElementById('mConsegna').value=o.consegnaA==='—'?'':o.consegnaA;
+  doc.getElementById('mKm').value=o.km||'';
+  doc.getElementById('mTotal').value=o.total||'';
+  doc.getElementById('mFee').value=o.fee||'';
+  doc.getElementById('mStatus').value=o.status;
+  doc.getElementById('mNote').value=o.note||'';
+  doc.getElementById('orderModal').classList.remove('hidden');
 }
 
-function closeModal(){document.getElementById('orderModal').classList.add('hidden');editingOrderIdx=null}
+function closeModal(){doc.getElementById('orderModal').classList.add('hidden');editingOrderIdx=null}
 
 function saveOrder(){
-  const dateVal=document.getElementById('mDate').value;
+  const dateVal=doc.getElementById('mDate').value;
   if(!dateVal){alert('Inserisci una data');return}
   const dateObj=new Date(dateVal);
   const dateStr=fmtDate(dateObj);
-  const payMethod=document.getElementById('mPayMethod').value;
-  const timeRaw=document.getElementById('mTime').value||'—';
+  const payMethod=doc.getElementById('mPayMethod').value;
+  const timeRaw=doc.getElementById('mTime').value||'—';
 
-  const orderNumRaw2 = document.getElementById('mOrderNum').value||'MANUAL';
+  const orderNumRaw2 = doc.getElementById('mOrderNum').value||'MANUAL';
   const ticketCount2 = (orderNumRaw2.match(/\*/g)||[]).length;
   const orderData={
     id: editingOrderIdx!==null ? D[cur].orders[editingOrderIdx].id : Date.now()+'_'+Math.random(),
@@ -1197,17 +1198,17 @@ function saveOrder(){
     orderNum:orderNumRaw2,
     isTicket: ticketCount2 > 0,
     ticketCount: ticketCount2,
-    ritiroDa:document.getElementById('mRitiro').value||'—',
-    consegnaA:document.getElementById('mConsegna').value||'—',
+    ritiroDa:doc.getElementById('mRitiro').value||'—',
+    consegnaA:doc.getElementById('mConsegna').value||'—',
     payMethod, isCash:payMethod==='CASH',
-    total:parseFloat(document.getElementById('mTotal').value)||0,
-    fee:parseFloat(document.getElementById('mFee').value)||0,
-    km:parseFloat(document.getElementById('mKm').value)||0,
-    status:document.getElementById('mStatus').value,
+    total:parseFloat(doc.getElementById('mTotal').value)||0,
+    fee:parseFloat(doc.getElementById('mFee').value)||0,
+    km:parseFloat(doc.getElementById('mKm').value)||0,
+    status:doc.getElementById('mStatus').value,
     monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
     weekNum:getWeekOfMonth(dateObj),
     deleted:false,
-    note:document.getElementById('mNote').value
+    note:doc.getElementById('mNote').value
   };
 
   if(editingOrderIdx!==null){
@@ -1237,8 +1238,8 @@ function deleteOrder(idx){
 function setTab(t){
   curTab=t;
   ['M','W','D','O'].forEach(x=>{
-    document.getElementById('tab'+x).classList.toggle('on',x===t);
-    document.getElementById('view'+x).classList.toggle('hidden',x!==t);
+    doc.getElementById('tab'+x).classList.toggle('on',x===t);
+    doc.getElementById('view'+x).classList.toggle('hidden',x!==t);
   });
   // Ensure curMon is valid before rendering
   if(cur&&D[cur]){
@@ -1253,10 +1254,10 @@ let globalMonth = null;
 
 function selectGlobal(){
   cur = null;
-  window.document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
+  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
   // Hide driver dashboard, show global
-  window.document.getElementById('dash').classList.add('hidden');
-  window.document.getElementById('viewGlobal').classList.remove('hidden');
+  doc.getElementById('dash').classList.add('hidden');
+  doc.getElementById('viewGlobal').classList.remove('hidden');
   // Collect all months across all drivers
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
@@ -1266,20 +1267,20 @@ function selectGlobal(){
 function renderGlobal(){
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   // Pills
-  const pills = window.document.getElementById('globalPills');
+  const pills = doc.getElementById('globalPills');
   pills.innerHTML = '';
   allMonths.forEach(mk=>{
-    const p = window.document.createElement('button');
+    const p = doc.createElement('button');
     p.className = 'pill'+(mk===globalMonth?' on':'');
     p.textContent = mlabel(mk);
     p.onclick = ()=>{ globalMonth=mk; renderGlobal(); };
     pills.appendChild(p);
   });
 
-  window.document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
+  doc.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
 
   // Monthly table
-  const mBody = window.document.getElementById('globalMonthBody');
+  const mBody = doc.getElementById('globalMonthBody');
   mBody.innerHTML = '';
   let mTotC=0,mTotFP=0,mTotTick=0,mTotMat=0,mTotSer=0,mTotAtt=0,mTotEx=0,mTotBn=0,mTotCash=0,mTotFee=0,mTotComp=0;
 
@@ -1292,7 +1293,7 @@ function renderGlobal(){
     const e=ms.e;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
-    const tr = window.document.createElement('tr');
+    const tr = doc.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1311,7 +1312,7 @@ function renderGlobal(){
   });
 
   // Monthly totals row
-  const mTot = window.document.createElement('tr');
+  const mTot = doc.createElement('tr');
   mTot.className = 'tr-tot';
   mTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE MESE</td>
@@ -1329,7 +1330,7 @@ function renderGlobal(){
   mBody.appendChild(mTot);
 
   // Annual table
-  const aBody = window.document.getElementById('globalAnnualBody');
+  const aBody = doc.getElementById('globalAnnualBody');
   aBody.innerHTML = '';
   let aTotC=0,aTotFP=0,aTotTick=0,aTotBn=0,aTotCash=0,aTotFee=0,aTotComp=0;
 
@@ -1345,7 +1346,7 @@ function renderGlobal(){
     const e=D[name].econ;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
-    const tr = window.document.createElement('tr');
+    const tr = doc.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1362,7 +1363,7 @@ function renderGlobal(){
   });
 
   // Annual totals row
-  const aTot = window.document.createElement('tr');
+  const aTot = doc.createElement('tr');
   aTot.className = 'tr-tot';
   aTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE ANNUALE</td>
@@ -1391,7 +1392,7 @@ function exportCSV(){
     rows.push([cur,e.mode,mlabel(o.monthKey),o.dateStr,dayIt(o.dayEn),shift==='mat'?'Mattina':shift==='ser'?'Sera':'N/A',o.orderNum,kmV?o.km.toFixed(2):'',isFP?'SI':'NO',o.payMethod,o.total.toFixed(2),o.fee.toFixed(2),o.isCash?o.fee.toFixed(2):'0',mezzo,o.status,o.note||'']);
   });
   const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const a=document.createElement('a');
+  const a=doc.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
   a.download=`fattorino_${cur.replace(/\s+/g,'_')}.csv`;
   a.click();
@@ -1449,13 +1450,13 @@ function saveSession(){
   try {
     const blob = new Blob([json], {type:'application/json;charset=utf-8'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = doc.createElement('a');
     a.style.display = 'none';
     a.href = url;
     a.download = 'fattorini_sessione_' + new Date().toISOString().slice(0,10) + '.json';
-    document.body.appendChild(a);
+    doc.body.appendChild(a);
     a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1500);
+    setTimeout(()=>{ URL.revokeObjectURL(url); doc.body.removeChild(a); }, 1500);
   } catch(e){}
 
   // Always show the save modal as fallback
@@ -1464,10 +1465,10 @@ function saveSession(){
 
 function showSaveModal(json){
   // Remove existing if any
-  const existing = document.getElementById('saveModal');
+  const existing = doc.getElementById('saveModal');
   if(existing) existing.remove();
 
-  const overlay = document.createElement('div');
+  const overlay = doc.createElement('div');
   overlay.id = 'saveModal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
 
@@ -1475,7 +1476,7 @@ function showSaveModal(json){
     <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;gap:14px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">💾 Salva sessione</div>
-        <button onclick="document.getElementById('saveModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+        <button onclick="doc.getElementById('saveModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
       </div>
       <div style="font-size:13px;color:var(--mut);line-height:1.6">
         <strong style="color:var(--txt)">Come salvare:</strong><br>
@@ -1486,9 +1487,9 @@ function showSaveModal(json){
       </div>
       <div style="display:flex;gap:8px">
         <button onclick="
-          navigator.clipboard.writeText(document.getElementById('sessionJsonText').value)
+          navigator.clipboard.writeText(doc.getElementById('sessionJsonText').value)
             .then(()=>{ this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); })
-            .catch(()=>{ document.getElementById('sessionJsonText').select(); document.execCommand('copy'); this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); });
+            .catch(()=>{ doc.getElementById('sessionJsonText').select(); doc.execCommand('copy'); this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); });
         " style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;font-weight:600">📋 Copia tutto</button>
         <span style="font-size:11px;color:var(--mut);line-height:2.2">${Object.keys(D).length} fattorini · ${Object.values(D).reduce((a,d)=>a+d.orders.filter(o=>!o.deleted).length,0)} ordini</span>
       </div>
@@ -1496,41 +1497,41 @@ function showSaveModal(json){
     </div>`;
 
   // Fix textarea: set value directly (not via innerHTML to avoid escaping issues)
-  document.body.appendChild(overlay);
-  document.getElementById('sessionJsonText').value = json;
+  doc.body.appendChild(overlay);
+  doc.getElementById('sessionJsonText').value = json;
   overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
 }
 
 // ── MODALE CARICA SESSIONE ──
 function showLoadModal(){
-  const existing = document.getElementById('loadModal');
+  const existing = doc.getElementById('loadModal');
   if(existing) existing.remove();
 
-  const overlay = document.createElement('div');
+  const overlay = doc.createElement('div');
   overlay.id = 'loadModal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
   overlay.innerHTML = `
     <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:680px;max-width:95vw;display:flex;flex-direction:column;gap:14px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">📂 Carica sessione</div>
-        <button onclick="document.getElementById('loadModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+        <button onclick="doc.getElementById('loadModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
       </div>
       <div style="font-size:13px;color:var(--mut)">Incolla qui il contenuto del file sessione salvato, oppure carica il file .json direttamente.</div>
       <div style="display:flex;gap:8px">
-        <button onclick="document.getElementById('sessionInput').click()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">📁 Scegli file .json</button>
+        <button onclick="doc.getElementById('sessionInput').click()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">📁 Scegli file .json</button>
       </div>
       <textarea id="pasteJsonText" placeholder="Oppure incolla qui il JSON copiato (CTRL+V)..." style="height:220px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:none;outline:none"></textarea>
       <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="document.getElementById('loadModal').remove()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--mut)">Annulla</button>
+        <button onclick="doc.getElementById('loadModal').remove()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--mut)">Annulla</button>
         <button onclick="loadFromPastedJSON()" style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:7px 18px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:600">✓ Carica sessione</button>
       </div>
     </div>`;
-  document.body.appendChild(overlay);
+  doc.body.appendChild(overlay);
   overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
 }
 
 function loadFromPastedJSON(){
-  const text = document.getElementById('pasteJsonText')?.value?.trim();
+  const text = doc.getElementById('pasteJsonText')?.value?.trim();
   if(!text){ alert('Incolla prima il JSON della sessione.'); return; }
   try {
     const payload = JSON.parse(text);
@@ -1538,10 +1539,10 @@ function loadFromPastedJSON(){
     D = deserializeD(payload.data);
     cur=null; curMon=null;
     renderSidebar();
-    document.getElementById('upWrap').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    document.getElementById('viewGlobal').classList.add('hidden');
-    document.getElementById('loadModal')?.remove();
+    doc.getElementById('upWrap').classList.add('hidden');
+    doc.getElementById('dash').classList.remove('hidden');
+    doc.getElementById('viewGlobal').classList.add('hidden');
+    doc.getElementById('loadModal')?.remove();
     const first=Object.keys(D)[0];
     if(first) selectDriver(first);
     autoSaveToLocalStorage();
@@ -1562,12 +1563,12 @@ function loadSession(file){
       D = deserializeD(payload.data);
       cur = null; curMon = null;
       renderSidebar();
-      document.getElementById('upWrap').classList.add('hidden');
-      document.getElementById('dash').classList.remove('hidden');
-      document.getElementById('viewGlobal').classList.add('hidden');
+      doc.getElementById('upWrap').classList.add('hidden');
+      doc.getElementById('dash').classList.remove('hidden');
+      doc.getElementById('viewGlobal').classList.add('hidden');
       const first = Object.keys(D)[0];
       if(first) selectDriver(first);
-      document.getElementById('fileTag').textContent = file.name;
+      doc.getElementById('fileTag').textContent = file.name;
       autoSaveToLocalStorage();
       showToast('✅ Sessione caricata — ' + Object.keys(D).length + ' fattorini');
     } catch(err){
@@ -1588,11 +1589,11 @@ function autoSaveToLocalStorage(){
     // ☁️ Sync cloud (debounced)
     if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
     // Show green dot
-    const dot = document.getElementById('autoSaveDot');
+    const dot = doc.getElementById('autoSaveDot');
     if(dot){
       dot.style.display = 'flex';
-      const circle = document.getElementById('autoSaveDotCircle');
-      const label = document.getElementById('autoSaveDotLabel');
+      const circle = doc.getElementById('autoSaveDotCircle');
+      const label = doc.getElementById('autoSaveDotLabel');
       if(circle) circle.style.background = '#16a34a';
       if(label) label.textContent = 'salvato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
       clearTimeout(dot._t);
@@ -1613,12 +1614,12 @@ function loadFromLocalStorage(){
     D = deserializeD(payload.data);
     cur = null; curMon = null;
     renderSidebar();
-    document.getElementById('upWrap').classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
+    doc.getElementById('upWrap').classList.add('hidden');
+    doc.getElementById('dash').classList.remove('hidden');
     const first = Object.keys(D)[0];
     if(first) selectDriver(first);
-    document.getElementById('fileTag').textContent = 'Sessione del ' + new Date(payload.savedAt).toLocaleDateString('it-IT');
-    const lsDot=document.getElementById('autoSaveDot'); if(lsDot) lsDot.style.display='flex';
+    doc.getElementById('fileTag').textContent = 'Sessione del ' + new Date(payload.savedAt).toLocaleDateString('it-IT');
+    const lsDot=doc.getElementById('autoSaveDot'); if(lsDot) lsDot.style.display='flex';
     showToast('✅ Sessione precedente ripristinata (' + Object.keys(D).length + ' fattorini)');
     return true;
   } catch(e){
@@ -1638,12 +1639,12 @@ function withAutoSave(fn){
 
 // ── TOAST NOTIFICATION ──
 function showToast(msg){
-  let t = document.getElementById('toast');
+  let t = doc.getElementById('toast');
   if(!t){
-    t = document.createElement('div');
+    t = doc.createElement('div');
     t.id = 'toast';
     t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--surf);border:1px solid var(--brd2);color:var(--txt);font-size:13px;font-family:DM Sans,sans-serif;padding:10px 18px;border-radius:8px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s';
-    document.body.appendChild(t);
+    doc.body.appendChild(t);
   }
   t.textContent = msg;
   t.style.opacity = '1';
@@ -1657,8 +1658,8 @@ function showToast(msg){
 window.addEventListener('load', ()=>{
   const restored = loadFromLocalStorage();
   if(!restored){
-    document.getElementById('upWrap').classList.remove('hidden');
-    document.getElementById('dash').classList.add('hidden');
+    doc.getElementById('upWrap').classList.remove('hidden');
+    doc.getElementById('dash').classList.add('hidden');
   }
   initCloudFromSaved();
 });
@@ -1669,16 +1670,16 @@ const APP_PWD_KEY = 'fattorini_pwd_v1';
 const DEFAULT_PWD = 'fattorini2026'; // password di default — cambiala dal pannello Cloud
 
 function checkLogin(){
-  const pwd = document.getElementById('loginPwd')?.value?.trim();
+  const pwd = doc.getElementById('loginPwd')?.value?.trim();
   const savedPwd = localStorage.getItem(APP_PWD_KEY) || DEFAULT_PWD;
   if(pwd === savedPwd){
-    document.getElementById('loginScreen').style.display = 'none';
+    doc.getElementById('loginScreen').style.display = 'none';
     sessionStorage.setItem('fattorini_auth', '1');
     initApp();
   } else {
-    const err = document.getElementById('loginErr');
+    const err = doc.getElementById('loginErr');
     if(err){ err.textContent = '❌ Password errata'; }
-    const inp = document.getElementById('loginPwd');
+    const inp = doc.getElementById('loginPwd');
     if(inp){ inp.value=''; inp.focus(); inp.style.borderColor='#dc2626'; setTimeout(()=>inp.style.borderColor='#dde0e8',1500); }
   }
 }
@@ -1695,19 +1696,19 @@ function initApp(){
   // Load localStorage session
   const restored = loadFromLocalStorage();
   if(!restored){
-    document.getElementById('upWrap').classList.remove('hidden');
-    document.getElementById('dash').classList.add('hidden');
+    doc.getElementById('upWrap').classList.remove('hidden');
+    doc.getElementById('dash').classList.add('hidden');
   }
 }
 
 // On page load: check if already authenticated this session
 window.addEventListener('load', ()=>{
   if(sessionStorage.getItem('fattorini_auth')==='1'){
-    document.getElementById('loginScreen').style.display='none';
+    doc.getElementById('loginScreen').style.display='none';
     initApp();
   } else {
-    document.getElementById('loginScreen').style.display='flex';
-    setTimeout(()=>document.getElementById('loginPwd')?.focus(), 100);
+    doc.getElementById('loginScreen').style.display='flex';
+    setTimeout(()=>doc.getElementById('loginPwd')?.focus(), 100);
   }
 });
 
@@ -1750,8 +1751,8 @@ function connectToFirebase(cfg){
         renderSidebar();
         const keys=Object.keys(D);
         if(keys.length){
-          document.getElementById('upWrap').classList.add('hidden');
-          document.getElementById('dash').classList.remove('hidden');
+          doc.getElementById('upWrap').classList.add('hidden');
+          doc.getElementById('dash').classList.remove('hidden');
           if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
         }
         showToast('☁️ Dati aggiornati da un altro dispositivo');
@@ -1760,7 +1761,7 @@ function connectToFirebase(cfg){
     cloudConnected=true;
     localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cfg));
     updateCloudStatus('connected');
-    const btn=document.getElementById('cloudBtn');
+    const btn=doc.getElementById('cloudBtn');
     if(btn){btn.style.background='rgba(22,163,74,.1)';btn.style.borderColor='rgba(22,163,74,.3)';btn.style.color='#16a34a';}
     return true;
   }catch(e){
@@ -1785,9 +1786,9 @@ function cloudSave(){
 }
 
 function updateCloudStatus(s){
-  const dot=document.getElementById('cloudDot');
-  const circle=document.getElementById('cloudDotCircle');
-  const label=document.getElementById('cloudDotLabel');
+  const dot=doc.getElementById('cloudDot');
+  const circle=doc.getElementById('cloudDotCircle');
+  const label=doc.getElementById('cloudDotLabel');
   if(!dot) return;
   dot.style.display='flex';
   const st={connected:{c:'#9ca3af',t:'cloud connesso'},saving:{c:'#f59e0b',t:'sync...'},synced:{c:'#16a34a',t:'sincronizzato'},error:{c:'#dc2626',t:'errore cloud'},disconnected:{c:'#6b7280',t:'cloud off'}};
@@ -1805,10 +1806,10 @@ function disconnectCloud(){
   if(fbApp){try{fbApp.delete();}catch(e){}}
   fbApp=null;fbDb=null;fbRef=null;cloudConnected=false;
   localStorage.removeItem(CLOUD_CFG_KEY);
-  const dot=document.getElementById('cloudDot');if(dot)dot.style.display='none';
-  const btn=document.getElementById('cloudBtn');
+  const dot=doc.getElementById('cloudDot');if(dot)dot.style.display='none';
+  const btn=doc.getElementById('cloudBtn');
   if(btn){btn.style.background='rgba(124,58,237,.08)';btn.style.borderColor='rgba(124,58,237,.3)';btn.style.color='var(--pur)';}
-  document.getElementById('cloudModal')?.remove();
+  doc.getElementById('cloudModal')?.remove();
   showToast('☁️ Cloud disconnesso');
 }
 
@@ -1832,9 +1833,9 @@ function parseFirebaseCfg(raw){
 }
 
 function tryConnectCloud(){
-  const raw=document.getElementById('cloudConfigText')?.value?.trim();
-  const ws=document.getElementById('cloudWorkspace')?.value?.trim();
-  const res=document.getElementById('cloudTestResult');
+  const raw=doc.getElementById('cloudConfigText')?.value?.trim();
+  const ws=doc.getElementById('cloudWorkspace')?.value?.trim();
+  const res=doc.getElementById('cloudTestResult');
   if(!raw||!ws){if(res){res.textContent='⚠️ Compila entrambi i campi';res.style.color='var(--acc4)';}return;}
   const fbCfg=parseFirebaseCfg(raw);
   if(!fbCfg){if(res){res.textContent='❌ JSON non valido';res.style.color='var(--acc3)';}return;}
@@ -1845,7 +1846,7 @@ function tryConnectCloud(){
   if(ok){
     if(res){res.textContent='✅ Connesso!';res.style.color='var(--grn)';}
     setTimeout(()=>{
-      document.getElementById('cloudModal')?.remove();
+      doc.getElementById('cloudModal')?.remove();
       if(Object.keys(D).length){cloudSave();showToast('☁️ Cloud connesso — dati sincronizzati');}
       else showToast('☁️ Cloud connesso — carica dati o attendi sync da altro PC');
     },900);
@@ -1855,17 +1856,17 @@ function tryConnectCloud(){
 }
 
 function showCloudModal(){
-  document.getElementById('cloudModal')?.remove();
+  doc.getElementById('cloudModal')?.remove();
   let cfg=null;
   try{const r=localStorage.getItem(CLOUD_CFG_KEY);if(r)cfg=JSON.parse(r);}catch(e){}
-  const ov=document.createElement('div');
+  const ov=doc.createElement('div');
   ov.id='cloudModal';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)';
   const connBanner=cloudConnected?`
     <div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div style="font-size:12px;color:#16a34a">&#x2705; <strong>Connesso</strong> &mdash; workspace: <code style="background:rgba(22,163,74,.1);padding:2px 7px;border-radius:4px">${cfg&&cfg.workspace?cfg.workspace:'&mdash;'}</code></div>
       <div style="display:flex;gap:8px">
-        <button onclick="cloudSave();showToast('&#x2601;&#xFE0F; Upload inviato');document.getElementById('cloudModal').remove();" style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#16a34a;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2B06; Forza upload</button>
+        <button onclick="cloudSave();showToast('&#x2601;&#xFE0F; Upload inviato');doc.getElementById('cloudModal').remove();" style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#16a34a;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2B06; Forza upload</button>
         <button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2715; Disconnetti</button>
       </div>
     </div>`:'';
@@ -1874,7 +1875,7 @@ function showCloudModal(){
   <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:16px;padding:28px;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800">&#x2601;&#xFE0F; Cloud Sync &mdash; Multi-PC</div>
-      <button onclick="document.getElementById('cloudModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">&#x2715;</button>
+      <button onclick="doc.getElementById('cloudModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">&#x2715;</button>
     </div>
     ${connBanner}
     <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.12);border-radius:10px;padding:16px">
@@ -1905,12 +1906,12 @@ function showCloudModal(){
       <div style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔐 Cambia password di accesso</div>
       <div style="display:flex;gap:8px">
         <input type="password" id="newPwdInput" placeholder="Nuova password (min 4 caratteri)" style="flex:1;background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:7px 10px;outline:none">
-        <button onclick="setNewPassword(document.getElementById('newPwdInput').value);document.getElementById('newPwdInput').value=''" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">✓ Imposta</button>
+        <button onclick="setNewPassword(doc.getElementById('newPwdInput').value);doc.getElementById('newPwdInput').value=''" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">✓ Imposta</button>
       </div>
       <div style="font-size:10px;color:var(--dim);margin-top:5px">Password default: <code style="font-family:'DM Mono',monospace;background:var(--surf3);padding:1px 5px;border-radius:3px">fattorini2026</code> — cambiala subito dopo il primo accesso</div>
     </div>
   </div>`;
-  document.body.appendChild(ov);
+  doc.body.appendChild(ov);
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
 }
 </script>
