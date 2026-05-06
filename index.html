@@ -570,12 +570,14 @@ function parseRows(rows){
     const r=rows[i];
     if(!r||!r[7]) continue;
     const name=String(r[7]).trim();
+    if(!name || name.length < 2 || /^[-–—]+$/.test(name)) continue;
     // Col S (idx 18) = Requested Delivery Date
     const dateRaw=r[18]?String(r[18]).trim():(r[0]?String(r[0]).trim():null);
     if(!dateRaw) continue;
     const dateObj=new Date(dateRaw);
     if(isNaN(dateObj)) continue;
 
+    if(!name || name.length < 2 || name === '--' || name === '-') continue;
     if(!D[name]) D[name]={
       orders:[],
       mezzo:{},
@@ -1212,10 +1214,10 @@ let globalMonth = null;
 
 function selectGlobal(){
   cur = null;
-  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
+  window.document.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
   // Hide driver dashboard, show global
-  document.getElementById('dash').classList.add('hidden');
-  document.getElementById('viewGlobal').classList.remove('hidden');
+  window.document.getElementById('dash').classList.add('hidden');
+  window.document.getElementById('viewGlobal').classList.remove('hidden');
   // Collect all months across all drivers
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
@@ -1225,20 +1227,20 @@ function selectGlobal(){
 function renderGlobal(){
   const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
   // Pills
-  const pills = document.getElementById('globalPills');
+  const pills = window.document.getElementById('globalPills');
   pills.innerHTML = '';
   allMonths.forEach(mk=>{
-    const p = document.createElement('button');
+    const p = window.document.createElement('button');
     p.className = 'pill'+(mk===globalMonth?' on':'');
     p.textContent = mlabel(mk);
     p.onclick = ()=>{ globalMonth=mk; renderGlobal(); };
     pills.appendChild(p);
   });
 
-  document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
+  window.document.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
 
   // Monthly table
-  const mBody = document.getElementById('globalMonthBody');
+  const mBody = window.document.getElementById('globalMonthBody');
   mBody.innerHTML = '';
   let mTotC=0,mTotFP=0,mTotTick=0,mTotMat=0,mTotSer=0,mTotAtt=0,mTotEx=0,mTotBn=0,mTotCash=0,mTotFee=0,mTotComp=0;
 
@@ -1251,7 +1253,7 @@ function renderGlobal(){
     const e=ms.e;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
-    const tr = document.createElement('tr');
+    const tr = window.document.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1270,7 +1272,7 @@ function renderGlobal(){
   });
 
   // Monthly totals row
-  const mTot = document.createElement('tr');
+  const mTot = window.document.createElement('tr');
   mTot.className = 'tr-tot';
   mTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE MESE</td>
@@ -1288,7 +1290,7 @@ function renderGlobal(){
   mBody.appendChild(mTot);
 
   // Annual table
-  const aBody = document.getElementById('globalAnnualBody');
+  const aBody = window.document.getElementById('globalAnnualBody');
   aBody.innerHTML = '';
   let aTotC=0,aTotFP=0,aTotTick=0,aTotBn=0,aTotCash=0,aTotFee=0,aTotComp=0;
 
@@ -1304,7 +1306,7 @@ function renderGlobal(){
     const e=D[name].econ;
     const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
     aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
-    const tr = document.createElement('tr');
+    const tr = window.document.createElement('tr');
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
@@ -1321,7 +1323,7 @@ function renderGlobal(){
   });
 
   // Annual totals row
-  const aTot = document.createElement('tr');
+  const aTot = window.document.createElement('tr');
   aTot.className = 'tr-tot';
   aTot.innerHTML=`
     <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE ANNUALE</td>
