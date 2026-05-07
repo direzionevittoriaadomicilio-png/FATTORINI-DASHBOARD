@@ -899,7 +899,14 @@ function computeMonth(name,mk){
     const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
     const deliveries=dayOrds.filter(o=>!o.isTicket);
     const cNorm=deliveries.length; // consegne normali
-    const c=cNorm+dayTickets; // TOTALE: normali + ticket (inclusi mezzi ticket)
+    // Fuori paese valgono 1.3 nel calcolo obiettivo/bonus
+    const FP_WEIGHT=1.3;
+    const cWeighted=deliveries.reduce((a,o)=>{
+      const kmV=vKm(o.km,s.kmMax);
+      const isFP=kmV&&o.km>s.kmThresh;
+      return a+(isFP?FP_WEIGHT:1);
+    },0)+dayTickets;
+    const c=cWeighted; // TOTALE pesato: normali + f.p.(×1.3) + ticket
     const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
     const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
     if(hasMat)daysWithMat++;
