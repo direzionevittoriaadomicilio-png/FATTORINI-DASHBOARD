@@ -11,7 +11,7 @@
   --bg:#f4f5f7;--surf:#ffffff;--surf2:#f0f1f4;--surf3:#e4e6eb;
   --brd:#dde0e8;--brd2:#c8ccd6;
   --acc:#2563eb;--acc2:#0891b2;--acc3:#dc2626;--acc4:#d97706;
-  --txt:#1a1d23;--mut:#6b7280;--dim:#9ca3af;
+  --txt:#0f1117;--mut:#374151;--dim:#6b7280;
   --grn:#16a34a;--cash:#b45309;--pur:#7c3aed;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -418,7 +418,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <div class="ts"><table>
             <thead><tr>
               <th>Settimana</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
-              <th>Cons. (tot.)</th><th>di cui F.P.</th><th>🌅</th><th>🌙</th>
+              <th>Cons. (tot.)</th><th>Bonus★</th><th>🌅</th><th>🌙</th>
               <th>Attese</th><th>Extra</th><th>Bonus €</th><th>Cash ord.</th><th>💵 Cash €</th>
             </tr></thead>
             <tbody id="wBody"></tbody>
@@ -1044,21 +1044,35 @@ function renderMonthly(allMS,months){
     const modeStr={giornata:`${ms.totDays} gg × €${e.importo}`,mese:`€${e.importo}/mese`,consegna:`${ms.totC} × €${e.importo}`}[e.mode];
     card.innerHTML=`
       <div class="mc-name">${mlabel(mk)}</div>
-      <div class="mc-rows">
-        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(🎫${ms.totTickets})</span>`:''}</span></div>
-        <div class="mc-row"><span style="color:var(--acc3)">↳ Fuori paese</span><span style="color:var(--acc3)">${ms.totFP} <span style="font-size:9px">(×1.3)</span></span></div>
-        <div class="mc-row"><span style="color:var(--acc)">↳ Ai fini del bonus</span><span style="color:var(--acc);font-weight:700">${ms.totCBonus.toFixed(1)}</span></div>
-        <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
-        <div class="mc-row"><span>Extra / Bonus</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)} / €${ms.bonus.toFixed(2)}</span></div>
-        <div class="mc-row"><span>🌅 Mat / 🌙 Sera</span><span>${ms.daysWithMat} / ${ms.daysWithSer}</span></div>
-        <div class="mc-row"><span>Tariffa tot.</span><span>€${ms.totFee.toFixed(2)}</span></div>
+      <!-- DUE COLONNE -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+        <!-- COLONNA SINISTRA: dati reali -->
+        <div style="background:var(--surf2);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:6px">📦 Consegne reali</div>
+          <div class="mc-row"><span>In paese</span><span>${ms.totC-ms.totFP}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(🎫${ms.totTickets})</span>`:''}</span></div>
+          <div class="mc-row"><span style="color:var(--acc3)">Fuori paese</span><span style="color:var(--acc3)">${ms.totFP}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600">Totale</span><span style="font-weight:700">${ms.totC}</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span>🌅 Turni mat.</span><span>${ms.daysWithMat}</span></div>
+          <div class="mc-row"><span>🌙 Turni sera</span><span>${ms.daysWithSer}</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span style="color:var(--cash)">💵 Cash trattenuto</span><span style="color:var(--cash);font-weight:600">€${ms.totCash.toFixed(2)}</span></div>
+          <div style="font-size:9px;color:var(--mut)">${ms.cashOrds} ordini cash</div>
+        </div>
+        <!-- COLONNA DESTRA: calcolo bonus -->
+        <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.12);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--acc);margin-bottom:6px">⭐ Calcolo bonus</div>
+          <div class="mc-row"><span>In paese (×1)</span><span>${ms.totC-ms.totFP}</span></div>
+          <div class="mc-row"><span style="color:var(--acc3)">Fuori paese (×1.3)</span><span style="color:var(--acc3)">${(ms.totFP*1.3).toFixed(1)}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600">Tot. pesato</span><span style="font-weight:700;color:var(--acc)">${ms.totCBonus.toFixed(1)}★</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
+          <div class="mc-row"><span>Differenza</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">${ms.extra>0?'+':''}${ms.extra.toFixed(1)}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600;color:var(--grn)">Bonus</span><span style="font-weight:700;color:var(--grn)">€${ms.bonus.toFixed(2)}</span></div>
+        </div>
       </div>
       <div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
       <div style="font-size:9px;color:var(--mut);text-align:right;margin-top:3px">${pct.toFixed(0)}% obiettivo</div>
-      <div class="mc-cash">
-        <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--cash)">💵 Cash trattenuto</span><span style="font-family:'DM Mono',monospace;color:var(--cash);font-weight:600">€${ms.totCash.toFixed(2)}</span></div>
-        <div style="font-size:10px;color:var(--mut)">${ms.cashOrds} ordini cash</div>
-      </div>
       <div class="mc-comp">
         <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--pur)">💼 Compenso</span><span style="font-family:'DM Mono',monospace;color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</span></div>
         <div style="font-size:10px;color:var(--mut)">${modeStr} + bonus</div>
@@ -1100,26 +1114,28 @@ function renderWeekly(){
   });
 
   const tb=doc.getElementById('wBody');tb.innerHTML='';
-  let rtC=0,rtFP=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
+  let rtC=0,rtFP=0,rtCBonus=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
 
   Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
     const wd=byWeek[wk];
     const wAtt=wd.reduce((a,d)=>{let x=0;if(d.hasMat)x+=e.sogliaMat;if(d.hasSer)x+=e.sogliaSer;return a+x},0);
-    const wC=wd.reduce((a,d)=>a+d.c,0);
-    const wFP=wd.reduce((a,d)=>a+d.fp,0);
+    const wC=wd.reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0); // totale reale
+    const wFP=wd.reduce((a,d)=>a+(d.cFuoriPaese||d.fp||0),0); // fuori paese reale
+    const wCBonus=wd.reduce((a,d)=>a+(d.cBonus||d.c),0); // pesato per bonus
     const wM=wd.filter(d=>d.hasMat).length,wS=wd.filter(d=>d.hasSer).length;
-    const wEx=Math.max(0,wC-wAtt),wBn=wEx*e.bonusEuro;
+    const wEx=Math.max(0,wCBonus-wAtt),wBn=wEx*e.bonusEuro;
     const wCO=wd.reduce((a,d)=>a+d.cashOrds,0),wCa=wd.reduce((a,d)=>a+d.cash,0);
     const cnt=[1,2,3,4,5,6,0].map(dow=>wd.filter(d=>{
       const o=activeOrders(cur).find(o=>o.dateStr===d.ds);return o?.date.getDay()===dow;
-    }).reduce((a,d)=>a+d.c,0));
+    }).reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0));
     rtC+=wC;rtFP+=wFP;rtM+=wM;rtS+=wS;rtAt+=wAtt;rtEx+=wEx;rtBn+=wBn;rtCO+=wCO;rtCa+=wCa;
+    rtCBonus+=wCBonus;
     const tr=doc.createElement('tr');
     tr.innerHTML=`
       <td><span class="b bb">Sett.${wk}</span></td>
-      ${cnt.map(c=>c>0?`<td><span class="b bg">${c}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
-      <td><span class="b by">${wC}</span></td>
-      <td>${wFP>0?`<span class="b br">${wFP}</span>`:'—'}</td>
+      ${cnt.map(c=>c>0?`<td><span class="b bg">${Number(c).toFixed(c%1?1:0)}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
+      <td><span class="b by">${wC}</span>${wFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${wFP}fp</span>`:''}</td>
+      <td><span class="b bb" title="Ai fini del bonus">${wCBonus.toFixed(1)}★</span></td>
       <td><span class="sm sm-m">${wM}</span></td><td><span class="sm sm-s">${wS}</span></td>
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${wAtt.toFixed(1)}</td>
       <td style="color:${wEx>0?'var(--grn)':'var(--dim)'}">+${wEx.toFixed(1)}</td>
@@ -1130,7 +1146,8 @@ function renderWeekly(){
   });
   const tot=doc.createElement('tr');tot.className='tr-tot';
   tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace">TOTALE</td><td colspan="7"></td>
-    <td><span class="b by">${rtC}</span></td><td>${rtFP>0?`<span class="b br">${rtFP}</span>`:'—'}</td>
+    <td><span class="b by">${rtC}</span>${rtFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${rtFP}fp</span>`:''}</td>
+    <td><span class="b bb">${ms.totCBonus.toFixed(1)}★</span></td>
     <td><span class="sm sm-m">${rtM}</span></td><td><span class="sm sm-s">${rtS}</span></td>
     <td style="font-family:'DM Mono',monospace">${rtAt.toFixed(1)}</td>
     <td style="color:${rtEx>0?'var(--grn)':'var(--dim)'}">+${rtEx.toFixed(1)}</td>
