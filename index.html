@@ -619,7 +619,7 @@ function parseRows(rows){
       date:dateObj, dateStr,
       timeRaw:r[16]?String(r[16]).trim():'—',
       timeHour:parseTimeHour(r[16]?String(r[16]):''),
-      dayEn:r[1]?String(r[1]).trim():'',
+      dayEn:dayFromDateStr(fmtDate(dateObj)),
       orderNum:orderNumRaw,
       isTicket, ticketCount,
       ritiroDa:r[3]?String(r[3]).trim():'—',
@@ -659,6 +659,7 @@ function getWeekOfMonth(d){
 }
 function fmtDate(d){return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`}
 function parseDateStr(s){const[dd,mm,yyyy]=s.split('/');return new Date(yyyy,mm-1,dd)}
+function dayFromDateStr(ds){return GEN[parseDateStr(ds).getDay()];}
 function mlabel(mk){const[y,m]=mk.split('-');return MESI[parseInt(m)-1]+' '+y}
 function dayIt(en){const i=GEN.indexOf(en);return i>=0?GIT[i]:en}
 function vKm(km,mx){return km>0&&km<=mx}
@@ -1045,7 +1046,7 @@ function renderDaily(){
     const tr=doc.createElement('tr');
     tr.innerHTML=`
       <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
-      <td>${dayIt(activeOrders(cur).find(o=>o.dateStr===day.ds)?.dayEn||'')}</td>
+      <td>${dayIt(dayFromDateStr(day.ds))}</td>
       <td>${sb}</td>
       <td><span class="b by">${day.c}</span></td>
       <td>${day.fp>0?`<span class="b br">${day.fp}</span>`:'—'}</td>
@@ -1219,7 +1220,7 @@ function saveOrder(){
     date:dateObj, dateStr,
     timeRaw,
     timeHour:parseTimeHour(timeRaw),
-    dayEn:GEN[dateObj.getDay()],
+    dayEn:dayFromDateStr(fmtDate(dateObj)),
     orderNum:orderNumRaw2,
     isTicket: ticketCount2 > 0,
     ticketCount: ticketCount2,
