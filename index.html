@@ -434,7 +434,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <div class="ts"><table>
             <thead><tr>
               <th>Data</th><th>Giorno</th><th>Turno</th>
-              <th>Cons. (tot.)</th><th>di cui F.P.</th><th>🎫 Ticket</th><th>Attese</th><th>Extra</th><th>Bonus €</th>
+              <th>In paese</th><th>F.paese</th><th>Bonus★</th><th>Attese</th><th>Extra</th><th>Bonus €</th>
               <th>Cash ord.</th><th>💵 Cash €</th><th>Tariffa €</th><th>Compenso base €</th>
             </tr></thead>
             <tbody id="dSumBody"></tbody>
@@ -495,7 +495,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
         <div class="ts"><table>
         <thead><tr>
           <th>Fattorino</th><th>Modalità pag.</th>
-          <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+          <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
           <th>🌅 Mat</th><th>🌙 Sera</th>
           <th>Attese</th><th>Extra</th><th>Bonus €</th>
           <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
@@ -509,7 +509,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
         <div class="ts"><table>
         <thead><tr>
           <th>Fattorino</th><th>Modalità pag.</th>
-          <th>Cons. tot.</th><th>F.P.</th><th>🎫 Ticket</th>
+          <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
           <th>Mesi lav.</th><th>Media cons./mese</th>
           <th>Bonus tot. €</th><th>💵 Cash tot. €</th>
           <th>Tariffa tot. €</th><th>Compenso tot. €</th>
@@ -886,7 +886,7 @@ function computeMonth(name,mk){
   const byDay={};
   orders.forEach(o=>{if(!byDay[o.dateStr])byDay[o.dateStr]=[];byDay[o.dateStr].push(o)});
 
-  let totC=0,totFP=0,totFee=0,totCash=0,cashOrds=0,daysWithMat=0,daysWithSer=0,totDays=0,totTickets=0;
+  let totC=0,totCBonus=0,totInPaese=0,totFP=0,totFee=0,totCash=0,cashOrds=0,daysWithMat=0,daysWithSer=0,totDays=0,totTickets=0;
   const days=[];
 
   Object.entries(byDay).sort((a,b)=>parseDateStr(a[0])-parseDateStr(b[0])).forEach(([ds,dayOrds])=>{
@@ -895,18 +895,25 @@ function computeMonth(name,mk){
     const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
     const cashN=dayOrds.filter(o=>o.isCash).length;
     const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
-    // Tickets count as deliveries (including half tickets = 0.5)
+    // Tickets (inclusi mezzi ticket = 0.5)
     const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
-    const deliveries=dayOrds.filter(o=>!o.isTicket);
-    const cNorm=deliveries.length; // consegne normali
-    // Fuori paese valgono 1.3 nel calcolo obiettivo/bonus
     const FP_WEIGHT=1.3;
-    const cWeighted=deliveries.reduce((a,o)=>{
+    // Consegne in paese: km <= soglia (o km anomalo) — include ticket
+    const cInPaese=dayOrds.filter(o=>{
       const kmV=vKm(o.km,s.kmMax);
-      const isFP=kmV&&o.km>s.kmThresh;
-      return a+(isFP?FP_WEIGHT:1);
-    },0)+dayTickets;
-    const c=cWeighted; // TOTALE pesato: normali + f.p.(×1.3) + ticket
+      return !kmV||o.km<=s.kmThresh; // km non valido o dentro soglia
+    }).reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+    // Consegne fuori paese: km > soglia e km valido — include ticket
+    const cFuoriPaese=dayOrds.filter(o=>{
+      const kmV=vKm(o.km,s.kmMax);
+      return kmV&&o.km>s.kmThresh;
+    }).reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+    // Totale reale = in paese + fuori paese
+    const cTot=cInPaese+cFuoriPaese;
+    // Totale ai fini del bonus (fuori paese pesati 1.3)
+    const cBonus=cInPaese+(cFuoriPaese*FP_WEIGHT);
+    const c=cBonus; // usato per calcolo extra/bonus
+    const cNorm=cTot; // totale reale per display
     const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
     const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
     if(hasMat)daysWithMat++;
@@ -915,13 +922,13 @@ function computeMonth(name,mk){
     const matC=dayOrds.filter(o=>getShift(o,s.cutHour)==='mat').length;
     const serC=dayOrds.filter(o=>getShift(o,s.cutHour)==='ser').length;
     const domShift=matC>0&&serC===0?'mat':serC>0&&matC===0?'ser':matC>0&&serC>0?'both':null;
-    totC+=c;totFP+=fp;totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;
-    days.push({ds,dayOrds,c,cNorm,fp,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
+    totC+=cTot;totCBonus+=cBonus;totInPaese+=cInPaese;totFP+=cFuoriPaese;totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;
+    days.push({ds,dayOrds,c,cNorm,cTot,cInPaese,cFuoriPaese,cBonus,fp:cFuoriPaese,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
   });
 
   // Bonus logic
   const attesa=daysWithMat*e.sogliaMat+daysWithSer*e.sogliaSer;
-  const extra=Math.max(0,totC-attesa);
+  const extra=Math.max(0,totCBonus-attesa); // usa totale pesato per bonus
   const bonus=extra*e.bonusEuro;
 
   // Compenso base
@@ -942,7 +949,7 @@ function computeMonth(name,mk){
   }
   const compTot=compBase+bonus;
 
-  return{orders,days,totC,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,attesa,extra,bonus,compBase,compTot,s,e};
+  return{orders,days,totC,totCBonus,totInPaese,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,attesa,extra,bonus,compBase,compTot,s,e};
 }
 
 // ── RENDER DRIVER ──
@@ -958,20 +965,20 @@ function renderDriver(){
   renderMezzo();
 
   // Aggregate
-  let aC=0,aFP=0,aFee=0,aCash=0,aCashO=0,aMat=0,aSer=0,aAtt=0,aExtra=0,aBonus=0,aCompBase=0,aCompTot=0,aDays=0,aTick=0,mesiOk=0;
+  let aC=0,aCBonus=0,aFP=0,aFee=0,aCash=0,aCashO=0,aMat=0,aSer=0,aAtt=0,aExtra=0,aBonus=0,aCompBase=0,aCompTot=0,aDays=0,aTick=0,mesiOk=0;
   const allMS={};
   months.forEach(mk=>{
     const ms=computeMonth(cur,mk);
     allMS[mk]=ms;
     if(ms.totC>0){
-      mesiOk++;aC+=ms.totC;aFP+=ms.totFP;aFee+=ms.totFee;aCash+=ms.totCash;aCashO+=ms.cashOrds;
+      mesiOk++;aC+=ms.totC;aCBonus+=(ms.totCBonus||ms.totC);aFP+=ms.totFP;aFee+=ms.totFee;aCash+=ms.totCash;aCashO+=ms.cashOrds;
       aMat+=ms.daysWithMat;aSer+=ms.daysWithSer;aAtt+=ms.attesa;aExtra+=ms.extra;
       aBonus+=ms.bonus;aCompBase+=ms.compBase;aCompTot+=ms.compTot;aDays+=ms.totDays;aTick+=ms.totTickets;
     }
   });
 
   doc.getElementById('stC').textContent=aC;
-  doc.getElementById('stCSub').textContent=`${mesiOk} ${mesiOk===1?'mese':'mesi'} · incl. ${aFP} f.p.`;
+  doc.getElementById('stCSub').textContent=`in paese: ${aC-aFP} · f.p.: ${aFP}`;
   doc.getElementById('stFP').textContent=aFP;
   doc.getElementById('stMat').textContent=aMat;
   doc.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
@@ -1038,7 +1045,9 @@ function renderMonthly(allMS,months){
     card.innerHTML=`
       <div class="mc-name">${mlabel(mk)}</div>
       <div class="mc-rows">
-        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(di cui ${ms.totTickets}🎫)</span>`:''} <span style="font-size:9px;color:var(--mut)">${ms.totFP>0?'f.p.: '+ms.totFP:''}</span></span></div>
+        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(🎫${ms.totTickets})</span>`:''}</span></div>
+        <div class="mc-row"><span style="color:var(--acc3)">↳ Fuori paese</span><span style="color:var(--acc3)">${ms.totFP} <span style="font-size:9px">(×1.3)</span></span></div>
+        <div class="mc-row"><span style="color:var(--acc)">↳ Ai fini del bonus</span><span style="color:var(--acc);font-weight:700">${ms.totCBonus.toFixed(1)}</span></div>
         <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
         <div class="mc-row"><span>Extra / Bonus</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)} / €${ms.bonus.toFixed(2)}</span></div>
         <div class="mc-row"><span>🌅 Mat / 🌙 Sera</span><span>${ms.daysWithMat} / ${ms.daysWithSer}</span></div>
@@ -1160,9 +1169,9 @@ function renderDaily(){
       <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
       <td>${dayIt(dayFromDateStr(day.ds))}</td>
       <td>${sb}</td>
-      <td><span class="b by">${day.c}</span></td>
-      <td>${day.fp>0?`<span class="b br">${day.fp}</span>`:'—'}</td>
-      <td>${day.dayTickets>0?`<span class="b bb">${day.dayTickets}</span>`:'—'}</td>
+      <td title="Consegne in paese"><span class="b by">${(day.cInPaese!==undefined?day.cInPaese:day.c).toFixed(1)}</span></td>
+      <td title="Fuori paese">${(day.cFuoriPaese||day.fp||0)>0?`<span class="b br">${(day.cFuoriPaese||day.fp).toFixed(1)}</span>`:'—'}</td>
+      <td title="Ai fini del bonus (f.p.×1.3)"><span class="b bb" style="color:#2563eb">${(day.cBonus!==undefined?day.cBonus:day.c).toFixed(1)}★</span></td>
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${att.toFixed(1)}</td>
       <td style="color:${ext>0?'var(--grn)':'var(--dim)'}">+${ext.toFixed(1)}</td>
       <td style="color:${bon>0?'var(--grn)':'var(--dim)'}">${bon>0?'€'+bon.toFixed(2):'—'}</td>
@@ -1542,9 +1551,9 @@ function renderGlobal(){
     tr.innerHTML=`
       <td><strong>${name}</strong></td>
       <td><span class="b bo">${modeStr}</span></td>
-      <td><span class="b by">${ms.totC}</span></td>
+      <td><span class="b by">${ms.totC}</span><span style="font-size:9px;color:var(--mut)"> (${ms.totFP}fp)</span></td>
       <td>${ms.totFP>0?`<span class="b br">${ms.totFP}</span>`:'—'}</td>
-      <td>${ms.totTickets>0?`<span class="b bb">🎫 ${ms.totTickets}</span>`:'—'}</td>
+      <td><span class="b bb" title="Ai fini del bonus (f.p.×1.3)">${(ms.totCBonus||ms.totC).toFixed(1)}★</span></td>
       <td><span class="sm sm-m">${ms.daysWithMat}</span></td>
       <td><span class="sm sm-s">${ms.daysWithSer}</span></td>
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${ms.attesa.toFixed(1)}</td>
