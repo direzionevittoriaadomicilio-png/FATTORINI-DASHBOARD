@@ -269,6 +269,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
               <option value="giornata">A giornata (importo fisso × giorni lavorati)</option>
               <option value="mese">Al mese (importo fisso mensile)</option>
               <option value="consegna">A consegna (tariffa × n° consegne)</option>
+              <option value="turno">A turno (tariffa per tipo turno + mezzo)</option>
             </select>
           </div>
           <div class="field" id="econImportoField">
@@ -276,6 +277,36 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
             <input class="inp" type="number" id="econImporto" value="0" step="0.5">
           </div>
         </div>
+        <!-- TURNO TARIFFE PANEL -->
+        <div id="econTurnoPanel" class="hidden" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:10px;padding:14px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Tariffe per turno</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px;margin-bottom:6px">
+            <div style="font-weight:600;color:var(--mut)">Turno</div>
+            <div style="font-weight:600;color:var(--mut)">🏢 Mezzo aziendale (€)</div>
+            <div style="font-weight:600;color:var(--mut)">🚗 Mezzo proprio (€)</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div style="font-size:11px">🌅 Mattina intera<br><span style="font-size:9px;color:var(--mut)">inizio prima delle 11:00</span></div>
+            <input class="inp" type="number" id="turnoMatAz" value="0" step="0.5" style="font-size:12px">
+            <input class="inp" type="number" id="turnoMatPr" value="0" step="0.5" style="font-size:12px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div style="font-size:11px">🌤 Mezza mattina<br><span style="font-size:9px;color:var(--mut)">inizio dalle 11:00</span></div>
+            <input class="inp" type="number" id="turnoMezzoMatAz" value="0" step="0.5" style="font-size:12px">
+            <input class="inp" type="number" id="turnoMezzoMatPr" value="0" step="0.5" style="font-size:12px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div style="font-size:11px">🌆 Pomeriggio+Sera<br><span style="font-size:9px;color:var(--mut)">inizio dalle 17 alle 19</span></div>
+            <input class="inp" type="number" id="turnoPomAz" value="0" step="0.5" style="font-size:12px">
+            <input class="inp" type="number" id="turnoPomPr" value="0" step="0.5" style="font-size:12px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center">
+            <div style="font-size:11px">🌙 Solo sera<br><span style="font-size:9px;color:var(--mut)">inizio dalle 19:00</span></div>
+            <input class="inp" type="number" id="turnoSerAz" value="0" step="0.5" style="font-size:12px">
+            <input class="inp" type="number" id="turnoSerPr" value="0" step="0.5" style="font-size:12px">
+          </div>
+        </div>
+
         <div class="grid2" style="margin-bottom:12px">
           <div class="field">
             <label>Soglia cons. mattina (per bonus)</label>
@@ -604,14 +635,22 @@ function parseRows(rows){
       orders:[],
       mezzo:{},
       settings:{kmThresh:5,kmMax:50,cutHour:14},
-      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:''}
+      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}
     };
 
     const dateStr=fmtDate(dateObj);
     const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
-    // Count asterisks in order number field — each * = 1 ticket
-    const ticketCount = (orderNumRaw.match(/\*/g)||[]).length;
+    // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
+    let ticketCount = 0;
+    if(orderNumRaw.includes('*')){
+      const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
+      if(halfMatch){
+        ticketCount = 0.5;
+      } else {
+        ticketCount = (orderNumRaw.match(/\*/g)||[]).length;
+      }
+    }
     const isTicket = ticketCount > 0;
 
     const order={
@@ -699,6 +738,7 @@ function selectDriver(name){
 // ── PANELS ──
 function openEconPanel(){
   const e=D[cur].econ;
+  if(!e.turno) e.turno={matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0};
   doc.getElementById('econDriverName').textContent=cur;
   doc.getElementById('econMode').value=e.mode;
   doc.getElementById('econImporto').value=e.importo;
@@ -706,6 +746,15 @@ function openEconPanel(){
   doc.getElementById('econSogliaSer').value=e.sogliaSer;
   doc.getElementById('econBonusEuro').value=e.bonusEuro;
   doc.getElementById('econNote').value=e.note||'';
+  // Turno tariffe
+  doc.getElementById('turnoMatAz').value=e.turno.matAz||0;
+  doc.getElementById('turnoMatPr').value=e.turno.matPr||0;
+  doc.getElementById('turnoMezzoMatAz').value=e.turno.mezzoMatAz||0;
+  doc.getElementById('turnoMezzoMatPr').value=e.turno.mezzoMatPr||0;
+  doc.getElementById('turnoPomAz').value=e.turno.pomAz||0;
+  doc.getElementById('turnoPomPr').value=e.turno.pomPr||0;
+  doc.getElementById('turnoSerAz').value=e.turno.serAz||0;
+  doc.getElementById('turnoSerPr').value=e.turno.serPr||0;
   updateEconLabel();
   doc.getElementById('econPanel').classList.remove('hidden');
   doc.getElementById('settPanel').classList.add('hidden');
@@ -713,8 +762,14 @@ function openEconPanel(){
 function closeEconPanel(){doc.getElementById('econPanel').classList.add('hidden')}
 function updateEconLabel(){
   const mode=doc.getElementById('econMode').value;
-  const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Tariffa per consegna (€)'};
+  const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Tariffa per consegna (€)',turno:'Importo base (€, opzionale)'};
   doc.getElementById('econImportoLabel').textContent=labels[mode]||'Importo (€)';
+  // Show/hide turno panel
+  const turnoPanel=doc.getElementById('econTurnoPanel');
+  if(turnoPanel) turnoPanel.classList.toggle('hidden', mode!=='turno');
+  // Show/hide importo field (hide for turno mode)
+  const importoField=doc.getElementById('econImportoField');
+  if(importoField) importoField.classList.toggle('hidden', mode==='turno');
 }
 doc.getElementById('econMode').addEventListener('change',updateEconLabel);
 function saveEcon(){
@@ -725,6 +780,15 @@ function saveEcon(){
   e.sogliaSer=parseFloat(doc.getElementById('econSogliaSer').value)||14;
   e.bonusEuro=parseFloat(doc.getElementById('econBonusEuro').value)||1;
   e.note=doc.getElementById('econNote').value;
+  if(!e.turno) e.turno={};
+  e.turno.matAz=parseFloat(doc.getElementById('turnoMatAz').value)||0;
+  e.turno.matPr=parseFloat(doc.getElementById('turnoMatPr').value)||0;
+  e.turno.mezzoMatAz=parseFloat(doc.getElementById('turnoMezzoMatAz').value)||0;
+  e.turno.mezzoMatPr=parseFloat(doc.getElementById('turnoMezzoMatPr').value)||0;
+  e.turno.pomAz=parseFloat(doc.getElementById('turnoPomAz').value)||0;
+  e.turno.pomPr=parseFloat(doc.getElementById('turnoPomPr').value)||0;
+  e.turno.serAz=parseFloat(doc.getElementById('turnoSerAz').value)||0;
+  e.turno.serPr=parseFloat(doc.getElementById('turnoSerPr').value)||0;
   closeEconPanel();
   renderDriver();
   autoSaveToLocalStorage();
@@ -786,6 +850,34 @@ function mkSel(current,onChange){
 }
 
 // ── COMPUTE MONTH ──
+// Determina il tipo di turno in base all'orario del primo ordine del giorno
+function getTurnoType(dayOrds, cutHour){
+  // Prendi l'orario minimo del giorno (primo ordine)
+  const hours = dayOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
+  if(!hours.length) return null;
+  const firstHour = Math.min(...hours);
+  if(firstHour < cutHour){ // turno mattina (prima delle 14)
+    return firstHour < 11 ? 'matIntera' : 'mezzoMat';
+  } else { // turno sera
+    return firstHour < 19 ? 'pomSera' : 'solaSera'; // pomSera = 17-19, solaSera = 19+
+  }
+}
+
+// Calcola compenso turno in base al tipo turno e al mezzo usato
+function getTurnoComp(turnoType, mezzoMat, mezzoSer, turnoTariffe){
+  if(!turnoTariffe||!turnoType) return 0;
+  // Determina mezzo dominante del turno
+  const mezzo = turnoType==='matIntera'||turnoType==='mezzoMat' ? mezzoMat : mezzoSer;
+  const isPropr = mezzo==='Auto propria';
+  const map = {
+    matIntera: isPropr ? turnoTariffe.matPr : turnoTariffe.matAz,
+    mezzoMat:  isPropr ? turnoTariffe.mezzoMatPr : turnoTariffe.mezzoMatAz,
+    pomSera:   isPropr ? turnoTariffe.pomPr : turnoTariffe.pomAz,
+    solaSera:  isPropr ? turnoTariffe.serPr : turnoTariffe.serAz,
+  };
+  return map[turnoType]||0;
+}
+
 function computeMonth(name,mk){
   const d=D[name];
   const s=d.settings;
@@ -803,20 +895,21 @@ function computeMonth(name,mk){
     const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
     const cashN=dayOrds.filter(o=>o.isCash).length;
     const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
-    // Tickets: count asterisks; Deliveries: non-ticket orders
+    // Tickets count as deliveries (including half tickets = 0.5)
     const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
     const deliveries=dayOrds.filter(o=>!o.isTicket);
-    const c=deliveries.length; // consegne (esclusi ticket)
-    const hasMat=deliveries.some(o=>getShift(o,s.cutHour)==='mat');
-    const hasSer=deliveries.some(o=>getShift(o,s.cutHour)==='ser');
+    const cNorm=deliveries.length; // consegne normali
+    const c=cNorm+dayTickets; // TOTALE: normali + ticket (inclusi mezzi ticket)
+    const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
+    const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
     if(hasMat)daysWithMat++;
     if(hasSer)daysWithSer++;
     totDays++;
-    const matC=deliveries.filter(o=>getShift(o,s.cutHour)==='mat').length;
-    const serC=deliveries.filter(o=>getShift(o,s.cutHour)==='ser').length;
+    const matC=dayOrds.filter(o=>getShift(o,s.cutHour)==='mat').length;
+    const serC=dayOrds.filter(o=>getShift(o,s.cutHour)==='ser').length;
     const domShift=matC>0&&serC===0?'mat':serC>0&&matC===0?'ser':matC>0&&serC>0?'both':null;
     totC+=c;totFP+=fp;totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;
-    days.push({ds,dayOrds,c,fp,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
+    days.push({ds,dayOrds,c,cNorm,fp,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
   });
 
   // Bonus logic
@@ -829,6 +922,17 @@ function computeMonth(name,mk){
   if(e.mode==='giornata') compBase=totDays*e.importo;
   else if(e.mode==='mese') compBase=e.importo;
   else if(e.mode==='consegna') compBase=totC*e.importo;
+  else if(e.mode==='turno'){
+    // Per ogni giorno calcola turno type e compenso
+    days.forEach(day=>{
+      const turnoType=getTurnoType(day.dayOrds, s.cutHour);
+      const mz=D[name]?.mezzo?.[day.ds]||{};
+      const comp=getTurnoComp(turnoType, mz.mat||'—', mz.ser||'—', e.turno||{});
+      compBase+=comp;
+      day.turnoType=turnoType;
+      day.turnoComp=comp;
+    });
+  }
   const compTot=compBase+bonus;
 
   return{orders,days,totC,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,attesa,extra,bonus,compBase,compTot,s,e};
@@ -927,7 +1031,7 @@ function renderMonthly(allMS,months){
     card.innerHTML=`
       <div class="mc-name">${mlabel(mk)}</div>
       <div class="mc-rows">
-        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC} <span style="font-size:9px;color:var(--mut)">(f.p.: ${ms.totFP})</span></span></div>
+        <div class="mc-row"><span>Consegne totali</span><span>${ms.totC}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(di cui ${ms.totTickets}🎫)</span>`:''} <span style="font-size:9px;color:var(--mut)">${ms.totFP>0?'f.p.: '+ms.totFP:''}</span></span></div>
         <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
         <div class="mc-row"><span>Extra / Bonus</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)} / €${ms.bonus.toFixed(2)}</span></div>
         <div class="mc-row"><span>🌅 Mat / 🌙 Sera</span><span>${ms.daysWithMat} / ${ms.daysWithSer}</span></div>
@@ -1037,6 +1141,7 @@ function renderDaily(){
     let cmpBase=0;
     if(e.mode==='giornata')cmpBase=e.importo;
     else if(e.mode==='consegna')cmpBase=day.c*e.importo;
+    else if(e.mode==='turno')cmpBase=day.turnoComp||0;
     else cmpBase=e.importo/30; // mese: approssimazione giornaliera
     rC+=day.c;rFP+=day.fp;rAt+=att;rEx+=ext;rBn+=bon;rCO+=day.cashOrds;rCa+=day.cash;rFee+=day.fee;rCmp+=cmpBase;rTick+=day.dayTickets||0;
     const sb=day.domShift==='mat'?'<span class="sm sm-m">🌅 Mattina</span>':
@@ -1424,7 +1529,7 @@ function renderGlobal(){
     mTotC+=ms.totC;mTotFP+=ms.totFP;mTotTick+=ms.totTickets;mTotMat+=ms.daysWithMat;mTotSer+=ms.daysWithSer;
     mTotAtt+=ms.attesa;mTotEx+=ms.extra;mTotBn+=ms.bonus;mTotCash+=ms.totCash;mTotFee+=ms.totFee;mTotComp+=ms.compTot;
     const e=ms.e;
-    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna',turno:'A turno'}[e.mode]||e.mode;
     const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
     const tr = doc.createElement('tr');
     tr.innerHTML=`
@@ -1477,7 +1582,7 @@ function renderGlobal(){
     });
     const media = mesiOk>0?(tC/mesiOk).toFixed(1):0;
     const e=D[name].econ;
-    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna'}[e.mode];
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna',turno:'A turno'}[e.mode]||e.mode;
     aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
     const tr = doc.createElement('tr');
     tr.innerHTML=`
@@ -1557,7 +1662,7 @@ function deserializeD(raw){
     out[name]={
       mezzo: raw[name].mezzo||{},
       settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:14},
-      econ: raw[name].econ||{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:''},
+      econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
       orders: (raw[name].orders||[]).map(o=>{
         const dateObj = o.date ? new Date(o.date) : new Date();
         return {
