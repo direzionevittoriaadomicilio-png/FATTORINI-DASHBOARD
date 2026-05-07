@@ -443,7 +443,19 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
     <!-- GLOBAL OVERVIEW (sibling of dash) -->
     <!-- GLOBAL OVERVIEW -->
     <div id="viewGlobal" class="hidden" style="position:relative;z-index:10;background:var(--bg);min-height:100%;padding-bottom:40px">
-      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px">📊 Riepilogo totale — tutti i fattorini</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">📊 Riepilogo totale — tutti i fattorini</div>
+        <button onclick="toggleMezziPanel()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;color:var(--txt);font-family:'DM Mono',monospace">🚗 Gestisci mezzi</button>
+      </div>
+      <!-- MEZZI PANEL -->
+      <div id="mezziPanel" class="hidden" style="background:var(--surf);border:1px solid var(--brd2);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:12px">🚗 Mezzi disponibili</div>
+        <div id="mezziList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="newMezzoInput" placeholder="Nome nuovo mezzo..." class="inp" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')addMezzo()">
+          <button onclick="addMezzo()" style="background:var(--acc);color:#000;border:none;border-radius:8px;padding:7px 16px;font-size:11px;cursor:pointer;font-weight:700">+ Aggiungi</button>
+        </div>
+      </div>
       <!-- Month selector -->
       <div class="pills" id="globalPills"></div>
       <!-- Per-driver monthly table -->
@@ -523,7 +535,11 @@ const doc = window.document;
 const MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const GEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const GIT=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
-const MEZZI=['—','Auto aziendale','Ford','Citroen','Scooter','Moto','Auto propria','Bici','Altro'];
+let MEZZI=['—','Auto aziendale','Ford','Citroen','Scooter','Moto','Auto propria','Bici','Altro'];
+const MEZZI_KEY='fattorini_mezzi_v1';
+function loadMezzi(){ try{ const s=localStorage.getItem(MEZZI_KEY); if(s){ const m=JSON.parse(s); if(Array.isArray(m)&&m.length) MEZZI=m; } }catch(e){} }
+function saveMezzi(){ try{ localStorage.setItem(MEZZI_KEY,JSON.stringify(MEZZI)); }catch(e){} }
+loadMezzi();
 const COLORS=['#c8ff47','#47b8ff','#ff9f47','#5eea8d','#ff6b6b','#c47bff','#ffd447'];
 
 // D[name] = { orders[], mezzo{}, settings{}, econ{} }
@@ -1231,6 +1247,79 @@ function saveOrder(){
   renderDriver();
   autoSaveToLocalStorage();
   debouncedCloudSave();
+}
+
+function toggleMezziPanel(){
+  const p=doc.getElementById('mezziPanel');
+  if(p.classList.contains('hidden')){ p.classList.remove('hidden'); renderMezziPanel(); }
+  else p.classList.add('hidden');
+}
+
+function renderMezziPanel(){
+  const list=doc.getElementById('mezziList');
+  if(!list) return;
+  list.innerHTML='';
+  MEZZI.forEach((m,i)=>{
+    if(m==='—') return; // skip the empty option
+    const tag=doc.createElement('div');
+    tag.style.cssText='display:flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:5px 10px;font-size:12px';
+    tag.innerHTML=`<span style="font-family:'DM Mono',monospace">${m}</span>
+      <button onclick="editMezzo(${i})" style="background:none;border:none;cursor:pointer;color:var(--mut);font-size:11px;padding:0 2px" title="Rinomina">✏</button>
+      <button onclick="deleteMezzo(${i})" style="background:none;border:none;cursor:pointer;color:var(--acc3);font-size:11px;padding:0 2px" title="Elimina">✕</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function addMezzo(){
+  const inp=doc.getElementById('newMezzoInput');
+  const val=inp.value.trim();
+  if(!val){ showToast('⚠️ Inserisci un nome'); return; }
+  if(MEZZI.includes(val)){ showToast('⚠️ Mezzo già presente'); return; }
+  MEZZI.push(val);
+  saveMezzi();
+  inp.value='';
+  renderMezziPanel();
+  showToast('✅ Mezzo "'+val+'" aggiunto');
+}
+
+function editMezzo(idx){
+  const current=MEZZI[idx];
+  const newName=prompt('Rinomina mezzo:',current);
+  if(!newName||!newName.trim()||newName.trim()===current) return;
+  if(MEZZI.includes(newName.trim())){ showToast('⚠️ Nome già esistente'); return; }
+  // Update all existing assignments
+  const oldName=MEZZI[idx];
+  MEZZI[idx]=newName.trim();
+  saveMezzi();
+  // Update mezzo assignments in all drivers
+  Object.values(D).forEach(drv=>{
+    Object.values(drv.mezzo||{}).forEach(turni=>{
+      if(turni.mat===oldName) turni.mat=newName.trim();
+      if(turni.ser===oldName) turni.ser=newName.trim();
+    });
+  });
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  renderMezziPanel();
+  showToast('✅ Rinominato in "'+newName.trim()+'"');
+}
+
+function deleteMezzo(idx){
+  const name=MEZZI[idx];
+  if(!confirm('Eliminare il mezzo "'+name+'"? Verrà rimosso anche dalle assegnazioni esistenti.')) return;
+  MEZZI.splice(idx,1);
+  saveMezzi();
+  // Clear assignments with this mezzo
+  Object.values(D).forEach(drv=>{
+    Object.values(drv.mezzo||{}).forEach(turni=>{
+      if(turni.mat===name) turni.mat='—';
+      if(turni.ser===name) turni.ser='—';
+    });
+  });
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  renderMezziPanel();
+  showToast('🗑 Mezzo "'+name+'" eliminato');
 }
 
 function deleteDriver(name){
