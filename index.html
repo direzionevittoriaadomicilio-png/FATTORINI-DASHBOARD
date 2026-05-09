@@ -335,7 +335,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
       <div class="panel hidden" id="settPanel">
         <div class="panel-title">⚙ Impostazioni tecniche — <span id="settDriverName"></span></div>
         <div class="grid3">
-          <div class="field"><label>Soglia fuori paese (km)</label><input class="inp" type="number" id="cfgKmThresh" value="5" step="0.5"></div>
+          <div class="field"><label>Soglia km (solo per ticket e NS)</label><input class="inp" type="number" id="cfgKmThresh" value="5" step="0.5"></div>
           <div class="field"><label>Km max GPS valido</label><input class="inp" type="number" id="cfgKmMax" value="50" step="5"></div>
           <div class="field"><label>Ora taglio mattina/sera</label><input class="inp" type="number" id="cfgCutHour" value="14" min="10" max="18"></div>
         </div>
@@ -656,8 +656,8 @@ function parseRows(rows){
     const order={
       id: Date.now()+'_'+i+'_'+Math.random(),
       date:dateObj, dateStr,
-      timeRaw:r[16]?String(r[16]).trim():'—',
-      timeHour:parseTimeHour(r[16]?String(r[16]):''),
+      timeRaw:r[17]?String(r[17]).trim():'—',
+      timeHour:parseTimeHour(r[17]?String(r[17]):''),
       dayEn:dayFromDateStr(fmtDate(dateObj)),
       orderNum:orderNumRaw,
       isTicket, ticketCount,
@@ -702,6 +702,23 @@ function dayFromDateStr(ds){return GEN[parseDateStr(ds).getDay()];}
 function mlabel(mk){const[y,m]=mk.split('-');return MESI[parseInt(m)-1]+' '+y}
 function dayIt(en){const i=GEN.indexOf(en);return i>=0?GIT[i]:en}
 function vKm(km,mx){return km>0&&km<=mx}
+
+// Nuova logica fuori paese:
+// - fee > 4.90 → sempre fuori paese
+// - Eccezioni (ticket e NS): usano i km
+const FP_FEE_SOGLIA = 4.90;
+function isNsOrder(o){ 
+  const n=(o.orderNum||'').trim().toUpperCase();
+  return n==='NS'||n==='€ NS'||n==='€NS';
+}
+function isFuoriPaese(o, s){
+  if(o.isTicket || isNsOrder(o)){
+    // Usano i km
+    return vKm(o.km,s.kmMax) && o.km > s.kmThresh;
+  }
+  // Tutti gli altri: fuori paese se fee > 4.90
+  return o.fee > FP_FEE_SOGLIA;
+}
 function getShift(o,ch){if(o.timeHour===null)return null;return o.timeHour<ch?'mat':'ser'}
 function activeOrders(name){return (D[name]?.orders||[]).filter(o=>!o.deleted)}
 function getMonths(name){return[...new Set(activeOrders(name).map(o=>o.monthKey))].sort()}
@@ -890,24 +907,19 @@ function computeMonth(name,mk){
   const days=[];
 
   Object.entries(byDay).sort((a,b)=>parseDateStr(a[0])-parseDateStr(b[0])).forEach(([ds,dayOrds])=>{
-    const vOrds=dayOrds.filter(o=>vKm(o.km,s.kmMax));
-    const fp=vOrds.filter(o=>o.km>s.kmThresh&&!o.isTicket).length;
+    const fp=dayOrds.filter(o=>isFuoriPaese(o,s)&&!o.isTicket).length;
     const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
     const cashN=dayOrds.filter(o=>o.isCash).length;
     const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
     // Tickets (inclusi mezzi ticket = 0.5)
     const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
     const FP_WEIGHT=1.3;
-    // Consegne in paese: km <= soglia (o km anomalo) — include ticket
-    const cInPaese=dayOrds.filter(o=>{
-      const kmV=vKm(o.km,s.kmMax);
-      return !kmV||o.km<=s.kmThresh; // km non valido o dentro soglia
-    }).reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
-    // Consegne fuori paese: km > soglia e km valido — include ticket
-    const cFuoriPaese=dayOrds.filter(o=>{
-      const kmV=vKm(o.km,s.kmMax);
-      return kmV&&o.km>s.kmThresh;
-    }).reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+    // Consegne fuori paese: usa nuova logica (fee>4.90 oppure km per ticket/NS)
+    const cFuoriPaese=dayOrds.filter(o=>isFuoriPaese(o,s))
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+    // Consegne in paese: tutto il resto
+    const cInPaese=dayOrds.filter(o=>!isFuoriPaese(o,s))
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
     // Totale reale = in paese + fuori paese
     const cTot=cInPaese+cFuoriPaese;
     // Totale ai fini del bonus (fuori paese pesati 1.3)
@@ -1237,7 +1249,7 @@ function renderOrders(){
 
   const tb=doc.getElementById('oBody');tb.innerHTML='';
   orders.forEach((o,i)=>{
-    const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
+    const isFP=isFuoriPaese(o,s);
     const shift=getShift(o,s.cutHour);
     const shiftB=shift==='mat'?'<span class="sm sm-m">🌅</span>':shift==='ser'?'<span class="sm sm-s">🌙</span>':'<span style="color:var(--dim)">?</span>';
     const payB=o.isCash?'<span class="b bca">CASH</span>':o.payMethod==='CARD'?'<span class="b bb">CARD</span>':`<span style="color:var(--dim)">${o.payMethod}</span>`;
@@ -1254,7 +1266,7 @@ function renderOrders(){
       <td>${o.isTicket?`<span class="b bg">🎫 ${o.orderNum}</span>`:`<span class="b bb">#${o.orderNum}</span>`}</td>
       <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa||'—'}</td>
       <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':kmV?'var(--txt)':'var(--dim)'}">${kmV?o.km.toFixed(2)+'km':'n/d'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':'var(--txt)'}">${o.km>0?o.km.toFixed(2)+'km':'n/d'}</td>
       <td>${isFP?'<span class="b br">✓</span>':'—'}</td>
       <td>${payB}</td>
       <td>€${o.total.toFixed(2)}</td>
@@ -1656,11 +1668,11 @@ function exportCSV(){
   const s=D[cur].settings,e=D[cur].econ;
   const rows=[['Fattorino','Modalità pag.','Mese','Data','Giorno','Turno','N.Ordine','Km','FuoriPaese','Pagamento','Totale','Tariffa','CashTrattenuto','Mezzo','Status','Note']];
   activeOrders(cur).sort((a,b)=>a.date-b.date).forEach(o=>{
-    const kmV=vKm(o.km,s.kmMax),isFP=kmV&&o.km>s.kmThresh;
+    const isFP=isFuoriPaese(o,s);
     const shift=getShift(o,s.cutHour);
     const mz=D[cur].mezzo[o.dateStr]||{};
     const mezzo=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
-    rows.push([cur,e.mode,mlabel(o.monthKey),o.dateStr,dayIt(o.dayEn),shift==='mat'?'Mattina':shift==='ser'?'Sera':'N/A',o.orderNum,kmV?o.km.toFixed(2):'',isFP?'SI':'NO',o.payMethod,o.total.toFixed(2),o.fee.toFixed(2),o.isCash?o.fee.toFixed(2):'0',mezzo,o.status,o.note||'']);
+    rows.push([cur,e.mode,mlabel(o.monthKey),o.dateStr,dayIt(o.dayEn),shift==='mat'?'Mattina':shift==='ser'?'Sera':'N/A',o.orderNum,o.km>0?o.km.toFixed(2):'',isFP?'SI':'NO',o.payMethod,o.total.toFixed(2),o.fee.toFixed(2),o.isCash?o.fee.toFixed(2):'0',mezzo,o.status,o.note||'']);
   });
   const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a=doc.createElement('a');
