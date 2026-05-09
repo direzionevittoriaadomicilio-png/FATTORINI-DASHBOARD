@@ -1186,7 +1186,7 @@ function renderDaily(){
       <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
       <td>${dayIt(dayFromDateStr(day.ds))}</td>
       <td>${sb}</td>
-      <td title="Consegne in paese"><span class="b by">${(day.cInPaese!==undefined?day.cInPaese:day.c).toFixed(1)}</span></td>
+      <td title="Consegne in paese"><span class="b by">${(day.cInPaese!==undefined?day.cInPaese:day.c).toFixed(1)}</span>${(day.dayTickets||0)>0?`<span class="b bg" style="font-size:9px;margin-left:3px">🎫${day.dayTickets}</span>`:''}</td>
       <td title="Fuori paese">${(day.cFuoriPaese||day.fp||0)>0?`<span class="b br">${(day.cFuoriPaese||day.fp).toFixed(1)}</span>`:'—'}</td>
       <td title="Ai fini del bonus (f.p.×1.3)"><span class="b bb" style="color:#2563eb">${(day.cBonus!==undefined?day.cBonus:day.c).toFixed(1)}★</span></td>
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${att.toFixed(1)}</td>
