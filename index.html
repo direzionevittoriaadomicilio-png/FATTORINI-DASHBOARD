@@ -646,9 +646,9 @@ function parseRows(rows){
     if(orderNumRaw.includes('*')){
       const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
       if(halfMatch){
-        ticketCount = 0.5;
+        ticketCount = 1.5; // * 1/2 = 1.5 consegne
       } else {
-        ticketCount = (orderNumRaw.match(/\*/g)||[]).length;
+        ticketCount = 1; // * singolo = 1 consegna
       }
     }
     const isTicket = ticketCount > 0;
@@ -1364,7 +1364,8 @@ function saveOrder(){
   const timeRaw=doc.getElementById('mTime').value||'—';
 
   const orderNumRaw2 = doc.getElementById('mOrderNum').value||'MANUAL';
-  const ticketCount2 = (orderNumRaw2.match(/\*/g)||[]).length;
+  const isHalfTicket2 = /\*\s*1\s*\/\s*2/.test(orderNumRaw2);
+  const ticketCount2 = orderNumRaw2.includes('*') ? (isHalfTicket2 ? 1.5 : 1) : 0;
   const orderData={
     id: editingOrderIdx!==null ? D[cur].orders[editingOrderIdx].id : Date.now()+'_'+Math.random(),
     date:dateObj, dateStr,
