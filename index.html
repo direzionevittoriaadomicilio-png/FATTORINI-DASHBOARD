@@ -642,13 +642,16 @@ function parseRows(rows){
     const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
     // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
-    let ticketCount = 0;
+    let ticketCount = 0;    // valore ticket (per contatore ticket)
+    let ticketConsegne = 0; // valore consegna (per totale consegne)
     if(orderNumRaw.includes('*')){
       const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
       if(halfMatch){
-        ticketCount = 1.5; // * 1/2 = 1.5 consegne
+        ticketCount = 1.5;    // * 1/2 = 1.5 ticket
+        ticketConsegne = 1;   // * 1/2 = 1 consegna
       } else {
-        ticketCount = 1; // * singolo = 1 consegna
+        ticketCount = 1;      // * = 1 ticket
+        ticketConsegne = 1;   // * = 1 consegna
       }
     }
     const isTicket = ticketCount > 0;
@@ -660,7 +663,7 @@ function parseRows(rows){
       timeHour:parseTimeHour(r[17]?String(r[17]):''),
       dayEn:dayFromDateStr(fmtDate(dateObj)),
       orderNum:orderNumRaw,
-      isTicket, ticketCount,
+      isTicket, ticketCount, ticketConsegne,
       ritiroDa:r[3]?String(r[3]).trim():'—',
       consegnaA:r[5]?String(r[5]).trim():'—',
       payMethod, isCash:payMethod==='CASH',
@@ -912,14 +915,15 @@ function computeMonth(name,mk){
     const cashN=dayOrds.filter(o=>o.isCash).length;
     const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
     // Tickets (inclusi mezzi ticket = 0.5)
-    const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
+    const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0); // contatore ticket
+    const dayTicketConsegne=dayOrds.reduce((a,o)=>a+(o.ticketConsegne||o.ticketCount||0),0); // consegne ticket
     const FP_WEIGHT=1.3;
     // Consegne fuori paese: usa nuova logica (fee>4.90 oppure km per ticket/NS)
     const cFuoriPaese=dayOrds.filter(o=>isFuoriPaese(o,s))
-      .reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
     // Consegne in paese: tutto il resto
     const cInPaese=dayOrds.filter(o=>!isFuoriPaese(o,s))
-      .reduce((a,o)=>a+(o.isTicket?(o.ticketCount||0):1),0);
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
     // Totale reale = in paese + fuori paese
     const cTot=cInPaese+cFuoriPaese;
     // Totale ai fini del bonus (fuori paese pesati 1.3)
@@ -1366,6 +1370,7 @@ function saveOrder(){
   const orderNumRaw2 = doc.getElementById('mOrderNum').value||'MANUAL';
   const isHalfTicket2 = /\*\s*1\s*\/\s*2/.test(orderNumRaw2);
   const ticketCount2 = orderNumRaw2.includes('*') ? (isHalfTicket2 ? 1.5 : 1) : 0;
+  const ticketConsegne2 = orderNumRaw2.includes('*') ? 1 : 0;
   const orderData={
     id: editingOrderIdx!==null ? D[cur].orders[editingOrderIdx].id : Date.now()+'_'+Math.random(),
     date:dateObj, dateStr,
@@ -1375,6 +1380,7 @@ function saveOrder(){
     orderNum:orderNumRaw2,
     isTicket: ticketCount2 > 0,
     ticketCount: ticketCount2,
+    ticketConsegne: ticketConsegne2,
     ritiroDa:doc.getElementById('mRitiro').value||'—',
     consegnaA:doc.getElementById('mConsegna').value||'—',
     payMethod, isCash:payMethod==='CASH',
