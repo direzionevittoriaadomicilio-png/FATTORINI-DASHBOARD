@@ -619,7 +619,7 @@ function loadFile(file){
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       if(!wb.SheetNames.length){ showToast('⚠️ File vuoto o non valido'); cloudPaused=false; return; }
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false});
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
 
       // Debug: mostra struttura prime righe in console
       console.log('[LOAD] File:', file.name, '— Righe totali:', rows.length);
@@ -658,6 +658,35 @@ function loadFile(file){
   r.readAsArrayBuffer(file);
 }
 
+// Parser date italiane: "09 mag 2026", "7 maggio 2026", "09/05/2026"
+const MESI_IT={
+  'gen':0,'gennaio':0,'feb':1,'febbraio':1,'mar':2,'marzo':2,
+  'apr':3,'aprile':3,'mag':4,'maggio':4,'giu':5,'giugno':5,
+  'lug':6,'luglio':6,'ago':7,'agosto':7,'set':8,'settembre':8,
+  'ott':9,'ottobre':9,'nov':10,'novembre':10,'dic':11,'dicembre':11
+};
+function parseDate(raw){
+  if(!raw) return null;
+  // Se è già una Date valida (da XLSX cellDates)
+  if(raw instanceof Date && !isNaN(raw)) return raw;
+  const s=String(raw).trim();
+  // Formato italiano testuale: "09 mag 2026" o "9 maggio 2026"
+  const mIt=s.match(/^(\d{1,2})\s+([a-zA-Zà-ù]+)\s+(\d{4})$/);
+  if(mIt){
+    const mm=MESI_IT[mIt[2].toLowerCase()];
+    if(mm!==undefined) return new Date(parseInt(mIt[3]),mm,parseInt(mIt[1]));
+  }
+  // Formato DD/MM/YYYY o DD-MM-YYYY
+  const mSlash=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(mSlash) return new Date(parseInt(mSlash[3]),parseInt(mSlash[2])-1,parseInt(mSlash[1]));
+  // Formato YYYY-MM-DD (ISO)
+  const mIso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(mIso) return new Date(parseInt(mIso[1]),parseInt(mIso[2])-1,parseInt(mIso[3]));
+  // Prova new Date() standard come ultimo tentativo
+  const d=new Date(s);
+  return isNaN(d)?null:d;
+}
+
 function parseTimeHour(str){
   if(!str) return null;
   const s=String(str).trim().toLowerCase();
@@ -687,10 +716,10 @@ function parseRows(rows){
     const name=String(r[7]).trim();
     if(!name || name.length < 2 || /^[-–—]+$/.test(name)) continue;
     // Col S (idx 18) = Requested Delivery Date
-    const dateRaw=r[18]?String(r[18]).trim():(r[0]?String(r[0]).trim():null);
+    const dateRaw=r[18]||r[0]||null;
     if(!dateRaw) continue;
-    const dateObj=new Date(dateRaw);
-    if(isNaN(dateObj)) continue;
+    const dateObj=parseDate(dateRaw);
+    if(!dateObj||isNaN(dateObj)) continue;
 
     if(!name || name.length < 2 || name === '--' || name === '-') continue;
     if(!D[name]) D[name]={
@@ -736,7 +765,11 @@ function parseRows(rows){
       tariffaConsegna:parseFloat(r[11])||0,  // Col L = tariffa di consegna
       fee:parseFloat(r[11])||0,
       km:parseFloat(r[14])||0,
-      status:r[38]?String(r[38]).trim():'—',
+      status:(()=>{
+        const st=r[38]?String(r[38]).trim():'—';
+        const map={'Consegnato':'Delivered','Annullato':'Cancelled','In attesa':'Pending','Cancellato':'Cancelled'};
+        return map[st]||st;
+      })(),
       monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
       weekNum:getWeekOfMonth(dateObj),
       deleted:false, note:''
