@@ -19,7 +19,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-
 
 header{background:var(--surf);border-bottom:1px solid var(--brd);height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
 .logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
-.logo em{background:var(--acc);color:#fff;padding:2px 8px;border-radius:5px;font-style:normal}
+.logo em{background:var(--acc);color:#000;padding:2px 8px;border-radius:5px;font-style:normal}
 .hfile{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);border:1px solid var(--brd2);padding:3px 11px;border-radius:20px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hbtn{background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;color:var(--mut);font-size:11px;font-family:'DM Mono',monospace;padding:5px 12px;cursor:pointer;transition:all .15s}
 .hbtn:hover{color:var(--txt);border-color:var(--mut)}
@@ -38,7 +38,7 @@ main{flex:1;padding:22px 26px;overflow-x:hidden}
 /* UPLOAD */
 .up-wrap{max-width:560px;margin:70px auto;text-align:center}
 .up-zone{border:2px dashed var(--brd2);border-radius:14px;padding:50px 30px;cursor:pointer;position:relative;background:var(--surf);transition:all .2s}
-.up-zone:hover,.up-zone.drag{border-color:var(--acc);background:rgba(37,99,235,.02)}
+.up-zone:hover,.up-zone.drag{border-color:var(--acc);background:rgba(200,255,71,.03)}
 .up-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .up-icon{font-size:40px;margin-bottom:12px}
 .up-h{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
@@ -60,22 +60,21 @@ main{flex:1;padding:22px 26px;overflow-x:hidden}
 /* BANNERS */
 .banners{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
 .bnr{border-radius:12px;padding:13px 16px;border:1.5px solid;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.bnr-bonus{background:linear-gradient(135deg,rgba(37,99,235,.05),transparent);border-color:rgba(37,99,235,.2)}
-.bnr-bonus.pos{background:linear-gradient(135deg,rgba(22,163,74,.06),transparent);border-color:rgba(22,163,74,.2)}
-.bnr-bonus.neg{background:linear-gradient(135deg,rgba(220,38,38,.06),transparent);border-color:rgba(220,38,38,.2)}
-.bnr-cash{background:linear-gradient(135deg,rgba(180,83,9,.07),transparent);border-color:rgba(180,83,9,.2)}
-.bnr-comp{background:linear-gradient(135deg,rgba(124,58,237,.07),transparent);border-color:rgba(124,58,237,.2)}
+.bnr-bonus{background:linear-gradient(135deg,rgba(200,255,71,.07),transparent);border-color:rgba(200,255,71,.25)}
+.bnr-bonus.neg{background:linear-gradient(135deg,rgba(255,107,107,.06),transparent);border-color:rgba(255,107,107,.25)}
+.bnr-cash{background:linear-gradient(135deg,rgba(255,212,71,.07),transparent);border-color:rgba(255,212,71,.3)}
+.bnr-comp{background:linear-gradient(135deg,rgba(196,123,255,.07),transparent);border-color:rgba(196,123,255,.25)}
 .bnr-l{display:flex;align-items:center;gap:10px}
 .bnr-ico{font-size:20px}
 .bnr-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:800}
-.bnr-bonus .bnr-title{color:var(--acc)}.bnr-bonus.pos .bnr-title{color:var(--grn)}.bnr-bonus.neg .bnr-title{color:var(--acc3)}
+.bnr-bonus .bnr-title{color:var(--acc)}.bnr-bonus.neg .bnr-title{color:var(--acc3)}
 .bnr-cash .bnr-title{color:var(--cash)}.bnr-comp .bnr-title{color:var(--pur)}
 .bnr-desc{font-size:10px;color:var(--mut);margin-top:2px}
 .bnr-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;white-space:nowrap}
-.bnr-bonus .bnr-val{color:var(--acc)}.bnr-bonus.pos .bnr-val{color:var(--grn)}.bnr-bonus.neg .bnr-val{color:var(--acc3)}
+.bnr-bonus .bnr-val{color:var(--acc)}.bnr-bonus.neg .bnr-val{color:var(--acc3)}
 .bnr-cash .bnr-val{color:var(--cash)}.bnr-comp .bnr-val{color:var(--pur)}
 
-/* PANEL */
+/* PANEL generico */
 .panel{background:var(--surf);border:1px solid var(--brd);border-radius:11px;padding:16px;margin-bottom:16px}
 .panel-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
@@ -86,12 +85,12 @@ main{flex:1;padding:22px 26px;overflow-x:hidden}
 .inp:focus{border-color:var(--acc)}
 select.inp{cursor:pointer}
 .btn{border:none;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .15s}
-.btn-acc{background:var(--acc);color:#fff}
+.btn-acc{background:var(--acc);color:#000}
 .btn-acc:hover{opacity:.9}
 .btn-ghost{background:var(--surf2);border:1px solid var(--brd2);color:var(--mut)}
 .btn-ghost:hover{color:var(--txt);border-color:var(--mut)}
-.btn-red{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);color:var(--acc3)}
-.btn-red:hover{background:rgba(220,38,38,.18)}
+.btn-red{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--acc3)}
+.btn-red:hover{background:rgba(255,107,107,.2)}
 
 /* TABS */
 .tabs{display:flex;gap:3px;margin-bottom:14px;background:var(--surf);border:1px solid var(--brd);border-radius:9px;padding:3px;width:fit-content}
@@ -111,16 +110,17 @@ select.inp{cursor:pointer}
 .ts{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 thead th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:7px 10px;text-align:left;background:var(--surf2);border-bottom:1px solid var(--brd);white-space:nowrap}
-tbody td{padding:7px 10px;font-size:11px;border-bottom:1px solid var(--brd);vertical-align:middle}
+tbody td{padding:7px 10px;font-size:11px;border-bottom:1px solid rgba(37,37,41,.5);vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:var(--surf2)}
+tbody tr:hover td{background:rgba(255,255,255,.01)}
 .tr-tot td{background:var(--surf2)!important;font-weight:600;border-top:1px solid var(--brd2)!important}
-.tr-cash td{background:rgba(180,83,9,.03)!important}
+.tr-cash td{background:rgba(255,212,71,.03)!important}
+.tr-edit td{background:rgba(200,255,71,.04)!important}
 
 /* MONTH CARDS */
-.mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;margin-bottom:16px}
+.mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
 .mc{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:13px;cursor:pointer;transition:all .15s}
-.mc:hover{border-color:var(--brd2)}.mc.on{border-color:var(--acc);background:rgba(37,99,235,.02)}
+.mc:hover{border-color:var(--brd2)}.mc.on{border-color:var(--acc);background:rgba(200,255,71,.02)}
 .mc-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:var(--dim);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px}
 .mc.on .mc-name{color:var(--acc)}
 .mc-rows{display:flex;flex-direction:column;gap:4px}
@@ -129,8 +129,8 @@ tbody tr:hover td{background:var(--surf2)}
 .mc-row span:last-child{font-family:'DM Mono',monospace}
 .mc-bar{height:2px;background:var(--brd2);border-radius:2px;overflow:hidden;margin-top:7px}
 .mc-fill{height:100%;border-radius:2px}
-.mc-cash{background:rgba(180,83,9,.06);border:1px solid rgba(180,83,9,.12);border-radius:5px;padding:5px 7px;margin-top:7px}
-.mc-comp{background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.12);border-radius:5px;padding:5px 7px;margin-top:5px}
+.mc-cash{background:rgba(255,212,71,.07);border:1px solid rgba(255,212,71,.15);border-radius:5px;padding:5px 7px;margin-top:7px}
+.mc-comp{background:rgba(196,123,255,.07);border:1px solid rgba(196,123,255,.15);border-radius:5px;padding:5px 7px;margin-top:5px}
 
 /* MEZZO */
 .mday-row{display:grid;grid-template-columns:100px 125px 125px;gap:7px;align-items:center;background:var(--surf2);border-radius:6px;padding:6px 9px}
@@ -140,51 +140,34 @@ tbody tr:hover td{background:var(--surf2)}
 
 /* BADGES */
 .b{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-family:'DM Mono',monospace}
-.by{background:rgba(37,99,235,.1);color:var(--acc)}
-.bb{background:rgba(8,145,178,.1);color:var(--acc2)}
-.bg{background:rgba(22,163,74,.1);color:var(--grn)}
-.bo{background:rgba(217,119,6,.1);color:var(--acc4)}
-.br{background:rgba(220,38,38,.1);color:var(--acc3)}
-.bca{background:rgba(180,83,9,.12);color:var(--cash)}
-.bpur{background:rgba(124,58,237,.1);color:var(--pur)}
+.by{background:rgba(200,255,71,.1);color:var(--acc)}
+.bb{background:rgba(71,184,255,.1);color:var(--acc2)}
+.bg{background:rgba(94,234,141,.1);color:var(--grn)}
+.bo{background:rgba(255,159,71,.1);color:var(--acc4)}
+.br{background:rgba(255,107,107,.1);color:var(--acc3)}
+.bca{background:rgba(255,212,71,.15);color:var(--cash)}
+.bpur{background:rgba(196,123,255,.1);color:var(--pur)}
 .sm{font-size:10px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:3px}
-.sm-m{background:rgba(253,224,71,.15);color:#b45309}
-.sm-s{background:rgba(8,145,178,.1);color:var(--acc2)}
+.sm-m{background:rgba(255,220,71,.1);color:#ffdc47}
+.sm-s{background:rgba(71,184,255,.1);color:var(--acc2)}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal{background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto}
 .modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
 .modal-close{background:transparent;border:none;color:var(--mut);font-size:20px;cursor:pointer;line-height:1}
 .modal-close:hover{color:var(--txt)}
-.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd)}
 
-/* TOAST */
-#toast{position:fixed;bottom:22px;right:22px;background:var(--txt);color:var(--surf);padding:9px 16px;border-radius:9px;font-size:12px;font-family:'DM Mono',monospace;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+/* PROGBAR */
+.progbar{height:3px;background:var(--brd2);border-radius:3px;overflow:hidden;margin-top:5px}
+.progfill{height:100%;border-radius:3px}
 
-/* ACCORDION ORDINI */
-.acc-day{border-bottom:1px solid var(--brd)}
-.acc-day:last-child{border-bottom:none}
-.acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
-.acc-hdr:hover{background:var(--surf2)}
-.acc-hdr.open{background:var(--surf2)}
-.acc-left{display:flex;align-items:center;gap:10px}
-.acc-arrow{font-size:11px;color:var(--dim);transition:transform .2s;display:inline-block}
-.acc-hdr.open .acc-arrow{transform:rotate(90deg)}
-.acc-date{font-family:'Syne',sans-serif;font-size:13px;font-weight:800}
-.acc-day-label{font-size:10px;color:var(--mut);font-family:'DM Mono',monospace}
-.acc-pills{display:flex;gap:5px;flex-wrap:wrap}
-.acc-body{display:none;overflow:hidden}
-.acc-body.open{display:block}
-.acc-body table{width:100%;border-collapse:collapse}
-.acc-body thead th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:5px 10px;text-align:left;background:var(--surf3);border-bottom:1px solid var(--brd);white-space:nowrap}
-.acc-body tbody td{padding:6px 10px;font-size:11px;border-bottom:1px solid var(--brd);vertical-align:middle}
-.acc-body tbody tr:last-child td{border-bottom:none}
-.acc-body tbody tr:hover td{background:var(--surf2)}
-.acc-summary{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.acc-stat{font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)}
-.acc-stat b{color:var(--txt)}
+.obj-rows{display:flex;flex-direction:column;gap:4px;width:100%}
+.obj-row{display:flex;justify-content:space-between;font-size:11px}
+.obj-row span:first-child{color:var(--mut)}
+.obj-row span:last-child{font-family:'DM Mono',monospace}
 
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -193,46 +176,54 @@ tbody tr:hover td{background:var(--surf2)}
 </head>
 <body>
 
-<div id="toast"></div>
-
-<!-- LOGIN -->
-<div id="loginScreen" style="position:fixed;inset:0;background:#f4f5f7;z-index:9999;display:flex;align-items:center;justify-content:center">
-  <div style="background:#fff;border:1px solid #dde0e8;border-radius:16px;padding:40px 36px;width:380px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.08)">
-    <div style="font-size:36px;margin-bottom:12px">📦</div>
-    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px">Fattorini Dashboard</div>
-    <div style="font-size:13px;color:#6b7280;margin-bottom:28px">Inserisci la password per accedere</div>
-    <input type="password" id="loginPwd" placeholder="Password"
-      style="width:100%;background:#f0f1f4;border:1.5px solid #dde0e8;border-radius:8px;color:#1a1d23;font-family:'DM Mono',monospace;font-size:14px;padding:11px 14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:3px"
-      onkeydown="if(event.key==='Enter')checkLogin()"
-      oninput="document.getElementById('loginErr').textContent=''">
-    <div id="loginErr" style="color:#dc2626;font-size:12px;margin-bottom:10px;height:16px"></div>
-    <button onclick="checkLogin()" style="width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer">Accedi →</button>
-    <div style="margin-top:20px;font-size:11px;color:#9ca3af">Accesso protetto · solo utenti autorizzati</div>
-  </div>
-</div>
-
 <header>
   <div class="logo"><em>📦</em> Fattorini Dashboard</div>
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+  <div style="display:flex;align-items:center;gap:8px">
     <div class="hfile" id="fileTag">nessun file caricato</div>
-    <button class="hbtn" onclick="document.getElementById('fileInput2').click()">+ Carica Excel</button>
+    <button class="hbtn" onclick="document.getElementById('fileInput2').click()">+ Carica file</button>
     <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none" onchange="loadFile(this.files[0])">
     <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
-    <button class="hbtn" onclick="saveSession()" style="background:rgba(37,99,235,.08);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
-    <button class="hbtn" onclick="document.getElementById('sessionInput').click()">📂 Carica sessione</button>
+    <button class="hbtn" onclick="saveSession()" title="Salva tutti i dati in un file JSON" style="background:rgba(37,99,235,.1);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
+    <button class="hbtn" onclick="showLoadModal()" title="Carica una sessione salvata">📂 Carica sessione</button>
     <input type="file" id="sessionInput" accept=".json" style="display:none" onchange="loadSession(this.files[0])">
-    <div id="autoSaveDot" style="display:none;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">
+    <div style="width:1px;height:20px;background:var(--brd2)"></div>
+    <button class="hbtn" id="cloudBtn" onclick="showCloudModal()" title="Sincronizzazione cloud multi-PC (Firebase)" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.3);color:var(--pur)">☁️ Cloud Sync</button>
+    <div id="cloudDot" title="Stato cloud — clicca per dettagli" onclick="showCloudModal()" style="display:none;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut);cursor:pointer;padding:3px 7px;border-radius:12px;border:1px solid transparent;transition:all .15s">
+      <div style="width:7px;height:7px;border-radius:50%;background:#9ca3af;transition:background .4s" id="cloudDotCircle"></div>
+      <span id="cloudDotLabel">cloud</span>
+    </div>
+    <div style="width:1px;height:20px;background:var(--brd2)"></div>
+    <div id="autoSaveDot" title="Salvataggio automatico locale" style="display:none;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">
       <div style="width:7px;height:7px;border-radius:50%;background:#9ca3af;transition:background .3s" id="autoSaveDotCircle"></div>
       <span id="autoSaveDotLabel">locale</span>
     </div>
   </div>
 </header>
 
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen" style="position:fixed;inset:0;background:#f4f5f7;z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border:1px solid #dde0e8;border-radius:16px;padding:40px 36px;width:380px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.08)">
+    <div style="font-size:36px;margin-bottom:12px">📦</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;color:#1a1d23">Fattorini Dashboard</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:28px">Inserisci la password per accedere</div>
+    <input type="password" id="loginPwd" placeholder="Password"
+      style="width:100%;background:#f0f1f4;border:1.5px solid #dde0e8;border-radius:8px;color:#1a1d23;font-family:'DM Mono',monospace;font-size:14px;padding:11px 14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:3px"
+      onkeydown="if(event.key==='Enter')checkLogin()"
+      oninput="document.getElementById('loginErr').textContent=''">
+    <div id="loginErr" style="color:#dc2626;font-size:12px;margin-bottom:10px;height:16px"></div>
+    <button onclick="checkLogin()"
+      style="width:100%;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+      Accedi →
+    </button>
+    <div style="margin-top:20px;font-size:11px;color:#9ca3af">Accesso protetto — solo utenti autorizzati</div>
+  </div>
+</div>
+
 <div class="layout">
   <aside>
     <div class="aside-title">Fattorini</div>
     <button class="drv-btn" id="btnGlobal" onclick="selectGlobal()" style="margin-bottom:6px;border:1px solid var(--brd2)">
-      <div class="drv-av" style="background:rgba(37,99,235,.12);color:var(--acc)">📊</div>
+      <div class="drv-av" style="background:rgba(37,99,235,.15);color:var(--acc)">📊</div>
       <span>Riepilogo totale</span>
     </button>
     <div style="height:1px;background:var(--brd);margin:4px 0"></div>
@@ -241,14 +232,14 @@ tbody tr:hover td{background:var(--surf2)}
 
   <main>
     <!-- UPLOAD -->
-    <div id="upWrap">
+    <div id="upWrap" class="hidden">
       <div class="up-wrap">
         <div class="up-zone" id="dropZone">
           <input type="file" id="fileInput" accept=".xlsx,.xls">
           <div class="up-icon">📊</div>
           <div class="up-h">Carica il report ordini</div>
           <div class="up-s">Trascina o clicca · <strong>Extended_order_report.xlsx</strong></div>
-          <div class="up-s" style="margin-top:6px;color:var(--acc2)">Puoi caricare un file al giorno — i dati si accumulano per mese</div>
+          <div class="up-s" style="margin-top:6px;color:var(--acc2)">Puoi caricare più file — i dati si accumulano</div>
         </div>
       </div>
     </div>
@@ -256,6 +247,7 @@ tbody tr:hover td{background:var(--surf2)}
     <!-- DASHBOARD -->
     <div id="dash" class="hidden">
 
+      <!-- DRIVER HEADER -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
         <div>
           <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800" id="drvName">—</div>
@@ -267,16 +259,16 @@ tbody tr:hover td{background:var(--surf2)}
         </div>
       </div>
 
-      <!-- CONDIZIONI ECONOMICHE -->
+      <!-- CONDIZIONI ECONOMICHE PANEL -->
       <div class="panel hidden" id="econPanel">
         <div class="panel-title">💼 Condizioni economiche — <span id="econDriverName"></span></div>
         <div class="grid2" style="margin-bottom:12px">
           <div class="field">
             <label>Modalità di pagamento</label>
-            <select class="inp" id="econMode" onchange="onEconModeChange()">
+            <select class="inp" id="econMode">
               <option value="giornata">A giornata (importo fisso × giorni lavorati)</option>
               <option value="mese">Al mese (importo fisso mensile)</option>
-              <option value="consegna">A consegna (somma tariffe da col. K)</option>
+              <option value="consegna">A consegna (tariffa × n° consegne)</option>
               <option value="turno">A turno (tariffa per tipo turno + mezzo)</option>
             </select>
           </div>
@@ -285,8 +277,7 @@ tbody tr:hover td{background:var(--surf2)}
             <input class="inp" type="number" id="econImporto" value="0" step="0.5">
           </div>
         </div>
-
-        <!-- TURNO TARIFFE -->
+        <!-- TURNO TARIFFE PANEL -->
         <div id="econTurnoPanel" class="hidden" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:10px;padding:14px;margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;margin-bottom:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Tariffe per turno</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px;margin-bottom:6px">
@@ -305,7 +296,7 @@ tbody tr:hover td{background:var(--surf2)}
             <input class="inp" type="number" id="turnoMezzoMatPr" value="0" step="0.5" style="font-size:12px">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px">
-            <div style="font-size:11px">🌆 Pomeriggio+Sera<br><span style="font-size:9px;color:var(--mut)">inizio 17–19</span></div>
+            <div style="font-size:11px">🌆 Pomeriggio+Sera<br><span style="font-size:9px;color:var(--mut)">inizio dalle 17 alle 19</span></div>
             <input class="inp" type="number" id="turnoPomAz" value="0" step="0.5" style="font-size:12px">
             <input class="inp" type="number" id="turnoPomPr" value="0" step="0.5" style="font-size:12px">
           </div>
@@ -318,11 +309,11 @@ tbody tr:hover td{background:var(--surf2)}
 
         <div class="grid2" style="margin-bottom:12px">
           <div class="field">
-            <label>Soglia cons. mattina per bonus (media mensile)</label>
+            <label>Soglia cons. mattina (per bonus)</label>
             <input class="inp" type="number" id="econSogliaMat" value="12.5" step="0.5">
           </div>
           <div class="field">
-            <label>Soglia cons. sera per bonus (media mensile)</label>
+            <label>Soglia cons. sera (per bonus)</label>
             <input class="inp" type="number" id="econSogliaSer" value="14" step="0.5">
           </div>
           <div class="field">
@@ -340,11 +331,11 @@ tbody tr:hover td{background:var(--surf2)}
         </div>
       </div>
 
-      <!-- IMPOSTAZIONI TECNICHE -->
+      <!-- IMPOSTAZIONI TECNICHE PANEL -->
       <div class="panel hidden" id="settPanel">
         <div class="panel-title">⚙ Impostazioni tecniche — <span id="settDriverName"></span></div>
         <div class="grid3">
-          <div class="field"><label>Soglia km fuori paese (ticket/NS)</label><input class="inp" type="number" id="cfgKmThresh" value="5" step="0.5"></div>
+          <div class="field"><label>Soglia km (solo per ticket e NS)</label><input class="inp" type="number" id="cfgKmThresh" value="5" step="0.5"></div>
           <div class="field"><label>Km max GPS valido</label><input class="inp" type="number" id="cfgKmMax" value="50" step="5"></div>
           <div class="field"><label>Ora taglio mattina/sera</label><input class="inp" type="number" id="cfgCutHour" value="14" min="10" max="18"></div>
         </div>
@@ -371,10 +362,10 @@ tbody tr:hover td{background:var(--surf2)}
       <!-- STATS -->
       <div class="stats">
         <div class="sc sy"><div class="sc-l">Consegne</div><div class="sc-v" id="stC">—</div><div class="sc-s" id="stCSub">—</div></div>
-        <div class="sc sr"><div class="sc-l">Fuori Paese</div><div class="sc-v" id="stFP">—</div><div class="sc-s">pesate ×1.3 bonus</div></div>
-        <div class="sc so"><div class="sc-l">Turni Mattina</div><div class="sc-v" id="stMat">—</div><div class="sc-s" id="stMatSub">—</div></div>
-        <div class="sc sb"><div class="sc-l">Turni Sera</div><div class="sc-v" id="stSer">—</div><div class="sc-s" id="stSerSub">—</div></div>
-        <div class="sc sg"><div class="sc-l">Cons. Extra</div><div class="sc-v" id="stExtra">—</div><div class="sc-s">sopra soglia mensile</div></div>
+        <div class="sc sr"><div class="sc-l">di cui Fuori Paese</div><div class="sc-v" id="stFP">—</div><div class="sc-s">incluse nel totale</div></div>
+        <div class="sc so"><div class="sc-l">Gg Mattina</div><div class="sc-v" id="stMat">—</div><div class="sc-s" id="stMatSub">—</div></div>
+        <div class="sc sb"><div class="sc-l">Gg Sera</div><div class="sc-v" id="stSer">—</div><div class="sc-s" id="stSerSub">—</div></div>
+        <div class="sc sg"><div class="sc-l">Cons. Extra</div><div class="sc-v" id="stExtra">—</div><div class="sc-s">sopra soglia</div></div>
         <div class="sc sb"><div class="sc-l">🎫 Ticket</div><div class="sc-v" id="stTick">—</div><div class="sc-s">asterischi (*)</div></div>
         <div class="sc sca"><div class="sc-l">💵 Cash</div><div class="sc-v" id="stCash">—</div><div class="sc-s" id="stCashSub">—</div></div>
         <div class="sc sp"><div class="sc-l">Compenso Tot.</div><div class="sc-v" id="stComp">—</div><div class="sc-s">base + bonus</div></div>
@@ -427,8 +418,8 @@ tbody tr:hover td{background:var(--surf2)}
           <div class="ts"><table>
             <thead><tr>
               <th>Settimana</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
-              <th>Cons.tot</th><th>F.paese</th><th>Bonus★</th><th>🌅 turni</th><th>🌙 turni</th>
-              <th>Attesa</th><th>Extra</th><th>💵 Cash €</th>
+              <th>Cons. (tot.)</th><th>Bonus★</th><th>🌅</th><th>🌙</th>
+              <th>Attese</th><th>Extra</th><th>Bonus €</th><th>Cash ord.</th><th>💵 Cash €</th>
             </tr></thead>
             <tbody id="wBody"></tbody>
           </table></div>
@@ -443,77 +434,92 @@ tbody tr:hover td{background:var(--surf2)}
           <div class="ts"><table>
             <thead><tr>
               <th>Data</th><th>Giorno</th><th>Turno</th>
-              <th>In paese</th><th>F.paese</th><th>Cons.bonus★</th><th>🌅 mat</th><th>🌙 ser</th>
-              <th>Cash ord.</th><th>💵 Cash €</th><th>Tariffa K (somma €)</th><th>Comp.base €</th>
+              <th>In paese</th><th>F.paese</th><th>Bonus★</th><th>Attese</th><th>Extra</th><th>Bonus €</th>
+              <th>Cash ord.</th><th>💵 Cash €</th><th>Tariffa €</th><th>Compenso base €</th>
             </tr></thead>
             <tbody id="dSumBody"></tbody>
           </table></div>
         </div>
       </div>
 
-      <!-- ORDERS -->
+      <!-- ORDINI (edit/delete) -->
       <div id="viewO" class="hidden">
         <div class="pills" id="oPills"></div>
         <div class="tw">
           <div class="th">
             <div class="tt" id="oTitle">—</div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:190px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
-              <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="expandAllDays()">↕ Espandi tutti</button>
-              <button id="oBulkDelete" class="btn btn-red" style="display:none;padding:4px 12px;font-size:11px" onclick="deleteSelected()">✕ Elimina selezionati</button>
+            <div style="display:flex;gap:6px">
+              <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:200px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
+              <button id="oBulkDelete" class="btn btn-red" style="display:none;padding:4px 12px;font-size:11px;margin-left:8px" onclick="deleteSelected()">✕ Elimina selezionati</button>
               <button class="btn btn-ghost" onclick="openAddOrder()">+ Aggiungi ordine</button>
             </div>
           </div>
-          <div id="oAccordion"></div>
+          <div class="ts"><table>
+            <thead><tr>
+              <th style="width:30px"><input type="checkbox" id="oSelectAll" onchange="toggleSelectAll()" title="Seleziona tutti"></th>
+              <th>Data</th><th>Ora</th><th>Turno</th><th>N° Ordine</th>
+              <th>Ritiro da</th><th>Consegna a</th>
+              <th>Km</th><th>F.P. (>soglia)</th>
+              <th>Pagam.</th><th>Totale €</th><th>Tariffa €</th><th>Mezzo</th><th>Status</th>
+              <th>Azioni</th>
+            </tr></thead>
+            <tbody id="oBody"></tbody>
+          </table></div>
         </div>
       </div>
 
-    </div><!-- /#dash -->
 
+
+    </div>
+    <!-- GLOBAL OVERVIEW (sibling of dash) -->
     <!-- GLOBAL OVERVIEW -->
-    <div id="viewGlobal" class="hidden" style="padding-bottom:40px">
+    <div id="viewGlobal" class="hidden" style="position:relative;z-index:10;background:var(--bg);min-height:100%;padding-bottom:40px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">📊 Riepilogo totale — tutti i fattorini</div>
-        <button onclick="toggleMezziPanel()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace">🚗 Gestisci mezzi</button>
+        <button onclick="toggleMezziPanel()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:6px 14px;font-size:11px;cursor:pointer;color:var(--txt);font-family:'DM Mono',monospace">🚗 Gestisci mezzi</button>
       </div>
-      <div id="mezziPanel" class="hidden panel">
+      <!-- MEZZI PANEL -->
+      <div id="mezziPanel" class="hidden" style="background:var(--surf);border:1px solid var(--brd2);border-radius:12px;padding:16px;margin-bottom:16px">
         <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:12px">🚗 Mezzi disponibili</div>
         <div id="mezziList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
           <input type="text" id="newMezzoInput" placeholder="Nome nuovo mezzo..." class="inp" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')addMezzo()">
-          <button onclick="addMezzo()" style="background:var(--acc);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:11px;cursor:pointer;font-weight:700">+ Aggiungi</button>
+          <button onclick="addMezzo()" style="background:var(--acc);color:#000;border:none;border-radius:8px;padding:7px 16px;font-size:11px;cursor:pointer;font-weight:700">+ Aggiungi</button>
         </div>
       </div>
+      <!-- Month selector -->
       <div class="pills" id="globalPills"></div>
+      <!-- Per-driver monthly table -->
       <div class="tw" style="margin-bottom:20px">
         <div class="th"><div class="tt" id="globalMonthTitle">Confronto mensile</div></div>
         <div class="ts"><table>
-          <thead><tr>
-            <th>Fattorino</th><th>Mod.pag.</th>
-            <th>Cons.tot</th><th>F.paese</th><th>Bonus★</th>
-            <th>🌅 Mat</th><th>🌙 Sera</th>
-            <th>Attesa</th><th>Extra</th><th>Bonus €</th>
-            <th>💵 Cash €</th><th>Tar.K €</th><th>Compenso €</th>
-          </tr></thead>
-          <tbody id="globalMonthBody"></tbody>
+        <thead><tr>
+          <th>Fattorino</th><th>Modalità pag.</th>
+          <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
+          <th>🌅 Mat</th><th>🌙 Sera</th>
+          <th>Attese</th><th>Extra</th><th>Bonus €</th>
+          <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
+        </tr></thead>
+        <tbody id="globalMonthBody"></tbody>
         </table></div>
       </div>
+      <!-- Annual summary per driver -->
       <div class="tw">
         <div class="th"><div class="tt">Riepilogo annuale — tutti i fattorini</div></div>
         <div class="ts"><table>
-          <thead><tr>
-            <th>Fattorino</th><th>Mod.pag.</th>
-            <th>Cons.tot</th><th>F.paese</th><th>Bonus★</th>
-            <th>Mesi lav.</th><th>Media cons/mese</th>
-            <th>Bonus tot €</th><th>💵 Cash tot €</th>
-            <th>Tar.K tot €</th><th>Compenso tot €</th>
-          </tr></thead>
-          <tbody id="globalAnnualBody"></tbody>
+        <thead><tr>
+          <th>Fattorino</th><th>Modalità pag.</th>
+          <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
+          <th>Mesi lav.</th><th>Media cons./mese</th>
+          <th>Bonus tot. €</th><th>💵 Cash tot. €</th>
+          <th>Tariffa tot. €</th><th>Compenso tot. €</th>
+        </tr></thead>
+        <tbody id="globalAnnualBody"></tbody>
         </table></div>
       </div>
     </div>
 
-  </main>
+    </main>
 </div>
 
 <!-- EDIT/ADD ORDER MODAL -->
@@ -538,8 +544,7 @@ tbody tr:hover td{background:var(--surf2)}
       <div class="field"><label>Consegna a</label><input class="inp" type="text" id="mConsegna"></div>
       <div class="field"><label>Km</label><input class="inp" type="number" id="mKm" step="0.01"></div>
       <div class="field"><label>Totale ordine €</label><input class="inp" type="number" id="mTotal" step="0.01"></div>
-      <div class="field"><label>Tariffa K (col K) €</label><input class="inp" type="number" id="mTariffaK" step="0.01"></div>
-      <div class="field"><label>Fee €</label><input class="inp" type="number" id="mFee" step="0.01"></div>
+      <div class="field"><label>Tariffa consegna €</label><input class="inp" type="number" id="mFee" step="0.01"></div>
       <div class="field"><label>Status</label>
         <select class="inp" id="mStatus">
           <option value="Delivered">Delivered</option>
@@ -562,149 +567,15 @@ const MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Ag
 const GEN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const GIT=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
 let MEZZI=['—','Auto aziendale','Ford','Citroen','Scooter','Moto','Auto propria','Bici','Altro'];
-const MEZZI_KEY='fattorini_mezzi_v2';
-const DATA_KEY='fattorini_data_v2';
-const COLORS=['#2563eb','#0891b2','#d97706','#16a34a','#dc2626','#7c3aed','#b45309'];
-
-function loadMezzi(){try{const s=localStorage.getItem(MEZZI_KEY);if(s){const m=JSON.parse(s);if(Array.isArray(m)&&m.length)MEZZI=m;}}catch(e){}}
-function saveMezzi(){try{localStorage.setItem(MEZZI_KEY,JSON.stringify(MEZZI));}catch(e){}}
+const MEZZI_KEY='fattorini_mezzi_v1';
+function loadMezzi(){ try{ const s=localStorage.getItem(MEZZI_KEY); if(s){ const m=JSON.parse(s); if(Array.isArray(m)&&m.length) MEZZI=m; } }catch(e){} }
+function saveMezzi(){ try{ localStorage.setItem(MEZZI_KEY,JSON.stringify(MEZZI)); }catch(e){} }
 loadMezzi();
+const COLORS=['#c8ff47','#47b8ff','#ff9f47','#5eea8d','#ff6b6b','#c47bff','#ffd447'];
 
-// D[name] = { orders[], mezzo{dateStr:{mat,ser}}, settings{}, econ{} }
+// D[name] = { orders[], mezzo{}, settings{}, econ{} }
 let D={}, cur=null, curMon=null, curTab='M';
-let editingOrderId=null;
-
-// ── LOGIN ──
-const LOGIN_PWD='vittoria2024';
-function checkLogin(){
-  const v=doc.getElementById('loginPwd').value;
-  if(v===LOGIN_PWD){
-    doc.getElementById('loginScreen').style.display='none';
-    tryLoadFromLocalStorage();
-    showToast('✓ Accesso effettuato');
-  } else {
-    doc.getElementById('loginErr').textContent='Password errata';
-  }
-}
-
-// ── TOAST ──
-let _toastT=null;
-function showToast(msg){
-  const t=doc.getElementById('toast');
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(_toastT);
-  _toastT=setTimeout(()=>{t.style.opacity='0';},3000);
-}
-
-// ── LOCAL STORAGE ──
-function autoSaveToLocalStorage(){
-  try{
-    doc.getElementById('autoSaveDot').style.display='flex';
-    doc.getElementById('autoSaveDotCircle').style.background='#d97706';
-    doc.getElementById('autoSaveDotLabel').textContent='salvataggio...';
-    localStorage.setItem(DATA_KEY,JSON.stringify(serializeD(D)));
-    setTimeout(()=>{
-      doc.getElementById('autoSaveDotCircle').style.background='#16a34a';
-      doc.getElementById('autoSaveDotLabel').textContent='salvato';
-    },300);
-  }catch(e){console.warn('localStorage save failed',e);}
-}
-function tryLoadFromLocalStorage(){
-  try{
-    const s=localStorage.getItem(DATA_KEY);
-    if(s){
-      const loaded=JSON.parse(s);
-      D=deserializeD(loaded);
-      if(Object.keys(D).length>0){
-        renderSidebar();
-        doc.getElementById('upWrap').classList.add('hidden');
-        doc.getElementById('dash').classList.remove('hidden');
-        cur=Object.keys(D)[0];
-        const months=getMonths(cur);
-        curMon=months[months.length-1]||null;
-        selectDriver(cur);
-        doc.getElementById('autoSaveDot').style.display='flex';
-        doc.getElementById('autoSaveDotCircle').style.background='#16a34a';
-        doc.getElementById('autoSaveDotLabel').textContent='dati locali';
-        showToast('📂 Dati ripristinati dal browser');
-      }
-    }
-  }catch(e){console.warn('localStorage load failed',e);}
-}
-function serializeD(data){
-  const out={};
-  for(const[name,d] of Object.entries(data)){
-    out[name]={
-      orders:d.orders.map(o=>({...o,date:o.date.toISOString()})),
-      mezzo:d.mezzo,settings:d.settings,econ:d.econ
-    };
-  }
-  return out;
-}
-function deserializeD(data){
-  const out={};
-  for(const[name,d] of Object.entries(data)){
-    out[name]={
-      orders:(d.orders||[]).map(o=>({...o,date:new Date(o.date)})),
-      mezzo:d.mezzo||{},
-      settings:d.settings||{kmThresh:5,kmMax:50,cutHour:14},
-      econ:d.econ||defaultEcon()
-    };
-  }
-  return out;
-}
-function defaultEcon(){return{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}};}
-
-// ── SESSION SAVE/LOAD ──
-function saveSession(){
-  const data=JSON.stringify({version:2,savedAt:new Date().toISOString(),data:serializeD(D)});
-  const blob=new Blob([data],{type:'application/json'});
-  const a=doc.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='fattorini_session_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
-  showToast('💾 Sessione salvata');
-}
-function loadSession(file){
-  if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const parsed=JSON.parse(e.target.result);
-      const raw=parsed.data||parsed;
-      D=deserializeD(raw);
-      renderSidebar();
-      doc.getElementById('upWrap').classList.add('hidden');
-      doc.getElementById('dash').classList.remove('hidden');
-      if(!cur||!D[cur]) cur=Object.keys(D)[0];
-      const months=getMonths(cur);
-      curMon=months[months.length-1]||null;
-      selectDriver(cur);
-      autoSaveToLocalStorage();
-      showToast('📂 Sessione caricata');
-    }catch(err){showToast('⚠️ Errore nel file sessione');}
-  };
-  r.readAsText(file);
-}
-
-// ── EXPORT CSV ──
-function exportCSV(){
-  if(!cur||!D[cur]){showToast('Nessun fattorino selezionato');return;}
-  const orders=activeOrders(cur);
-  const s=D[cur].settings;
-  const rows=[['Data','Ora','Turno','N°Ordine','Ritiro','Consegna','Km','FuoriPaese','Pag.','Totale','TariffaK','Fee','Status','Note']];
-  orders.forEach(o=>{
-    const shift=getShift(o,s.cutHour);
-    const fp=isFuoriPaese(o,s)?'Sì':'No';
-    rows.push([o.dateStr,o.timeRaw,shift||'—',o.orderNum,o.ritiroDa,o.consegnaA,o.km,fp,o.payMethod,o.total,o.tariffaConsegna||0,o.fee,o.status,o.note||'']);
-  });
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=doc.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=cur+'_ordini.csv';
-  a.click();
-}
+let editingOrderIdx=null; // index in D[cur].orders or null for new
 
 // ── UPLOAD ──
 const dz=doc.getElementById('dropZone');
@@ -712,27 +583,35 @@ dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')})
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
 doc.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
-doc.getElementById('fileInput2').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
 
 function loadFile(file){
   doc.getElementById('fileTag').textContent=file.name;
+  // Blocca il listener Firebase durante il caricamento
+  cloudPaused = true;
   const r=new FileReader();
   r.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'array'});
     const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-    const addedCount=parseRows(rows);
-    autoSaveToLocalStorage();
-    showToast(`✓ ${addedCount} ordini aggiunti · dati aggiornati`);
+    parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));
+    // Forza upload immediato al cloud con i nuovi dati, poi riattiva il listener
+    if(cloudConnected && fbRef){
+      cloudSaving = true;
+      updateCloudStatus('saving');
+      fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D)})
+        .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ Excel caricato e sincronizzato sul cloud'); })
+        .catch(e=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('⚠️ Excel caricato ma errore cloud: '+e.message); });
+    } else {
+      cloudPaused = false;
+    }
   };
   r.readAsArrayBuffer(file);
 }
 
 function parseTimeHour(str){
-  if(!str)return null;
+  if(!str) return null;
   const s=String(str).trim().toLowerCase();
   const m=s.match(/(\d+):(\d+)\s*(am|pm)/);
-  if(!m)return null;
+  if(!m) return null;
   let h=parseInt(m[1]),mi=parseInt(m[2]),ap=m[3];
   if(ap==='pm'&&h!==12)h+=12;
   if(ap==='am'&&h===12)h=0;
@@ -740,111 +619,84 @@ function parseTimeHour(str){
 }
 
 function parseRows(rows){
-  // Raccoglie le date presenti nel file per fare merge per data
-  const newDateSet=new Set();
-  const newOrders=[];
-
   for(let i=2;i<rows.length;i++){
     const r=rows[i];
     if(!r||!r[7]) continue;
     const name=String(r[7]).trim();
-    if(!name||name.length<2||/^[-–—]+$/.test(name)) continue;
-
+    if(!name || name.length < 2 || /^[-–—]+$/.test(name)) continue;
+    // Col S (idx 18) = Requested Delivery Date
     const dateRaw=r[18]?String(r[18]).trim():(r[0]?String(r[0]).trim():null);
     if(!dateRaw) continue;
     const dateObj=new Date(dateRaw);
     if(isNaN(dateObj)) continue;
 
+    if(!name || name.length < 2 || name === '--' || name === '-') continue;
+    if(!D[name]) D[name]={
+      orders:[],
+      mezzo:{},
+      settings:{kmThresh:5,kmMax:50,cutHour:14},
+      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}
+    };
+
     const dateStr=fmtDate(dateObj);
-
-    // Trova metodo pagamento: cerca CASH/CARD in tutta la riga
-    let payMethod='N/A';
-    for(let j=0;j<r.length;j++){
-      if(j===10) continue; // salta col K (tariffa)
-      const val=r[j]?String(r[j]).trim().toUpperCase():'';
-      if(val==='CASH'){payMethod='CASH';break;}
-      if(val==='CARD'){payMethod='CARD';break;}
-    }
-
-    // Crea driver se non esiste, preservando settings/econ esistenti
-    if(!D[name]){
-      D[name]={
-        orders:[],
-        mezzo:{},
-        settings:{kmThresh:5,kmMax:50,cutHour:14},
-        econ:defaultEcon()
-      };
-    }
-
-    const orderNumRaw=r[2]!==null&&r[2]!==undefined?String(r[2]).trim():'';
-    let ticketCount=0,ticketConsegne=0;
+    const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
+    const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
+    // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
+    let ticketCount = 0;    // valore ticket (per contatore ticket)
+    let ticketConsegne = 0; // valore consegna (per totale consegne)
     if(orderNumRaw.includes('*')){
-      const halfMatch=orderNumRaw.match(/\*\s*1\s*\/\s*2/);
-      if(halfMatch){ticketCount=1.5;ticketConsegne=1;}
-      else{ticketCount=1;ticketConsegne=1;}
+      const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
+      if(halfMatch){
+        ticketCount = 1.5;    // * 1/2 = 1.5 ticket
+        ticketConsegne = 1;   // * 1/2 = 1 consegna
+      } else {
+        ticketCount = 1;      // * = 1 ticket
+        ticketConsegne = 1;   // * = 1 consegna
+      }
     }
-    const isTicket=ticketCount>0;
+    const isTicket = ticketCount > 0;
 
     const order={
-      id:Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2),
-      date:dateObj,dateStr,
+      id: Date.now()+'_'+i+'_'+Math.random(),
+      date:dateObj, dateStr,
       timeRaw:r[17]?String(r[17]).trim():'—',
       timeHour:parseTimeHour(r[17]?String(r[17]):''),
       dayEn:dayFromDateStr(fmtDate(dateObj)),
       orderNum:orderNumRaw,
-      isTicket,ticketCount,ticketConsegne,
+      isTicket, ticketCount, ticketConsegne,
       ritiroDa:r[3]?String(r[3]).trim():'—',
       consegnaA:r[5]?String(r[5]).trim():'—',
-      payMethod,isCash:payMethod==='CASH',
+      payMethod, isCash:payMethod==='CASH',
       total:parseFloat(r[9])||0,
-      tariffaConsegna:parseFloat(r[10])||0,  // Col K = tariffa di consegna
-      fee:parseFloat(r[11])||0,               // Col L = fee
+      fee:parseFloat(r[11])||0,
       km:parseFloat(r[14])||0,
       status:r[38]?String(r[38]).trim():'—',
       monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
       weekNum:getWeekOfMonth(dateObj),
-      deleted:false,note:''
+      deleted:false, note:''
     };
 
-    newDateSet.add(name+'|'+dateStr);
-    newOrders.push({name,order});
+    // Deduplicate only for real order numbers (not tickets/special rows)
+    const isRealOrderNum = orderNumRaw && !isTicket && orderNumRaw !== '€ NS' && !isNaN(orderNumRaw);
+    const exists = isRealOrderNum && D[name].orders.some(o=>!o.deleted&&o.orderNum===orderNumRaw&&o.dateStr===order.dateStr);
+    if(!exists) D[name].orders.push(order);
+    if(!D[name].mezzo[dateStr]) D[name].mezzo[dateStr]={mat:'—',ser:'—'};
   }
-
-  // Merge: per ogni (driver,data) presente nel file, rimuovi ordini esistenti non-manuali
-  // poi aggiungi i nuovi. Gli ordini aggiunti manualmente (senza orderNum da Excel) vengono preservati.
-  newDateSet.forEach(key=>{
-    const[name,dateStr]=key.split('|');
-    if(!D[name]) return;
-    // Rimuovi ordini esistenti per quella data (non manuali = hanno id numerico standard)
-    D[name].orders=D[name].orders.filter(o=>o.dateStr!==dateStr||o.manualAdd===true);
-  });
-
-  // Aggiungi nuovi ordini (deduplicando per numero ordine reale)
-  let added=0;
-  newOrders.forEach(({name,order})=>{
-    const isRealOrderNum=order.orderNum&&!order.isTicket&&order.orderNum!=='€ NS'&&!isNaN(order.orderNum);
-    const exists=isRealOrderNum&&D[name].orders.some(o=>!o.deleted&&o.orderNum===order.orderNum&&o.dateStr===order.dateStr);
-    if(!exists){
-      D[name].orders.push(order);
-      if(!D[name].mezzo[order.dateStr])D[name].mezzo[order.dateStr]={mat:'—',ser:'—'};
-      added++;
-    }
-  });
-
   renderSidebar();
   doc.getElementById('upWrap').classList.add('hidden');
   doc.getElementById('dash').classList.remove('hidden');
   if(!cur||!D[cur]) cur=Object.keys(D)[0];
-  const months=getMonths(cur);
-  if(!months.includes(curMon)) curMon=months[months.length-1]||null;
   selectDriver(cur);
-  return added;
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
 }
 
 // ── HELPERS ──
 function getWeekOfMonth(d){
   const fd=new Date(d.getFullYear(),d.getMonth(),1);
-  const fdDow=(fd.getDay()+6)%7;
+  // getDay(): 0=Sun..6=Sat → convert to Mon-based: Mon=0..Sun=6
+  const fdDow=(fd.getDay()+6)%7; // offset of first day from Monday
+  const dDow=(d.getDay()+6)%7;   // day of week Mon-based
   return Math.ceil((d.getDate()+fdDow)/7);
 }
 function fmtDate(d){return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`}
@@ -853,17 +705,25 @@ function dayFromDateStr(ds){return GEN[parseDateStr(ds).getDay()];}
 function mlabel(mk){const[y,m]=mk.split('-');return MESI[parseInt(m)-1]+' '+y}
 function dayIt(en){const i=GEN.indexOf(en);return i>=0?GIT[i]:en}
 function vKm(km,mx){return km>0&&km<=mx}
-function eur(v){return'€ '+parseFloat(v||0).toFixed(2)}
-function fmt1(v){return parseFloat(v||0).toFixed(1)}
 
-const FP_FEE_SOGLIA=4.90;
-function isNsOrder(o){const n=(o.orderNum||'').trim().toUpperCase();return n==='NS'||n==='€ NS'||n==='€NS';}
-function isFuoriPaese(o,s){
-  if(o.isTicket||isNsOrder(o)){return vKm(o.km,s.kmMax)&&o.km>s.kmThresh;}
-  return o.fee>FP_FEE_SOGLIA;
+// Nuova logica fuori paese:
+// - fee > 4.90 → sempre fuori paese
+// - Eccezioni (ticket e NS): usano i km
+const FP_FEE_SOGLIA = 4.90;
+function isNsOrder(o){ 
+  const n=(o.orderNum||'').trim().toUpperCase();
+  return n==='NS'||n==='€ NS'||n==='€NS';
+}
+function isFuoriPaese(o, s){
+  if(o.isTicket || isNsOrder(o)){
+    // Usano i km
+    return vKm(o.km,s.kmMax) && o.km > s.kmThresh;
+  }
+  // Tutti gli altri: fuori paese se fee > 4.90
+  return o.fee > FP_FEE_SOGLIA;
 }
 function getShift(o,ch){if(o.timeHour===null)return null;return o.timeHour<ch?'mat':'ser'}
-function activeOrders(name){return(D[name]?.orders||[]).filter(o=>!o.deleted)}
+function activeOrders(name){return (D[name]?.orders||[]).filter(o=>!o.deleted)}
 function getMonths(name){return[...new Set(activeOrders(name).map(o=>o.monthKey))].sort()}
 function getDays(name,mk){return[...new Set(activeOrders(name).filter(o=>o.monthKey===mk).map(o=>o.dateStr))].sort((a,b)=>parseDateStr(a)-parseDateStr(b))}
 
@@ -876,22 +736,12 @@ function renderSidebar(){
     btn.className='drv-btn'+(name===cur?' on':'');
     const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const col=COLORS[i%COLORS.length];
-    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}</span><span class="drv-del" title="Elimina fattorino" style="opacity:0;font-size:13px;color:var(--acc3);margin-left:auto">✕</span>`;
+    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}</span><span class="drv-del" title="Elimina fattorino" onclick="event.stopPropagation();deleteDriver('${name}')" style="opacity:0;font-size:13px;padding:0 2px;color:var(--acc3);line-height:1">✕</span>`;
     btn.onmouseenter=()=>btn.querySelector('.drv-del').style.opacity='1';
     btn.onmouseleave=()=>btn.querySelector('.drv-del').style.opacity='0';
-    btn.querySelector('.drv-del').onclick=ev=>{ev.stopPropagation();deleteDriver(name);};
     btn.onclick=()=>selectDriver(name);
     list.appendChild(btn);
   });
-}
-function deleteDriver(name){
-  if(!confirm(`Eliminare tutti i dati di ${name}?`))return;
-  delete D[name];
-  if(cur===name) cur=Object.keys(D)[0]||null;
-  renderSidebar();
-  if(cur) selectDriver(cur);
-  else{doc.getElementById('dash').classList.add('hidden');doc.getElementById('upWrap').classList.remove('hidden');}
-  autoSaveToLocalStorage();
 }
 
 function selectDriver(name){
@@ -899,29 +749,16 @@ function selectDriver(name){
   doc.getElementById('viewGlobal').classList.add('hidden');
   doc.getElementById('dash').classList.remove('hidden');
   doc.getElementById('upWrap').classList.add('hidden');
-  doc.querySelectorAll('.drv-btn').forEach(b=>{
-    b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span')?.textContent?.trim()===name);
-  });
-  doc.getElementById('btnGlobal').classList.remove('on');
+  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span').textContent===name));
   const months=getMonths(name);
-  if(!months.includes(curMon)) curMon=months[months.length-1]||null;
+  if(!months.includes(curMon)) curMon=months[0]||null;
   renderDriver();
-}
-
-function selectGlobal(){
-  doc.getElementById('dash').classList.add('hidden');
-  doc.getElementById('viewGlobal').classList.remove('hidden');
-  doc.getElementById('upWrap').classList.add('hidden');
-  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on'));
-  doc.getElementById('btnGlobal').classList.add('on');
-  cur=null;
-  renderGlobal();
 }
 
 // ── PANELS ──
 function openEconPanel(){
   const e=D[cur].econ;
-  if(!e.turno)e.turno={matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0};
+  if(!e.turno) e.turno={matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0};
   doc.getElementById('econDriverName').textContent=cur;
   doc.getElementById('econMode').value=e.mode;
   doc.getElementById('econImporto').value=e.importo;
@@ -929,6 +766,7 @@ function openEconPanel(){
   doc.getElementById('econSogliaSer').value=e.sogliaSer;
   doc.getElementById('econBonusEuro').value=e.bonusEuro;
   doc.getElementById('econNote').value=e.note||'';
+  // Turno tariffe
   doc.getElementById('turnoMatAz').value=e.turno.matAz||0;
   doc.getElementById('turnoMatPr').value=e.turno.matPr||0;
   doc.getElementById('turnoMezzoMatAz').value=e.turno.mezzoMatAz||0;
@@ -937,20 +775,23 @@ function openEconPanel(){
   doc.getElementById('turnoPomPr').value=e.turno.pomPr||0;
   doc.getElementById('turnoSerAz').value=e.turno.serAz||0;
   doc.getElementById('turnoSerPr').value=e.turno.serPr||0;
-  onEconModeChange();
+  updateEconLabel();
   doc.getElementById('econPanel').classList.remove('hidden');
   doc.getElementById('settPanel').classList.add('hidden');
 }
-function onEconModeChange(){
+function closeEconPanel(){doc.getElementById('econPanel').classList.add('hidden')}
+function updateEconLabel(){
   const mode=doc.getElementById('econMode').value;
-  const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Extra fisso per consegna (€, 0=usa col.K)',turno:'Importo base extra (€)'};
+  const labels={giornata:'Importo per giornata (€)',mese:'Importo fisso mensile (€)',consegna:'Tariffa per consegna (€)',turno:'Importo base (€, opzionale)'};
   doc.getElementById('econImportoLabel').textContent=labels[mode]||'Importo (€)';
+  // Show/hide turno panel
   const turnoPanel=doc.getElementById('econTurnoPanel');
-  if(turnoPanel) turnoPanel.classList.toggle('hidden',mode!=='turno');
+  if(turnoPanel) turnoPanel.classList.toggle('hidden', mode!=='turno');
+  // Show/hide importo field (hide for turno mode)
   const importoField=doc.getElementById('econImportoField');
-  if(importoField) importoField.classList.toggle('hidden',mode==='turno');
+  if(importoField) importoField.classList.toggle('hidden', mode==='turno');
 }
-function closeEconPanel(){doc.getElementById('econPanel').classList.add('hidden');}
+doc.getElementById('econMode').addEventListener('change',updateEconLabel);
 function saveEcon(){
   const e=D[cur].econ;
   e.mode=doc.getElementById('econMode').value;
@@ -959,7 +800,7 @@ function saveEcon(){
   e.sogliaSer=parseFloat(doc.getElementById('econSogliaSer').value)||14;
   e.bonusEuro=parseFloat(doc.getElementById('econBonusEuro').value)||1;
   e.note=doc.getElementById('econNote').value;
-  if(!e.turno)e.turno={};
+  if(!e.turno) e.turno={};
   e.turno.matAz=parseFloat(doc.getElementById('turnoMatAz').value)||0;
   e.turno.matPr=parseFloat(doc.getElementById('turnoMatPr').value)||0;
   e.turno.mezzoMatAz=parseFloat(doc.getElementById('turnoMezzoMatAz').value)||0;
@@ -971,9 +812,8 @@ function saveEcon(){
   closeEconPanel();
   renderDriver();
   autoSaveToLocalStorage();
-  showToast('✓ Condizioni salvate per '+cur);
+  debouncedCloudSave();
 }
-
 function openSettingsPanel(){
   const s=D[cur].settings;
   doc.getElementById('settDriverName').textContent=cur;
@@ -983,7 +823,7 @@ function openSettingsPanel(){
   doc.getElementById('settPanel').classList.remove('hidden');
   doc.getElementById('econPanel').classList.add('hidden');
 }
-function closeSettPanel(){doc.getElementById('settPanel').classList.add('hidden');}
+function closeSettPanel(){doc.getElementById('settPanel').classList.add('hidden')}
 function saveSettings(){
   const s=D[cur].settings;
   s.kmThresh=parseFloat(doc.getElementById('cfgKmThresh').value)||5;
@@ -1003,49 +843,57 @@ function renderMezzo(){
     const p=doc.createElement('button');
     p.className='pill'+(mk===curMon?' on':'');
     p.textContent=mlabel(mk);
-    p.onclick=()=>{curMon=mk;renderMezzo();renderCurrentTab();};
+    p.onclick=()=>{curMon=mk;renderMezzo();renderCurrentTab()};
     pills.appendChild(p);
   });
   doc.getElementById('mezzoPeriodLabel').textContent=curMon?mlabel(curMon):'—';
   const grid=doc.getElementById('mezzoDayGrid');
   grid.innerHTML='';
-  if(!curMon)return;
+  if(!curMon) return;
   getDays(cur,curMon).forEach(ds=>{
-    if(!D[cur].mezzo[ds])D[cur].mezzo[ds]={mat:'—',ser:'—'};
+    if(!D[cur].mezzo[ds]) D[cur].mezzo[ds]={mat:'—',ser:'—'};
     const mz=D[cur].mezzo[ds];
     const row=doc.createElement('div');
     row.className='mday-row';
     const lbl=doc.createElement('div');lbl.className='mday-label';lbl.textContent=ds;
-    const selM=mkSel(mz.mat,v=>{D[cur].mezzo[ds].mat=v;autoSaveToLocalStorage();});
-    const selS=mkSel(mz.ser,v=>{D[cur].mezzo[ds].ser=v;autoSaveToLocalStorage();});
+    const selM=mkSel(mz.mat,v=>{D[cur].mezzo[ds].mat=v;autoSaveToLocalStorage();debouncedCloudSave();});
+    const selS=mkSel(mz.ser,v=>{D[cur].mezzo[ds].ser=v;autoSaveToLocalStorage();debouncedCloudSave();});
     row.appendChild(lbl);row.appendChild(selM);row.appendChild(selS);
     grid.appendChild(row);
   });
 }
 function mkSel(current,onChange){
   const sel=doc.createElement('select');sel.className='mday-sel';
-  MEZZI.forEach(m=>{const o=doc.createElement('option');o.value=m;o.textContent=m;if(m===current)o.selected=true;sel.appendChild(o);});
+  MEZZI.forEach(m=>{const o=doc.createElement('option');o.value=m;o.textContent=m;if(m===current)o.selected=true;sel.appendChild(o)});
   sel.addEventListener('change',e=>onChange(e.target.value));
   return sel;
 }
 
-// ── COMPUTE ──
-function getTurnoType(dayOrds,cutHour){
-  const hours=dayOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
-  if(!hours.length)return null;
-  const firstHour=Math.min(...hours);
-  if(firstHour<cutHour){return firstHour<11?'matIntera':'mezzoMat';}
-  else{return firstHour<19?'pomSera':'solaSera';}
+// ── COMPUTE MONTH ──
+// Determina il tipo di turno in base all'orario del primo ordine del giorno
+function getTurnoType(dayOrds, cutHour){
+  // Prendi l'orario minimo del giorno (primo ordine)
+  const hours = dayOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
+  if(!hours.length) return null;
+  const firstHour = Math.min(...hours);
+  if(firstHour < cutHour){ // turno mattina (prima delle 14)
+    return firstHour < 11 ? 'matIntera' : 'mezzoMat';
+  } else { // turno sera
+    return firstHour < 19 ? 'pomSera' : 'solaSera'; // pomSera = 17-19, solaSera = 19+
+  }
 }
-function getTurnoComp(turnoType,mezzoMat,mezzoSer,turnoTariffe){
-  if(!turnoTariffe||!turnoType)return 0;
-  const mezzo=turnoType==='matIntera'||turnoType==='mezzoMat'?mezzoMat:mezzoSer;
-  const isPropr=mezzo==='Auto propria';
-  const map={
-    matIntera:isPropr?turnoTariffe.matPr:turnoTariffe.matAz,
-    mezzoMat:isPropr?turnoTariffe.mezzoMatPr:turnoTariffe.mezzoMatAz,
-    pomSera:isPropr?turnoTariffe.pomPr:turnoTariffe.pomAz,
-    solaSera:isPropr?turnoTariffe.serPr:turnoTariffe.serAz,
+
+// Calcola compenso turno in base al tipo turno e al mezzo usato
+function getTurnoComp(turnoType, mezzoMat, mezzoSer, turnoTariffe){
+  if(!turnoTariffe||!turnoType) return 0;
+  // Determina mezzo dominante del turno
+  const mezzo = turnoType==='matIntera'||turnoType==='mezzoMat' ? mezzoMat : mezzoSer;
+  const isPropr = mezzo==='Auto propria';
+  const map = {
+    matIntera: isPropr ? turnoTariffe.matPr : turnoTariffe.matAz,
+    mezzoMat:  isPropr ? turnoTariffe.mezzoMatPr : turnoTariffe.mezzoMatAz,
+    pomSera:   isPropr ? turnoTariffe.pomPr : turnoTariffe.pomAz,
+    solaSera:  isPropr ? turnoTariffe.serPr : turnoTariffe.serAz,
   };
   return map[turnoType]||0;
 }
@@ -1056,23 +904,32 @@ function computeMonth(name,mk){
   const e=d.econ;
   const orders=activeOrders(name).filter(o=>o.monthKey===mk);
   const byDay={};
-  orders.forEach(o=>{if(!byDay[o.dateStr])byDay[o.dateStr]=[];byDay[o.dateStr].push(o);});
+  orders.forEach(o=>{if(!byDay[o.dateStr])byDay[o.dateStr]=[];byDay[o.dateStr].push(o)});
 
-  let totC=0,totCBonus=0,totInPaese=0,totFP=0,totFee=0,totCash=0,cashOrds=0;
-  let daysWithMat=0,daysWithSer=0,totDays=0,totTickets=0,totTariffaK=0;
+  let totC=0,totCBonus=0,totInPaese=0,totFP=0,totFee=0,totCash=0,cashOrds=0,daysWithMat=0,daysWithSer=0,totDays=0,totTickets=0;
   const days=[];
 
   Object.entries(byDay).sort((a,b)=>parseDateStr(a[0])-parseDateStr(b[0])).forEach(([ds,dayOrds])=>{
-    const FP_WEIGHT=1.3;
-    const cFuoriPaese=dayOrds.filter(o=>isFuoriPaese(o,s)).reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
-    const cInPaese=dayOrds.filter(o=>!isFuoriPaese(o,s)).reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
-    const cTot=cInPaese+cFuoriPaese;
-    const cBonus=cInPaese+(cFuoriPaese*FP_WEIGHT);
-    const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
-    const tariffaK=dayOrds.reduce((a,o)=>a+(o.tariffaConsegna||0),0);
+    const fp=dayOrds.filter(o=>isFuoriPaese(o,s)&&!o.isTicket).length;
     const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
     const cashN=dayOrds.filter(o=>o.isCash).length;
-    const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0);
+    const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
+    // Tickets (inclusi mezzi ticket = 0.5)
+    const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0); // contatore ticket
+    const dayTicketConsegne=dayOrds.reduce((a,o)=>a+(o.ticketConsegne||o.ticketCount||0),0); // consegne ticket
+    const FP_WEIGHT=1.3;
+    // Consegne fuori paese: usa nuova logica (fee>4.90 oppure km per ticket/NS)
+    const cFuoriPaese=dayOrds.filter(o=>isFuoriPaese(o,s))
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
+    // Consegne in paese: tutto il resto
+    const cInPaese=dayOrds.filter(o=>!isFuoriPaese(o,s))
+      .reduce((a,o)=>a+(o.isTicket?(o.ticketConsegne||o.ticketCount||0):1),0);
+    // Totale reale = in paese + fuori paese
+    const cTot=cInPaese+cFuoriPaese;
+    // Totale ai fini del bonus (fuori paese pesati 1.3)
+    const cBonus=cInPaese+(cFuoriPaese*FP_WEIGHT);
+    const c=cBonus; // usato per calcolo extra/bonus
+    const cNorm=cTot; // totale reale per display
     const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
     const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
     if(hasMat)daysWithMat++;
@@ -1080,30 +937,27 @@ function computeMonth(name,mk){
     totDays++;
     const matC=dayOrds.filter(o=>getShift(o,s.cutHour)==='mat').length;
     const serC=dayOrds.filter(o=>getShift(o,s.cutHour)==='ser').length;
-    totC+=cTot;totCBonus+=cBonus;totInPaese+=cInPaese;totFP+=cFuoriPaese;
-    totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;totTariffaK+=tariffaK;
-    days.push({ds,dayOrds,cTot,cInPaese,cFuoriPaese,cBonus,fee,tariffaK,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,matC,serC});
+    const domShift=matC>0&&serC===0?'mat':serC>0&&matC===0?'ser':matC>0&&serC>0?'both':null;
+    totC+=cTot;totCBonus+=cBonus;totInPaese+=cInPaese;totFP+=cFuoriPaese;totFee+=fee;totCash+=cash;cashOrds+=cashN;totTickets+=dayTickets;
+    days.push({ds,dayOrds,c,cNorm,cTot,cInPaese,cFuoriPaese,cBonus,fp:cFuoriPaese,fee,cash,cashOrds:cashN,dayTickets,hasMat,hasSer,domShift,matC,serC});
   });
 
-  // BONUS: calcolato mensilmente su somma turni
-  // attesa = turni_mattina * sogliaMat + turni_sera * sogliaSer
+  // Bonus logic
   const attesa=daysWithMat*e.sogliaMat+daysWithSer*e.sogliaSer;
-  const extra=Math.max(0,totCBonus-attesa);
+  const extra=Math.max(0,totCBonus-attesa); // usa totale pesato per bonus
   const bonus=extra*e.bonusEuro;
 
   // Compenso base
   let compBase=0;
   if(e.mode==='giornata') compBase=totDays*e.importo;
   else if(e.mode==='mese') compBase=e.importo;
-  else if(e.mode==='consegna'){
-    // Usa le tariffe reali dalla colonna K; se importo > 0, aggiunge extra fisso per consegna
-    compBase=totTariffaK+(e.importo*totC);
-  }
+  else if(e.mode==='consegna') compBase=totC*e.importo;
   else if(e.mode==='turno'){
+    // Per ogni giorno calcola turno type e compenso
     days.forEach(day=>{
-      const turnoType=getTurnoType(day.dayOrds,s.cutHour);
+      const turnoType=getTurnoType(day.dayOrds, s.cutHour);
       const mz=D[name]?.mezzo?.[day.ds]||{};
-      const comp=getTurnoComp(turnoType,mz.mat||'—',mz.ser||'—',e.turno||{});
+      const comp=getTurnoComp(turnoType, mz.mat||'—', mz.ser||'—', e.turno||{});
       compBase+=comp;
       day.turnoType=turnoType;
       day.turnoComp=comp;
@@ -1111,12 +965,12 @@ function computeMonth(name,mk){
   }
   const compTot=compBase+bonus;
 
-  return{orders,days,totC,totCBonus,totInPaese,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,totTariffaK,attesa,extra,bonus,compBase,compTot,s,e};
+  return{orders,days,totC,totCBonus,totInPaese,totFP,totFee,totCash,cashOrds,daysWithMat,daysWithSer,totDays,totTickets,attesa,extra,bonus,compBase,compTot,s,e};
 }
 
 // ── RENDER DRIVER ──
 function renderDriver(){
-  if(!cur||!D[cur])return;
+  if(!cur||!D[cur]) return;
   const months=getMonths(cur);
   const d=D[cur];
   const e=d.econ;
@@ -1126,594 +980,1232 @@ function renderDriver(){
 
   renderMezzo();
 
-  // Aggregato su tutti i mesi
-  let aC=0,aCBonus=0,aFP=0,aFee=0,aCash=0,aCashO=0,aMat=0,aSer=0,aAtt=0,aExtra=0,aBonus=0,aCompBase=0,aCompTot=0,aDays=0,aTick=0,aTarK=0;
+  // Aggregate
+  let aC=0,aCBonus=0,aFP=0,aFee=0,aCash=0,aCashO=0,aMat=0,aSer=0,aAtt=0,aExtra=0,aBonus=0,aCompBase=0,aCompTot=0,aDays=0,aTick=0,mesiOk=0;
+  const allMS={};
   months.forEach(mk=>{
     const ms=computeMonth(cur,mk);
-    if(ms.totC>0||ms.totDays>0){
-      aC+=ms.totC;aCBonus+=ms.totCBonus;aFP+=ms.totFP;
-      aFee+=ms.totFee;aCash+=ms.totCash;aCashO+=ms.cashOrds;
+    allMS[mk]=ms;
+    if(ms.totC>0){
+      mesiOk++;aC+=ms.totC;aCBonus+=(ms.totCBonus||ms.totC);aFP+=ms.totFP;aFee+=ms.totFee;aCash+=ms.totCash;aCashO+=ms.cashOrds;
       aMat+=ms.daysWithMat;aSer+=ms.daysWithSer;aAtt+=ms.attesa;aExtra+=ms.extra;
-      aBonus+=ms.bonus;aCompBase+=ms.compBase;aCompTot+=ms.compTot;
-      aDays+=ms.totDays;aTick+=ms.totTickets;aTarK+=ms.totTariffaK;
+      aBonus+=ms.bonus;aCompBase+=ms.compBase;aCompTot+=ms.compTot;aDays+=ms.totDays;aTick+=ms.totTickets;
     }
   });
 
   doc.getElementById('stC').textContent=aC;
-  doc.getElementById('stCSub').textContent=`in paese: ${Math.round(aC-aFP)} · f.p.: ${fmt1(aFP)}`;
-  doc.getElementById('stFP').textContent=fmt1(aFP);
+  doc.getElementById('stCSub').textContent=`in paese: ${aC-aFP} · f.p.: ${aFP}`;
+  doc.getElementById('stFP').textContent=aFP;
   doc.getElementById('stMat').textContent=aMat;
-  doc.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/turno`;
+  doc.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
   doc.getElementById('stSer').textContent=aSer;
-  doc.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/turno`;
-  doc.getElementById('stExtra').textContent=fmt1(aExtra);
-  doc.getElementById('stTick').textContent=fmt1(aTick);
-  doc.getElementById('stCash').textContent=eur(aCash);
+  doc.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/giorno`;
+  doc.getElementById('stExtra').textContent=aExtra>0?'+'+aExtra.toFixed(1):0;
+  doc.getElementById('stTick').textContent=aTick;
+  doc.getElementById('stCash').textContent='€'+aCash.toFixed(2);
   doc.getElementById('stCashSub').textContent=`${aCashO} ord. cash`;
-  doc.getElementById('stComp').textContent=eur(aCompTot);
+  doc.getElementById('stComp').textContent='€'+aCompTot.toFixed(2);
 
-  // Banner bonus — calcolo su mese selezionato
-  if(curMon){
-    const ms=computeMonth(cur,curMon);
-    const bnr=doc.getElementById('bnrBonus');
-    bnr.className='bnr bnr-bonus'+(ms.bonus>0?' pos':ms.bonus===0&&ms.attesa>0?' neg':'');
-    doc.getElementById('bIco').textContent=ms.bonus>0?'🏆':'📊';
-    doc.getElementById('bTitle').textContent=ms.bonus>0?'Bonus raggiunto!':ms.attesa>0?'Bonus non raggiunto':'Stato bonus';
-    doc.getElementById('bDesc').textContent=`Attesa: ${fmt1(ms.attesa)} cons · Reali: ${fmt1(ms.totCBonus)} · Extra: ${fmt1(ms.extra)} (${ms.daysWithMat} turni mat + ${ms.daysWithSer} turni ser)`;
-    doc.getElementById('bVal').textContent=eur(ms.bonus);
-    doc.getElementById('cashDesc').textContent=`${ms.cashOrds} ord. cash · ${mlabel(curMon)}`;
-    doc.getElementById('cashVal').textContent=eur(ms.totCash);
-    doc.getElementById('compDesc').textContent=`${mlabel(curMon)} · base: ${eur(ms.compBase)} + bonus: ${eur(ms.bonus)}`;
-    doc.getElementById('compVal').textContent=eur(ms.compTot);
+  // Bonus banner
+  const bnr=doc.getElementById('bnrBonus');
+  if(aBonus>0){
+    bnr.classList.remove('neg');
+    doc.getElementById('bIco').textContent='🏆';
+    doc.getElementById('bTitle').textContent='Bonus maturato 🎉';
+    doc.getElementById('bDesc').textContent=`${aExtra.toFixed(1)} cons. extra × €${e.bonusEuro}`;
+    doc.getElementById('bVal').textContent='€'+aBonus.toFixed(2);
+  } else {
+    bnr.classList.add('neg');
+    doc.getElementById('bIco').textContent='🎯';
+    doc.getElementById('bTitle').textContent='Bonus non maturato';
+    doc.getElementById('bDesc').textContent=`Reali: ${aC} · Attese: ${aAtt.toFixed(1)}`;
+    doc.getElementById('bVal').textContent='€0.00';
   }
 
-  renderCurrentTab();
-}
+  // Cash banner
+  doc.getElementById('cashDesc').textContent=`${aCashO} ordini pagati in contanti`;
+  doc.getElementById('cashVal').textContent='€'+aCash.toFixed(2);
 
-// ── TABS ──
-function setTab(t){
-  curTab=t;
-  ['M','W','D','O'].forEach(k=>{
-    doc.getElementById('view'+k).classList.toggle('hidden',k!==t);
-    doc.getElementById('tab'+k).classList.toggle('on',k===t);
-  });
+  // Compenso banner
+  const modeLabel={giornata:`${aDays} gg × €${e.importo}`,mese:`fisso mensile × ${mesiOk} mesi`,consegna:`${aC} cons. × €${e.importo}`}[e.mode];
+  doc.getElementById('compDesc').textContent=`${modeLabel} + bonus €${aBonus.toFixed(2)}`;
+  doc.getElementById('compVal').textContent='€'+aCompTot.toFixed(2);
+
+  // Tab info
+  const pct=aAtt>0?Math.min(200,aC/aAtt*100):0;
+  doc.getElementById('tabObjInfo').textContent=`Obiettivo: ${pct.toFixed(0)}% (${aC}/${aAtt.toFixed(0)} consegne)`;
+
+  renderMonthly(allMS,months);
   renderCurrentTab();
 }
 
 function renderCurrentTab(){
-  if(!cur||!D[cur])return;
-  if(curTab==='M') renderMonthCards();
-  else if(curTab==='W') renderWeekly();
-  else if(curTab==='D') renderDaily();
-  else if(curTab==='O') renderOrders();
+  if(curTab==='W')renderWeekly();
+  else if(curTab==='D')renderDaily();
+  else if(curTab==='O')renderOrders();
 }
 
-// ── MONTHLY CARDS ──
-function renderMonthCards(){
-  const months=getMonths(cur);
-  const cards=doc.getElementById('mCards');
-  cards.innerHTML='';
+// ── MONTHLY ──
+function renderMonthly(allMS,months){
+  const grid=doc.getElementById('mCards');
+  grid.innerHTML='';
   months.forEach(mk=>{
-    const ms=computeMonth(cur,mk);
-    const isOn=mk===curMon;
-    const mc=doc.createElement('div');
-    mc.className='mc'+(isOn?' on':'');
-    const pct=ms.attesa>0?Math.min(100,(ms.totCBonus/ms.attesa)*100):0;
-    const fillColor=pct>=100?'var(--grn)':pct>=75?'var(--acc4)':'var(--acc3)';
-    mc.innerHTML=`
+    const ms=allMS[mk]||computeMonth(cur,mk);
+    const e=ms.e;
+    const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
+    const bc=pct>=100?'#5eea8d':'#ff6b6b';
+    const mz=D[cur].mezzo;
+    const card=doc.createElement('div');
+    card.className='mc'+(mk===curMon?' on':'');
+    const modeStr={giornata:`${ms.totDays} gg × €${e.importo}`,mese:`€${e.importo}/mese`,consegna:`${ms.totC} × €${e.importo}`}[e.mode];
+    card.innerHTML=`
       <div class="mc-name">${mlabel(mk)}</div>
-      <div class="mc-rows">
-        <div class="mc-row"><span>Consegne</span><span>${ms.totC} (FP: ${fmt1(ms.totFP)})</span></div>
-        <div class="mc-row"><span>Turni 🌅/🌙</span><span>${ms.daysWithMat} / ${ms.daysWithSer}</span></div>
-        <div class="mc-row"><span>Attesa bonus</span><span>${fmt1(ms.attesa)} · fatto: ${fmt1(ms.totCBonus)}</span></div>
-        <div class="mc-row"><span>Extra cons.</span><span>${fmt1(ms.extra)} × ${eur(ms.e.bonusEuro)}</span></div>
+      <!-- DUE COLONNE -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+        <!-- COLONNA SINISTRA: dati reali -->
+        <div style="background:var(--surf2);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:6px">📦 Consegne reali</div>
+          <div class="mc-row"><span>In paese</span><span>${ms.totC-ms.totFP}${ms.totTickets>0?` <span style="font-size:9px;color:var(--grn)">(🎫${ms.totTickets})</span>`:''}</span></div>
+          <div class="mc-row"><span style="color:var(--acc3)">Fuori paese</span><span style="color:var(--acc3)">${ms.totFP}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600">Totale</span><span style="font-weight:700">${ms.totC}</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span>🌅 Turni mat.</span><span>${ms.daysWithMat}</span></div>
+          <div class="mc-row"><span>🌙 Turni sera</span><span>${ms.daysWithSer}</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span style="color:var(--cash)">💵 Cash trattenuto</span><span style="color:var(--cash);font-weight:600">€${ms.totCash.toFixed(2)}</span></div>
+          <div style="font-size:9px;color:var(--mut)">${ms.cashOrds} ordini cash</div>
+        </div>
+        <!-- COLONNA DESTRA: calcolo bonus -->
+        <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.12);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:var(--acc);margin-bottom:6px">⭐ Calcolo bonus</div>
+          <div class="mc-row"><span>In paese (×1)</span><span>${ms.totC-ms.totFP}</span></div>
+          <div class="mc-row"><span style="color:var(--acc3)">Fuori paese (×1.3)</span><span style="color:var(--acc3)">${(ms.totFP*1.3).toFixed(1)}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600">Tot. pesato</span><span style="font-weight:700;color:var(--acc)">${ms.totCBonus.toFixed(1)}★</span></div>
+          <div style="height:8px"></div>
+          <div class="mc-row"><span>Attese (soglia)</span><span style="color:${pct>=100?'var(--grn)':'var(--acc3)'}">${ms.attesa.toFixed(1)}</span></div>
+          <div class="mc-row"><span>Differenza</span><span style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">${ms.extra>0?'+':''}${ms.extra.toFixed(1)}</span></div>
+          <div class="mc-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--brd)"><span style="font-weight:600;color:var(--grn)">Bonus</span><span style="font-weight:700;color:var(--grn)">€${ms.bonus.toFixed(2)}</span></div>
+        </div>
       </div>
-      <div class="mc-bar"><div class="mc-fill" style="width:${pct}%;background:${fillColor}"></div></div>
-      <div class="mc-cash"><div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--cash)">💵 Cash</span><span style="font-family:'DM Mono',monospace">${eur(ms.totCash)} (${ms.cashOrds} ord.)</span></div></div>
-      <div class="mc-comp"><div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--pur)">💼 Compenso</span><span style="font-family:'DM Mono',monospace;font-weight:700">${eur(ms.compTot)}</span></div><div style="font-size:9px;color:var(--mut);margin-top:2px">base ${eur(ms.compBase)} + bonus ${eur(ms.bonus)}</div></div>
-    `;
-    mc.onclick=()=>{curMon=mk;renderMezzo();renderDriver();};
-    cards.appendChild(mc);
+      <div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pct)}%;background:${bc}"></div></div>
+      <div style="font-size:9px;color:var(--mut);text-align:right;margin-top:3px">${pct.toFixed(0)}% obiettivo</div>
+      <div class="mc-comp">
+        <div style="display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--pur)">💼 Compenso</span><span style="font-family:'DM Mono',monospace;color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</span></div>
+        <div style="font-size:10px;color:var(--mut)">${modeStr} + bonus</div>
+      </div>
+      <div style="text-align:right;margin-top:8px">
+        <button onclick="event.stopPropagation();deleteMonth('${mk}')" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:6px;padding:3px 10px;font-size:10px;color:var(--acc3);cursor:pointer;font-family:'DM Mono',monospace">🗑 Elimina mese</button>
+      </div>`;
+    card.onclick=()=>{curMon=mk;setTab('D')};
+    grid.appendChild(card);
+  });
+}
+
+// ── PILLS ──
+function makePills(id,months,cb){
+  const c=doc.getElementById(id);if(!c)return;
+  c.innerHTML='';
+  months.forEach(mk=>{
+    const p=doc.createElement('button');
+    p.className='pill'+(mk===curMon?' on':'');
+    p.textContent=mlabel(mk);
+    p.onclick=()=>{curMon=mk;cb()};
+    c.appendChild(p);
   });
 }
 
 // ── WEEKLY ──
 function renderWeekly(){
   const months=getMonths(cur);
-  // Pills mesi
-  const pills=doc.getElementById('wPills');
-  pills.innerHTML='';
-  months.forEach(mk=>{
-    const p=doc.createElement('button');
-    p.className='pill'+(mk===curMon?' on':'');
-    p.textContent=mlabel(mk);
-    p.onclick=()=>{curMon=mk;renderMezzo();renderWeekly();};
-    pills.appendChild(p);
-  });
+  makePills('wPills',months,()=>renderWeekly());
   if(!curMon)return;
-  doc.getElementById('wTitle').textContent=`Dettaglio settimanale — ${mlabel(curMon)}`;
+  doc.getElementById('wTitle').textContent=mlabel(curMon)+' — Settimanale';
   const ms=computeMonth(cur,curMon);
-  // Raggruppa per settimana
+  const s=ms.s,e=ms.e;
+
   const byWeek={};
   ms.days.forEach(day=>{
-    const d=parseDateStr(day.ds);
-    const wn=getWeekOfMonth(d);
-    if(!byWeek[wn])byWeek[wn]={days:{},mat:0,ser:0,totC:0,totCBonus:0,totFP:0,cash:0};
-    byWeek[wn].days[day.ds]=day;
-    if(day.hasMat)byWeek[wn].mat++;
-    if(day.hasSer)byWeek[wn].ser++;
-    byWeek[wn].totC+=day.cTot;
-    byWeek[wn].totCBonus+=day.cBonus;
-    byWeek[wn].totFP+=day.cFuoriPaese;
-    byWeek[wn].cash+=day.cash;
+    const wk=activeOrders(cur).find(o=>o.dateStr===day.ds)?.weekNum||1;
+    if(!byWeek[wk])byWeek[wk]=[];byWeek[wk].push(day);
   });
-  const DAYS_EN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const tbody=doc.getElementById('wBody');
-  tbody.innerHTML='';
-  let totRow={totC:0,totCBonus:0,totFP:0,mat:0,ser:0,cash:0};
-  Object.keys(byWeek).sort((a,b)=>a-b).forEach(wn=>{
-    const wk=byWeek[wn];
+
+  const tb=doc.getElementById('wBody');tb.innerHTML='';
+  let rtC=0,rtFP=0,rtCBonus=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
+
+  Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
+    const wd=byWeek[wk];
+    const wAtt=wd.reduce((a,d)=>{let x=0;if(d.hasMat)x+=e.sogliaMat;if(d.hasSer)x+=e.sogliaSer;return a+x},0);
+    const wC=wd.reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0); // totale reale
+    const wFP=wd.reduce((a,d)=>a+(d.cFuoriPaese||d.fp||0),0); // fuori paese reale
+    const wCBonus=wd.reduce((a,d)=>a+(d.cBonus||d.c),0); // pesato per bonus
+    const wM=wd.filter(d=>d.hasMat).length,wS=wd.filter(d=>d.hasSer).length;
+    const wEx=Math.max(0,wCBonus-wAtt),wBn=wEx*e.bonusEuro;
+    const wCO=wd.reduce((a,d)=>a+d.cashOrds,0),wCa=wd.reduce((a,d)=>a+d.cash,0);
+    const cnt=[1,2,3,4,5,6,0].map(dow=>wd.filter(d=>{
+      const o=activeOrders(cur).find(o=>o.dateStr===d.ds);return o?.date.getDay()===dow;
+    }).reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0));
+    rtC+=wC;rtFP+=wFP;rtM+=wM;rtS+=wS;rtAt+=wAtt;rtEx+=wEx;rtBn+=wBn;rtCO+=wCO;rtCa+=wCa;
+    rtCBonus+=wCBonus;
     const tr=doc.createElement('tr');
-    // Calcola attesa e bonus di questa settimana (solo informativo, bonus è mensile)
-    const attW=wk.mat*ms.e.sogliaMat+wk.ser*ms.e.sogliaSer;
-    const extraW=Math.max(0,wk.totCBonus-attW);
-    const bonusW=extraW*ms.e.bonusEuro;
-    let cells=`<td><span class="b bb">Sett. ${wn}</span></td>`;
-    DAYS_EN.forEach(dayEn=>{
-      const dayEntry=Object.values(wk.days).find(d=>d.dayOrds[0]&&dayFromDateStr(d.ds)===dayEn);
-      if(dayEntry){
-        const shifts=[];
-        if(dayEntry.hasMat)shifts.push('<span class="sm sm-m">M</span>');
-        if(dayEntry.hasSer)shifts.push('<span class="sm sm-s">S</span>');
-        cells+=`<td style="text-align:center">${dayEntry.cTot}<br>${shifts.join('')}</td>`;
-      } else {
-        cells+=`<td style="color:var(--brd2);text-align:center">—</td>`;
-      }
-    });
-    cells+=`<td>${wk.totC}</td><td>${fmt1(wk.totFP)}</td><td>${fmt1(wk.totCBonus)}</td><td>${wk.mat}</td><td>${wk.ser}</td><td>${fmt1(attW)}</td><td>${fmt1(extraW)}</td><td>${eur(wk.cash)}</td>`;
-    tr.innerHTML=cells;
-    tbody.appendChild(tr);
-    totRow.totC+=wk.totC;totRow.totCBonus+=wk.totCBonus;totRow.totFP+=wk.totFP;totRow.mat+=wk.mat;totRow.ser+=wk.ser;totRow.cash+=wk.cash;
+    tr.innerHTML=`
+      <td><span class="b bb">Sett.${wk}</span></td>
+      ${cnt.map(c=>c>0?`<td><span class="b bg">${Number(c).toFixed(c%1?1:0)}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
+      <td><span class="b by">${wC}</span>${wFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${wFP}fp</span>`:''}</td>
+      <td><span class="b bb" title="Ai fini del bonus">${wCBonus.toFixed(1)}★</span></td>
+      <td><span class="sm sm-m">${wM}</span></td><td><span class="sm sm-s">${wS}</span></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${wAtt.toFixed(1)}</td>
+      <td style="color:${wEx>0?'var(--grn)':'var(--dim)'}">+${wEx.toFixed(1)}</td>
+      <td style="color:${wBn>0?'var(--grn)':'var(--dim)'}">${wBn>0?'€'+wBn.toFixed(2):'—'}</td>
+      <td>${wCO>0?`<span class="b bca">${wCO}</span>`:'—'}</td>
+      <td style="color:var(--cash)">${wCa>0?'€'+wCa.toFixed(2):'—'}</td>`;
+    tb.appendChild(tr);
   });
-  const tr=doc.createElement('tr');tr.className='tr-tot';
-  tr.innerHTML=`<td>Totale</td><td colspan="7"></td><td>${totRow.totC}</td><td>${fmt1(totRow.totFP)}</td><td>${fmt1(ms.totCBonus)}</td><td>${totRow.mat}</td><td>${totRow.ser}</td><td>${fmt1(ms.attesa)}</td><td>${fmt1(ms.extra)}</td><td>${eur(totRow.cash)}</td>`;
-  tbody.appendChild(tr);
+  const tot=doc.createElement('tr');tot.className='tr-tot';
+  tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace">TOTALE</td><td colspan="7"></td>
+    <td><span class="b by">${rtC}</span>${rtFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${rtFP}fp</span>`:''}</td>
+    <td><span class="b bb">${ms.totCBonus.toFixed(1)}★</span></td>
+    <td><span class="sm sm-m">${rtM}</span></td><td><span class="sm sm-s">${rtS}</span></td>
+    <td style="font-family:'DM Mono',monospace">${rtAt.toFixed(1)}</td>
+    <td style="color:${rtEx>0?'var(--grn)':'var(--dim)'}">+${rtEx.toFixed(1)}</td>
+    <td style="color:${rtBn>0?'var(--grn)':'var(--dim)'}">${rtBn>0?'€'+rtBn.toFixed(2):'—'}</td>
+    <td>${rtCO>0?`<span class="b bca">${rtCO}</span>`:'—'}</td>
+    <td style="color:var(--cash)">${rtCa>0?'€'+rtCa.toFixed(2):'—'}</td>`;
+  tb.appendChild(tot);
 }
 
 // ── DAILY ──
 function renderDaily(){
   const months=getMonths(cur);
-  const pills=doc.getElementById('dPills');
-  pills.innerHTML='';
-  months.forEach(mk=>{
-    const p=doc.createElement('button');
-    p.className='pill'+(mk===curMon?' on':'');
-    p.textContent=mlabel(mk);
-    p.onclick=()=>{curMon=mk;renderMezzo();renderDaily();};
-    pills.appendChild(p);
-  });
+  makePills('dPills',months,()=>renderDaily());
   if(!curMon)return;
-  doc.getElementById('dSumTitle').textContent=`Dettaglio giornaliero — ${mlabel(curMon)}`;
+  doc.getElementById('dSumTitle').textContent=mlabel(curMon)+' — Giornaliero';
   const ms=computeMonth(cur,curMon);
-  const tbody=doc.getElementById('dSumBody');
-  tbody.innerHTML='';
-  let totC=0,totFP=0,totCBonus=0,totCash=0,totCashO=0,totTarK=0,totBase=0;
+  const e=ms.e;
+  const tb=doc.getElementById('dSumBody');tb.innerHTML='';
+  let rC=0,rFP=0,rAt=0,rEx=0,rBn=0,rCO=0,rCa=0,rFee=0,rCmp=0,rTick=0;
+
   ms.days.forEach(day=>{
-    const shift=day.hasMat&&day.hasSer?'🌅🌙':day.hasMat?'🌅 mattina':day.hasSer?'🌙 sera':'—';
-    const turnoLabel=day.turnoType?({'matIntera':'🌅 Mat. intera','mezzoMat':'🌤 Mezza mat.','pomSera':'🌆 Pom+sera','solaSera':'🌙 Sola sera'}[day.turnoType]||day.turnoType):'—';
-    const compBaseLine=ms.e.mode==='turno'?(day.turnoComp||0):(ms.e.mode==='consegna'?day.tariffaK:0);
+    const att=(day.hasMat?e.sogliaMat:0)+(day.hasSer?e.sogliaSer:0);
+    const ext=Math.max(0,day.c-att),bon=ext*e.bonusEuro;
+    let cmpBase=0;
+    if(e.mode==='giornata')cmpBase=e.importo;
+    else if(e.mode==='consegna')cmpBase=day.c*e.importo;
+    else if(e.mode==='turno')cmpBase=day.turnoComp||0;
+    else cmpBase=e.importo/30; // mese: approssimazione giornaliera
+    rC+=day.c;rFP+=day.fp;rAt+=att;rEx+=ext;rBn+=bon;rCO+=day.cashOrds;rCa+=day.cash;rFee+=day.fee;rCmp+=cmpBase;rTick+=day.dayTickets||0;
+    const sb=day.domShift==='mat'?'<span class="sm sm-m">🌅 Mattina</span>':
+      day.domShift==='ser'?'<span class="sm sm-s">🌙 Sera</span>':
+      day.domShift==='both'?'<span class="sm sm-m">🌅</span> <span class="sm sm-s">🌙</span>':
+      '<span style="color:var(--dim)">—</span>';
     const tr=doc.createElement('tr');
-    if(day.cash>0)tr.className='tr-cash';
     tr.innerHTML=`
-      <td><b>${day.ds}</b></td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${day.ds}</td>
       <td>${dayIt(dayFromDateStr(day.ds))}</td>
-      <td>${ms.e.mode==='turno'?turnoLabel:shift}</td>
-      <td>${fmt1(day.cInPaese)}</td>
-      <td>${fmt1(day.cFuoriPaese)}</td>
-      <td>${fmt1(day.cBonus)}</td>
-      <td>${day.hasMat?'✓':'—'}</td>
-      <td>${day.hasSer?'✓':'—'}</td>
-      <td>${day.cashOrds}</td>
-      <td>${eur(day.cash)}</td>
-      <td>${eur(day.tariffaK)}</td>
-      <td>${eur(compBaseLine)}</td>
-    `;
-    tbody.appendChild(tr);
-    totC+=day.cTot;totFP+=day.cFuoriPaese;totCBonus+=day.cBonus;
-    totCash+=day.cash;totCashO+=day.cashOrds;totTarK+=day.tariffaK;
-    totBase+=compBaseLine;
+      <td>${sb}</td>
+      <td title="Consegne in paese"><span class="b by">${(day.cInPaese!==undefined?day.cInPaese:day.c).toFixed(1)}</span>${(day.dayTickets||0)>0?`<span class="b bg" style="font-size:9px;margin-left:3px">🎫${day.dayTickets}</span>`:''}</td>
+      <td title="Fuori paese">${(day.cFuoriPaese||day.fp||0)>0?`<span class="b br">${(day.cFuoriPaese||day.fp).toFixed(1)}</span>`:'—'}</td>
+      <td title="Ai fini del bonus (f.p.×1.3)"><span class="b bb" style="color:#2563eb">${(day.cBonus!==undefined?day.cBonus:day.c).toFixed(1)}★</span></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${att.toFixed(1)}</td>
+      <td style="color:${ext>0?'var(--grn)':'var(--dim)'}">+${ext.toFixed(1)}</td>
+      <td style="color:${bon>0?'var(--grn)':'var(--dim)'}">${bon>0?'€'+bon.toFixed(2):'—'}</td>
+      <td>${day.cashOrds>0?`<span class="b bca">${day.cashOrds}</span>`:'—'}</td>
+      <td style="color:var(--cash)">${day.cash>0?'€'+day.cash.toFixed(2):'—'}</td>
+      <td>€${day.fee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>
+      <td><button onclick="deleteDay('${day.ds}')" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:5px;padding:2px 8px;font-size:9px;color:var(--acc3);cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap">🗑 Giorno</button></td>`;
+    tb.appendChild(tr);
   });
-  const tr=doc.createElement('tr');tr.className='tr-tot';
-  tr.innerHTML=`<td colspan="3">Totale mese</td><td>${fmt1(ms.totInPaese)}</td><td>${fmt1(totFP)}</td><td>${fmt1(totCBonus)}</td><td>${ms.daysWithMat}</td><td>${ms.daysWithSer}</td><td>${totCashO}</td><td>${eur(totCash)}</td><td>${eur(totTarK)}</td><td>${eur(ms.compBase)}</td>`;
-  tbody.appendChild(tr);
+  const tot=doc.createElement('tr');tot.className='tr-tot';
+  tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace" colspan="3">TOTALE</td>
+    <td><span class="b by">${rC}</span></td><td>${rFP>0?`<span class="b br">${rFP}</span>`:'—'}</td>
+    <td style="font-family:'DM Mono',monospace;color:var(--acc2)">${rTick>0?rTick:'—'}</td>
+    <td style="font-family:'DM Mono',monospace">${rAt.toFixed(1)}</td>
+    <td style="color:${rEx>0?'var(--grn)':'var(--dim)'}">+${rEx.toFixed(1)}</td>
+    <td style="color:${rBn>0?'var(--grn)':'var(--dim)'}">${rBn>0?'€'+rBn.toFixed(2):'—'}</td>
+    <td>${rCO>0?`<span class="b bca">${rCO}</span>`:'—'}</td>
+    <td style="color:var(--cash)">${rCa>0?'€'+rCa.toFixed(2):'—'}</td>
+    <td>€${rFee.toFixed(2)}</td>
+    <td style="color:var(--pur)">€${rCmp.toFixed(2)}</td>`;
+  tb.appendChild(tot);
 }
 
-// ── ORDERS ──
-// ── ORDERS (accordion per giorno) ──
-let openDays=new Set(); // tiene traccia dei giorni aperti
-
+// ── ORDINI (edit/delete) ──
 function renderOrders(){
+  if(!cur||!D[cur])return;
   const months=getMonths(cur);
-  const pills=doc.getElementById('oPills');
-  pills.innerHTML='';
-  months.forEach(mk=>{
-    const p=doc.createElement('button');
-    p.className='pill'+(mk===curMon?' on':'');
-    p.textContent=mlabel(mk);
-    p.onclick=()=>{curMon=mk;openDays.clear();renderMezzo();renderOrders();};
-    pills.appendChild(p);
-  });
+  makePills('oPills',months,()=>renderOrders());
+  if(!curMon||!months.includes(curMon))curMon=months[0]||null;
   if(!curMon)return;
-  const s=D[cur].settings;
-  const q=(doc.getElementById('oSearch').value||'').toLowerCase();
-  const allOrds=activeOrders(cur).filter(o=>o.monthKey===curMon);
+  doc.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
+  const s=D[cur].settings,e=D[cur].econ;
+  const search=(doc.getElementById('oSearch').value||'').toLowerCase();
+  const orders=activeOrders(cur).filter(o=>o.monthKey===curMon)
+    .filter(o=>!search||o.orderNum.toString().includes(search)||(o.ritiroDa||'').toLowerCase().includes(search)||(o.consegnaA||'').toLowerCase().includes(search))
+    .sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0));
 
-  // Raggruppa per giorno
-  const byDay={};
-  allOrds.forEach(o=>{
-    if(!byDay[o.dateStr])byDay[o.dateStr]=[];
-    byDay[o.dateStr].push(o);
+  // Update select-all checkbox state
+  const selAll=doc.getElementById('oSelectAll');
+  if(selAll) selAll.checked=false;
+
+  // Update bulk delete button
+  const bulkBtn=doc.getElementById('oBulkDelete');
+  if(bulkBtn) bulkBtn.style.display='none';
+
+  const tb=doc.getElementById('oBody');tb.innerHTML='';
+  orders.forEach((o,i)=>{
+    const isFP=isFuoriPaese(o,s);
+    const shift=getShift(o,s.cutHour);
+    const shiftB=shift==='mat'?'<span class="sm sm-m">🌅</span>':shift==='ser'?'<span class="sm sm-s">🌙</span>':'<span style="color:var(--dim)">?</span>';
+    const payB=o.isCash?'<span class="b bca">CASH</span>':o.payMethod==='CARD'?'<span class="b bb">CARD</span>':`<span style="color:var(--dim)">${o.payMethod}</span>`;
+    const mz=D[cur].mezzo[o.dateStr]||{};
+    const mezzoVal=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
+    const realIdx=D[cur].orders.indexOf(o);
+    const tr=doc.createElement('tr');
+    if(o.isCash)tr.classList.add('tr-cash');
+    tr.innerHTML=`
+      <td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="${realIdx}" onchange="updateBulkBtn()"></td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${o.dateStr}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${o.timeRaw}</td>
+      <td>${shiftB}</td>
+      <td>${o.isTicket?`<span class="b bg">🎫 ${o.orderNum}</span>`:`<span class="b bb">#${o.orderNum}</span>`}</td>
+      <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa||'—'}</td>
+      <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':'var(--txt)'}">${o.km>0?o.km.toFixed(2)+'km':'n/d'}</td>
+      <td>${isFP?'<span class="b br">✓</span>':'—'}</td>
+      <td>${payB}</td>
+      <td>€${o.total.toFixed(2)}</td>
+      <td>€${o.fee.toFixed(2)}</td>
+      <td><span class="b bo">${mezzoVal}</span></td>
+      <td><span class="b ${o.status==='Delivered'?'bg':'br'}">${o.status}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder(${realIdx})">✏</button>
+        <button class="btn btn-red" style="padding:3px 8px;font-size:10px;margin-left:3px" onclick="deleteOrder(${realIdx})">✕</button>
+      </td>`;
+    tb.appendChild(tr);
   });
-  const sortedDays=Object.keys(byDay).sort((a,b)=>parseDateStr(a)-parseDateStr(b));
-
-  // Se c'è ricerca attiva, apri tutti i giorni che hanno risultati
-  if(q){
-    sortedDays.forEach(ds=>{
-      const hasMatch=byDay[ds].some(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.dateStr+o.payMethod).toLowerCase().includes(q));
-      if(hasMatch) openDays.add(ds);
-    });
+  if(!orders.length){
+    const tr=doc.createElement('tr');
+    tr.innerHTML=`<td colspan="15" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
+    tb.appendChild(tr);
   }
-
-  let totFiltered=0,totAll=allOrds.length;
-  if(q) totFiltered=allOrds.filter(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.dateStr+o.payMethod).toLowerCase().includes(q)).length;
-
-  doc.getElementById('oTitle').textContent=`Ordini — ${mlabel(curMon)} · ${q?totFiltered+'/':'' }${totAll} ordini · ${sortedDays.length} giorni`;
-  doc.getElementById('oBulkDelete').style.display='none';
-
-  const acc=doc.getElementById('oAccordion');
-  acc.innerHTML='';
-  const mz=D[cur].mezzo;
-
-  sortedDays.forEach(ds=>{
-    const dayOrds=byDay[ds];
-    const filtered=q?dayOrds.filter(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.dateStr+o.payMethod).toLowerCase().includes(q)):dayOrds;
-    if(q&&filtered.length===0) return;
-
-    const isOpen=openDays.has(ds);
-    const dayLabel=dayIt(dayFromDateStr(ds));
-
-    // Calcola stats giorno
-    const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
-    const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
-    const totTarK=dayOrds.reduce((a,o)=>a+(o.tariffaConsegna||0),0);
-    const totCash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
-    const cashN=dayOrds.filter(o=>o.isCash).length;
-    const FP=dayOrds.filter(o=>isFuoriPaese(o,s)).length;
-    const dayMezzo=mz[ds]||{};
-    const shifts=[];
-    if(hasMat) shifts.push(`<span class="sm sm-m">M ${dayMezzo.mat&&dayMezzo.mat!=='—'?'· '+dayMezzo.mat:''}</span>`);
-    if(hasSer)  shifts.push(`<span class="sm sm-s">S ${dayMezzo.ser&&dayMezzo.ser!=='—'?'· '+dayMezzo.ser:''}</span>`);
-
-    // Wrapper giorno
-    const dayDiv=doc.createElement('div');
-    dayDiv.className='acc-day';
-    dayDiv.dataset.ds=ds;
-
-    // Header giorno
-    const hdr=doc.createElement('div');
-    hdr.className='acc-hdr'+(isOpen?' open':'');
-    hdr.innerHTML=`
-      <div class="acc-left">
-        <span class="acc-arrow">▶</span>
-        <div>
-          <span class="acc-date">${ds}</span>
-          <span class="acc-day-label" style="margin-left:8px">${dayLabel}</span>
-        </div>
-        <div class="acc-pills">${shifts.join('')}</div>
-      </div>
-      <div class="acc-summary">
-        <span class="acc-stat">${filtered.length} ordini${q&&filtered.length!==dayOrds.length?` (${dayOrds.length} tot)`:''}</span>
-        ${FP>0?`<span class="acc-stat"><span class="b br">FP</span> <b>${FP}</b></span>`:''}
-        ${totCash>0?`<span class="acc-stat">💵 <b>${eur(totCash)}</b> (${cashN})</span>`:''}
-        <span class="acc-stat">Tar.K <b>${eur(totTarK)}</b></span>
-      </div>
-    `;
-    hdr.onclick=()=>toggleDay(ds);
-
-    // Body con tabella ordini
-    const body=doc.createElement('div');
-    body.className='acc-body'+(isOpen?' open':'');
-    body.id='acc-body-'+ds.replace(/\//g,'-');
-
-    const table=doc.createElement('table');
-    table.innerHTML=`<thead><tr>
-      <th><input type="checkbox" class="day-sel-all" data-ds="${ds}" onchange="toggleDaySelectAll(this,'${ds}')"></th>
-      <th>Ora</th><th>Turno</th><th>N° Ordine</th>
-      <th>Ritiro da</th><th>Consegna a</th>
-      <th>Km</th><th>F.P.</th>
-      <th>Pag.</th><th>Totale €</th><th>Tariffa K €</th><th>Fee €</th><th>Mezzo</th><th>Status</th>
-      <th>Azioni</th>
-    </tr></thead>`;
-    const tbody=doc.createElement('tbody');
-
-    filtered.sort((a,b)=>a.date-b.date).forEach(o=>{
-      const shift=getShift(o,s.cutHour);
-      const fp=isFuoriPaese(o,s);
-      const mezzoVal=shift==='mat'?dayMezzo.mat:shift==='ser'?dayMezzo.ser:'—';
-      const tr=doc.createElement('tr');
-      if(o.isCash) tr.className='tr-cash';
-      if(o.isTicket) tr.style.opacity='0.75';
-      tr.innerHTML=`
-        <td><input type="checkbox" class="ord-chk" data-id="${o.id}" onchange="updateBulkBtn()"></td>
-        <td><span style="font-family:'DM Mono',monospace;font-size:10px">${o.timeRaw}</span></td>
-        <td>${shift?`<span class="sm sm-${shift}">${shift==='mat'?'M':'S'}</span>`:'—'}</td>
-        <td><span style="font-family:'DM Mono',monospace;font-size:10px">${o.orderNum||'—'}${o.isTicket?` <span class="b bca">🎫</span>`:''}</span></td>
-        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.ritiroDa}</td>
-        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.consegnaA}</td>
-        <td>${o.km||'—'}</td>
-        <td>${fp?`<span class="b br">FP</span>`:'—'}</td>
-        <td>${o.isCash?`<span class="b bca">CASH</span>`:`<span class="b bb">${o.payMethod}</span>`}</td>
-        <td>${eur(o.total)}</td>
-        <td><b>${eur(o.tariffaConsegna)}</b></td>
-        <td>${eur(o.fee)}</td>
-        <td style="font-size:10px">${mezzoVal||'—'}</td>
-        <td><span style="font-size:10px;color:var(--mut)">${o.status}</span></td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-ghost" style="padding:2px 8px;font-size:10px" onclick="openEditOrder('${o.id}')">✏</button>
-          <button class="btn btn-red" style="padding:2px 8px;font-size:10px;margin-left:3px" onclick="deleteSingleOrder('${o.id}')">✕</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    body.appendChild(table);
-    dayDiv.appendChild(hdr);
-    dayDiv.appendChild(body);
-    acc.appendChild(dayDiv);
-  });
 }
 
-function toggleDay(ds){
-  const bodyId='acc-body-'+ds.replace(/\//g,'-');
-  const body=doc.getElementById(bodyId);
-  const hdr=body?.previousElementSibling;
-  if(!body)return;
-  const isOpen=body.classList.contains('open');
-  if(isOpen){openDays.delete(ds);body.classList.remove('open');hdr?.classList.remove('open');}
-  else{openDays.add(ds);body.classList.add('open');hdr?.classList.add('open');}
-}
-
-function expandAllDays(){
-  const allOpen=doc.querySelectorAll('.acc-body.open').length===doc.querySelectorAll('.acc-body').length;
-  doc.querySelectorAll('.acc-body').forEach(b=>{
-    const ds=b.closest('.acc-day')?.dataset.ds;
-    if(allOpen){b.classList.remove('open');b.previousElementSibling?.classList.remove('open');if(ds)openDays.delete(ds);}
-    else{b.classList.add('open');b.previousElementSibling?.classList.add('open');if(ds)openDays.add(ds);}
-  });
-}
-
-function toggleDaySelectAll(chk,ds){
-  const body=doc.getElementById('acc-body-'+ds.replace(/\//g,'-'));
-  if(!body)return;
-  body.querySelectorAll('.ord-chk').forEach(c=>c.checked=chk.checked);
-  updateBulkBtn();
+function updateBulkBtn(){
+  const checked=doc.querySelectorAll('.o-chk:checked').length;
+  const btn=doc.getElementById('oBulkDelete');
+  if(btn){ btn.style.display=checked>0?'inline-flex':'none'; btn.textContent='✕ Elimina selezionati ('+checked+')'; }
+  const selAll=doc.getElementById('oSelectAll');
+  const all=doc.querySelectorAll('.o-chk').length;
+  if(selAll) selAll.checked=checked===all&&all>0;
 }
 
 function toggleSelectAll(){
-  const all=doc.querySelectorAll('.ord-chk');
-  const anyUnchecked=[...all].some(c=>!c.checked);
-  all.forEach(c=>c.checked=anyUnchecked);
+  const selAll=doc.getElementById('oSelectAll');
+  doc.querySelectorAll('.o-chk').forEach(chk=>chk.checked=selAll.checked);
   updateBulkBtn();
 }
-function updateBulkBtn(){
-  const any=doc.querySelectorAll('.ord-chk:checked').length>0;
-  doc.getElementById('oBulkDelete').style.display=any?'inline-block':'none';
-}
+
 function deleteSelected(){
-  const ids=[...doc.querySelectorAll('.ord-chk:checked')].map(c=>c.dataset.id);
-  if(!ids.length)return;
-  if(!confirm(`Eliminare ${ids.length} ordini?`))return;
-  ids.forEach(id=>{const o=D[cur].orders.find(x=>x.id===id);if(o)o.deleted=true;});
+  const checked=[...doc.querySelectorAll('.o-chk:checked')];
+  if(!checked.length)return;
+  if(!confirm('Eliminare '+checked.length+' ordini selezionati?'))return;
+  checked.forEach(chk=>{
+    const idx=parseInt(chk.dataset.idx);
+    if(D[cur]&&D[cur].orders[idx]) D[cur].orders[idx].deleted=true;
+  });
   renderDriver();
   autoSaveToLocalStorage();
-}
-function deleteSingleOrder(id){
-  const o=D[cur].orders.find(x=>x.id===id);
-  if(!o)return;
-  if(!confirm('Eliminare questo ordine?'))return;
-  o.deleted=true;
-  renderDriver();
-  autoSaveToLocalStorage();
+  debouncedCloudSave();
 }
 
 // ── ORDER MODAL ──
-function openEditOrder(id){
-  editingOrderId=id;
-  const o=D[cur].orders.find(x=>x.id===id);
-  if(!o)return;
-  doc.getElementById('modalTitle').textContent='Modifica ordine';
-  const d=o.date;
-  doc.getElementById('mDate').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  doc.getElementById('mTime').value=o.timeRaw;
-  doc.getElementById('mOrderNum').value=o.orderNum||'';
-  doc.getElementById('mPayMethod').value=o.payMethod||'N/A';
-  doc.getElementById('mRitiro').value=o.ritiroDa||'';
-  doc.getElementById('mConsegna').value=o.consegnaA||'';
-  doc.getElementById('mKm').value=o.km||0;
-  doc.getElementById('mTotal').value=o.total||0;
-  doc.getElementById('mTariffaK').value=o.tariffaConsegna||0;
-  doc.getElementById('mFee').value=o.fee||0;
-  doc.getElementById('mStatus').value=o.status||'Delivered';
-  doc.getElementById('mNote').value=o.note||'';
-  doc.getElementById('orderModal').classList.remove('hidden');
-}
 function openAddOrder(){
-  editingOrderId=null;
-  doc.getElementById('modalTitle').textContent='Aggiungi ordine';
+  editingOrderIdx=null;
+  doc.getElementById('modalTitle').textContent='Nuovo ordine';
   doc.getElementById('mDate').value='';
   doc.getElementById('mTime').value='';
   doc.getElementById('mOrderNum').value='';
-  doc.getElementById('mPayMethod').value='N/A';
+  doc.getElementById('mPayMethod').value='CASH';
   doc.getElementById('mRitiro').value='';
   doc.getElementById('mConsegna').value='';
-  doc.getElementById('mKm').value='0';
-  doc.getElementById('mTotal').value='0';
-  doc.getElementById('mTariffaK').value='0';
-  doc.getElementById('mFee').value='0';
+  doc.getElementById('mKm').value='';
+  doc.getElementById('mTotal').value='';
+  doc.getElementById('mFee').value='';
   doc.getElementById('mStatus').value='Delivered';
   doc.getElementById('mNote').value='';
   doc.getElementById('orderModal').classList.remove('hidden');
 }
-function closeModal(){doc.getElementById('orderModal').classList.add('hidden');}
+
+function openEditOrder(idx){
+  const o=D[cur].orders[idx];
+  if(!o)return;
+  editingOrderIdx=idx;
+  doc.getElementById('modalTitle').textContent='Modifica ordine #'+o.orderNum;
+  // Convert dateStr DD/MM/YYYY → YYYY-MM-DD for input[type=date]
+  const[dd,mm,yyyy]=o.dateStr.split('/');
+  doc.getElementById('mDate').value=`${yyyy}-${mm}-${dd}`;
+  doc.getElementById('mTime').value=o.timeRaw==='—'?'':o.timeRaw;
+  doc.getElementById('mOrderNum').value=o.orderNum;
+  doc.getElementById('mPayMethod').value=o.payMethod==='N/A'?'N/A':o.payMethod;
+  doc.getElementById('mRitiro').value=o.ritiroDa==='—'?'':o.ritiroDa;
+  doc.getElementById('mConsegna').value=o.consegnaA==='—'?'':o.consegnaA;
+  doc.getElementById('mKm').value=o.km||'';
+  doc.getElementById('mTotal').value=o.total||'';
+  doc.getElementById('mFee').value=o.fee||'';
+  doc.getElementById('mStatus').value=o.status;
+  doc.getElementById('mNote').value=o.note||'';
+  doc.getElementById('orderModal').classList.remove('hidden');
+}
+
+function closeModal(){doc.getElementById('orderModal').classList.add('hidden');editingOrderIdx=null}
+
 function saveOrder(){
   const dateVal=doc.getElementById('mDate').value;
-  if(!dateVal){showToast('⚠️ Inserisci una data');return;}
-  const dateObj=new Date(dateVal+'T12:00:00');
+  if(!dateVal){alert('Inserisci una data');return}
+  const dateObj=new Date(dateVal);
   const dateStr=fmtDate(dateObj);
   const payMethod=doc.getElementById('mPayMethod').value;
+  const timeRaw=doc.getElementById('mTime').value||'—';
 
-  if(editingOrderId){
-    const o=D[cur].orders.find(x=>x.id===editingOrderId);
-    if(!o)return;
-    o.date=dateObj;o.dateStr=dateStr;
-    o.timeRaw=doc.getElementById('mTime').value;
-    o.timeHour=parseTimeHour(o.timeRaw);
-    o.orderNum=doc.getElementById('mOrderNum').value;
-    o.payMethod=payMethod;o.isCash=payMethod==='CASH';
-    o.ritiroDa=doc.getElementById('mRitiro').value;
-    o.consegnaA=doc.getElementById('mConsegna').value;
-    o.km=parseFloat(doc.getElementById('mKm').value)||0;
-    o.total=parseFloat(doc.getElementById('mTotal').value)||0;
-    o.tariffaConsegna=parseFloat(doc.getElementById('mTariffaK').value)||0;
-    o.fee=parseFloat(doc.getElementById('mFee').value)||0;
-    o.status=doc.getElementById('mStatus').value;
-    o.note=doc.getElementById('mNote').value;
-    o.monthKey=`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`;
+  const orderNumRaw2 = doc.getElementById('mOrderNum').value||'MANUAL';
+  const isHalfTicket2 = /\*\s*1\s*\/\s*2/.test(orderNumRaw2);
+  const ticketCount2 = orderNumRaw2.includes('*') ? (isHalfTicket2 ? 1.5 : 1) : 0;
+  const ticketConsegne2 = orderNumRaw2.includes('*') ? 1 : 0;
+  const orderData={
+    id: editingOrderIdx!==null ? D[cur].orders[editingOrderIdx].id : Date.now()+'_'+Math.random(),
+    date:dateObj, dateStr,
+    timeRaw,
+    timeHour:parseTimeHour(timeRaw),
+    dayEn:dayFromDateStr(fmtDate(dateObj)),
+    orderNum:orderNumRaw2,
+    isTicket: ticketCount2 > 0,
+    ticketCount: ticketCount2,
+    ticketConsegne: ticketConsegne2,
+    ritiroDa:doc.getElementById('mRitiro').value||'—',
+    consegnaA:doc.getElementById('mConsegna').value||'—',
+    payMethod, isCash:payMethod==='CASH',
+    total:parseFloat(doc.getElementById('mTotal').value)||0,
+    fee:parseFloat(doc.getElementById('mFee').value)||0,
+    km:parseFloat(doc.getElementById('mKm').value)||0,
+    status:doc.getElementById('mStatus').value,
+    monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
+    weekNum:getWeekOfMonth(dateObj),
+    deleted:false,
+    note:doc.getElementById('mNote').value
+  };
+
+  if(editingOrderIdx!==null){
+    D[cur].orders[editingOrderIdx]=orderData;
   } else {
-    const newOrd={
-      id:Date.now()+'_manual',
-      date:dateObj,dateStr,
-      timeRaw:doc.getElementById('mTime').value,
-      timeHour:parseTimeHour(doc.getElementById('mTime').value),
-      dayEn:dayFromDateStr(dateStr),
-      orderNum:doc.getElementById('mOrderNum').value,
-      isTicket:false,ticketCount:0,ticketConsegne:0,
-      ritiroDa:doc.getElementById('mRitiro').value,
-      consegnaA:doc.getElementById('mConsegna').value,
-      payMethod,isCash:payMethod==='CASH',
-      total:parseFloat(doc.getElementById('mTotal').value)||0,
-      tariffaConsegna:parseFloat(doc.getElementById('mTariffaK').value)||0,
-      fee:parseFloat(doc.getElementById('mFee').value)||0,
-      km:parseFloat(doc.getElementById('mKm').value)||0,
-      status:doc.getElementById('mStatus').value,
-      monthKey:`${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
-      weekNum:getWeekOfMonth(dateObj),
-      deleted:false,note:doc.getElementById('mNote').value,
-      manualAdd:true
-    };
-    D[cur].orders.push(newOrd);
-    if(!D[cur].mezzo[dateStr])D[cur].mezzo[dateStr]={mat:'—',ser:'—'};
+    D[cur].orders.push(orderData);
   }
+  if(!D[cur].mezzo[dateStr]) D[cur].mezzo[dateStr]={mat:'—',ser:'—'};
+  curMon=orderData.monthKey;
   closeModal();
   renderDriver();
   autoSaveToLocalStorage();
+  debouncedCloudSave();
 }
 
-// ── GLOBAL ──
-let curGlobalMon=null;
-function renderGlobal(){
-  const allMonths=[...new Set(Object.keys(D).flatMap(n=>getMonths(n)))].sort();
-  if(!curGlobalMon||!allMonths.includes(curGlobalMon)) curGlobalMon=allMonths[allMonths.length-1]||null;
+function toggleMezziPanel(){
+  const p=doc.getElementById('mezziPanel');
+  if(p.classList.contains('hidden')){ p.classList.remove('hidden'); renderMezziPanel(); }
+  else p.classList.add('hidden');
+}
 
-  const pills=doc.getElementById('globalPills');
-  pills.innerHTML='';
+function renderMezziPanel(){
+  const list=doc.getElementById('mezziList');
+  if(!list) return;
+  list.innerHTML='';
+  MEZZI.forEach((m,i)=>{
+    if(m==='—') return; // skip the empty option
+    const tag=doc.createElement('div');
+    tag.style.cssText='display:flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:5px 10px;font-size:12px';
+    tag.innerHTML=`<span style="font-family:'DM Mono',monospace">${m}</span>
+      <button onclick="editMezzo(${i})" style="background:none;border:none;cursor:pointer;color:var(--mut);font-size:11px;padding:0 2px" title="Rinomina">✏</button>
+      <button onclick="deleteMezzo(${i})" style="background:none;border:none;cursor:pointer;color:var(--acc3);font-size:11px;padding:0 2px" title="Elimina">✕</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function addMezzo(){
+  const inp=doc.getElementById('newMezzoInput');
+  const val=inp.value.trim();
+  if(!val){ showToast('⚠️ Inserisci un nome'); return; }
+  if(MEZZI.includes(val)){ showToast('⚠️ Mezzo già presente'); return; }
+  MEZZI.push(val);
+  saveMezzi();
+  inp.value='';
+  renderMezziPanel();
+  showToast('✅ Mezzo "'+val+'" aggiunto');
+}
+
+function editMezzo(idx){
+  const current=MEZZI[idx];
+  const newName=prompt('Rinomina mezzo:',current);
+  if(!newName||!newName.trim()||newName.trim()===current) return;
+  if(MEZZI.includes(newName.trim())){ showToast('⚠️ Nome già esistente'); return; }
+  // Update all existing assignments
+  const oldName=MEZZI[idx];
+  MEZZI[idx]=newName.trim();
+  saveMezzi();
+  // Update mezzo assignments in all drivers
+  Object.values(D).forEach(drv=>{
+    Object.values(drv.mezzo||{}).forEach(turni=>{
+      if(turni.mat===oldName) turni.mat=newName.trim();
+      if(turni.ser===oldName) turni.ser=newName.trim();
+    });
+  });
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  renderMezziPanel();
+  showToast('✅ Rinominato in "'+newName.trim()+'"');
+}
+
+function deleteMezzo(idx){
+  const name=MEZZI[idx];
+  if(!confirm('Eliminare il mezzo "'+name+'"? Verrà rimosso anche dalle assegnazioni esistenti.')) return;
+  MEZZI.splice(idx,1);
+  saveMezzi();
+  // Clear assignments with this mezzo
+  Object.values(D).forEach(drv=>{
+    Object.values(drv.mezzo||{}).forEach(turni=>{
+      if(turni.mat===name) turni.mat='—';
+      if(turni.ser===name) turni.ser='—';
+    });
+  });
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  renderMezziPanel();
+  showToast('🗑 Mezzo "'+name+'" eliminato');
+}
+
+function deleteDriver(name){
+  if(!confirm('Eliminare il fattorino "'+name+'" e tutti i suoi dati?')) return;
+  delete D[name];
+  if(cur===name){ cur=null; curMon=null; doc.getElementById('dash').classList.add('hidden'); doc.getElementById('upWrap').classList.remove('hidden'); }
+  renderSidebar();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Fattorino eliminato');
+}
+
+function deleteDay(dateStr){
+  if(!cur||!D[cur]) return;
+  const count = D[cur].orders.filter(o=>!o.deleted&&o.dateStr===dateStr).length;
+  if(!confirm('Eliminare tutti i '+count+' ordini del '+dateStr+'?')) return;
+  D[cur].orders.forEach(o=>{ if(o.dateStr===dateStr) o.deleted=true; });
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Giorno '+dateStr+' eliminato');
+}
+
+function deleteMonth(mk){
+  if(!cur||!D[cur]) return;
+  const count = D[cur].orders.filter(o=>!o.deleted&&o.monthKey===mk).length;
+  if(!confirm('Eliminare tutti i '+count+' ordini del mese '+mlabel(mk)+'?')) return;
+  D[cur].orders.forEach(o=>{ if(o.monthKey===mk) o.deleted=true; });
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+  showToast('🗑 Mese '+mlabel(mk)+' eliminato');
+}
+
+function deleteOrder(idx){
+  const o=D[cur].orders[idx];
+  if(!o)return;
+  if(!confirm(`Eliminare l'ordine #${o.orderNum} del ${o.dateStr}?`))return;
+  D[cur].orders[idx].deleted=true;
+  renderDriver();
+  autoSaveToLocalStorage();
+  debouncedCloudSave();
+}
+
+// ── TABS ──
+function setTab(t){
+  curTab=t;
+  ['M','W','D','O'].forEach(x=>{
+    doc.getElementById('tab'+x).classList.toggle('on',x===t);
+    doc.getElementById('view'+x).classList.toggle('hidden',x!==t);
+  });
+  // Ensure curMon is valid before rendering
+  if(cur&&D[cur]){
+    const months=getMonths(cur);
+    if(!curMon||!months.includes(curMon))curMon=months[0]||null;
+  }
+  renderCurrentTab();
+}
+
+// ── GLOBAL OVERVIEW ──
+let globalMonth = null;
+
+function selectGlobal(){
+  cur = null;
+  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
+  // Hide driver dashboard, show global
+  doc.getElementById('dash').classList.add('hidden');
+  const vg=doc.getElementById('viewGlobal');
+  vg.classList.remove('hidden');
+  vg.scrollIntoView({behavior:'smooth',block:'start'});
+  // Collect all months across all drivers
+  const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
+  if(!globalMonth || !allMonths.includes(globalMonth)) globalMonth = allMonths[allMonths.length-1]||null;
+  renderGlobal();
+}
+
+function renderGlobal(){
+  const allMonths = [...new Set(Object.values(D).flatMap(d=>d.orders.filter(o=>!o.deleted).map(o=>o.monthKey)))].sort();
+  // Pills
+  const pills = doc.getElementById('globalPills');
+  pills.innerHTML = '';
   allMonths.forEach(mk=>{
-    const p=doc.createElement('button');
-    p.className='pill'+(mk===curGlobalMon?' on':'');
-    p.textContent=mlabel(mk);
-    p.onclick=()=>{curGlobalMon=mk;renderGlobal();};
+    const p = doc.createElement('button');
+    p.className = 'pill'+(mk===globalMonth?' on':'');
+    p.textContent = mlabel(mk);
+    p.onclick = ()=>{ globalMonth=mk; renderGlobal(); };
     pills.appendChild(p);
   });
 
-  doc.getElementById('globalMonthTitle').textContent=`Confronto mensile — ${curGlobalMon?mlabel(curGlobalMon):'—'}`;
+  doc.getElementById('globalMonthTitle').textContent = 'Confronto mensile — '+(globalMonth?mlabel(globalMonth):'');
 
-  // MENSILE
-  const tbody=doc.getElementById('globalMonthBody');
-  tbody.innerHTML='';
-  if(curGlobalMon){
-    Object.keys(D).forEach(name=>{
-      if(!D[name])return;
-      const ms=computeMonth(name,curGlobalMon);
-      if(ms.totC===0&&ms.totDays===0)return;
-      const tr=doc.createElement('tr');
-      tr.innerHTML=`
-        <td><b>${name}</b></td>
-        <td><span class="b bb">${ms.e.mode}</span></td>
-        <td>${ms.totC}</td><td>${fmt1(ms.totFP)}</td><td>${fmt1(ms.totCBonus)}</td>
-        <td>${ms.daysWithMat}</td><td>${ms.daysWithSer}</td>
-        <td>${fmt1(ms.attesa)}</td><td>${fmt1(ms.extra)}</td><td>${eur(ms.bonus)}</td>
-        <td>${eur(ms.totCash)}</td><td>${eur(ms.totTariffaK)}</td>
-        <td><b>${eur(ms.compTot)}</b></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+  // Monthly table
+  const mBody = doc.getElementById('globalMonthBody');
+  mBody.innerHTML = '';
+  let mTotC=0,mTotFP=0,mTotTick=0,mTotMat=0,mTotSer=0,mTotAtt=0,mTotEx=0,mTotBn=0,mTotCash=0,mTotFee=0,mTotComp=0;
 
-  // ANNUALE
-  const annualBody=doc.getElementById('globalAnnualBody');
-  annualBody.innerHTML='';
   Object.keys(D).forEach(name=>{
-    if(!D[name])return;
-    const months=getMonths(name);
-    let aC=0,aFP=0,aCBonus=0,aCash=0,aBonus=0,aComp=0,aTarK=0,mesiOk=0;
+    const months = getMonths(name);
+    if(!months.includes(globalMonth)) return;
+    const ms = computeMonth(name, globalMonth);
+    mTotC+=ms.totC;mTotFP+=ms.totFP;mTotTick+=ms.totTickets;mTotMat+=ms.daysWithMat;mTotSer+=ms.daysWithSer;
+    mTotAtt+=ms.attesa;mTotEx+=ms.extra;mTotBn+=ms.bonus;mTotCash+=ms.totCash;mTotFee+=ms.totFee;mTotComp+=ms.compTot;
+    const e=ms.e;
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna',turno:'A turno'}[e.mode]||e.mode;
+    const pct=ms.attesa>0?Math.min(200,ms.totC/ms.attesa*100):0;
+    const tr = doc.createElement('tr');
+    tr.innerHTML=`
+      <td><strong>${name}</strong></td>
+      <td><span class="b bo">${modeStr}</span></td>
+      <td><span class="b by">${ms.totC}</span><span style="font-size:9px;color:var(--mut)"> (${ms.totFP}fp)</span></td>
+      <td>${ms.totFP>0?`<span class="b br">${ms.totFP}</span>`:'—'}</td>
+      <td><span class="b bb" title="Ai fini del bonus (f.p.×1.3)">${(ms.totCBonus||ms.totC).toFixed(1)}★</span></td>
+      <td><span class="sm sm-m">${ms.daysWithMat}</span></td>
+      <td><span class="sm sm-s">${ms.daysWithSer}</span></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--mut)">${ms.attesa.toFixed(1)}</td>
+      <td style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)}</td>
+      <td style="color:${ms.bonus>0?'var(--grn)':'var(--dim)'}">${ms.bonus>0?'€'+ms.bonus.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${ms.totCash>0?'€'+ms.totCash.toFixed(2):'—'}</td>
+      <td>€${ms.totFee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</td>`;
+    mBody.appendChild(tr);
+  });
+
+  // Monthly totals row
+  const mTot = doc.createElement('tr');
+  mTot.className = 'tr-tot';
+  mTot.innerHTML=`
+    <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE MESE</td>
+    <td><span class="b by">${mTotC}</span></td>
+    <td>${mTotFP>0?`<span class="b br">${mTotFP}</span>`:'—'}</td>
+    <td>${mTotTick>0?`<span class="b bb">🎫 ${mTotTick}</span>`:'—'}</td>
+    <td><span class="sm sm-m">${mTotMat}</span></td>
+    <td><span class="sm sm-s">${mTotSer}</span></td>
+    <td style="font-family:'DM Mono',monospace">${mTotAtt.toFixed(1)}</td>
+    <td style="color:${mTotEx>0?'var(--grn)':'var(--dim)'}">+${mTotEx.toFixed(1)}</td>
+    <td style="color:${mTotBn>0?'var(--grn)':'var(--dim)'}">${mTotBn>0?'€'+mTotBn.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${mTotCash>0?'€'+mTotCash.toFixed(2):'—'}</td>
+    <td>€${mTotFee.toFixed(2)}</td>
+    <td style="color:var(--pur);font-weight:600">€${mTotComp.toFixed(2)}</td>`;
+  mBody.appendChild(mTot);
+
+  // Annual table
+  const aBody = doc.getElementById('globalAnnualBody');
+  aBody.innerHTML = '';
+  let aTotC=0,aTotFP=0,aTotTick=0,aTotBn=0,aTotCash=0,aTotFee=0,aTotComp=0;
+
+  Object.keys(D).forEach(name=>{
+    const months = getMonths(name);
+    if(!months.length) return;
+    let tC=0,tFP=0,tTick=0,tBn=0,tCash=0,tFee=0,tComp=0,mesiOk=0;
     months.forEach(mk=>{
       const ms=computeMonth(name,mk);
-      if(ms.totC>0||ms.totDays>0){mesiOk++;aC+=ms.totC;aFP+=ms.totFP;aCBonus+=ms.totCBonus;aCash+=ms.totCash;aBonus+=ms.bonus;aComp+=ms.compTot;aTarK+=ms.totTariffaK;}
+      if(ms.totC>0){ tC+=ms.totC;tFP+=ms.totFP;tTick+=ms.totTickets;tBn+=ms.bonus;tCash+=ms.totCash;tFee+=ms.totFee;tComp+=ms.compTot;mesiOk++; }
     });
-    const avg=mesiOk>0?(aC/mesiOk).toFixed(1):'—';
-    const tr=doc.createElement('tr');
+    const media = mesiOk>0?(tC/mesiOk).toFixed(1):0;
+    const e=D[name].econ;
+    const modeStr={giornata:'Giornata',mese:'Mensile',consegna:'A consegna',turno:'A turno'}[e.mode]||e.mode;
+    aTotC+=tC;aTotFP+=tFP;aTotTick+=tTick;aTotBn+=tBn;aTotCash+=tCash;aTotFee+=tFee;aTotComp+=tComp;
+    const tr = doc.createElement('tr');
     tr.innerHTML=`
-      <td><b>${name}</b></td>
-      <td><span class="b bb">${D[name].econ.mode}</span></td>
-      <td>${aC}</td><td>${fmt1(aFP)}</td><td>${fmt1(aCBonus)}</td>
-      <td>${mesiOk}</td><td>${avg}</td>
-      <td>${eur(aBonus)}</td><td>${eur(aCash)}</td>
-      <td>${eur(aTarK)}</td><td><b>${eur(aComp)}</b></td>
-    `;
-    annualBody.appendChild(tr);
+      <td><strong>${name}</strong></td>
+      <td><span class="b bo">${modeStr}</span></td>
+      <td><span class="b by">${tC}</span></td>
+      <td>${tFP>0?`<span class="b br">${tFP}</span>`:'—'}</td>
+      <td>${tTick>0?`<span class="b bb">🎫 ${tTick}</span>`:'—'}</td>
+      <td>${mesiOk}</td>
+      <td style="font-family:'DM Mono',monospace">${media}</td>
+      <td style="color:${tBn>0?'var(--grn)':'var(--dim)'}">${tBn>0?'€'+tBn.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${tCash>0?'€'+tCash.toFixed(2):'—'}</td>
+      <td>€${tFee.toFixed(2)}</td>
+      <td style="color:var(--pur);font-weight:600">€${tComp.toFixed(2)}</td>`;
+    aBody.appendChild(tr);
   });
+
+  // Annual totals row
+  const aTot = doc.createElement('tr');
+  aTot.className = 'tr-tot';
+  aTot.innerHTML=`
+    <td style="color:var(--acc);font-family:'DM Mono',monospace;font-size:9px" colspan="2">TOTALE ANNUALE</td>
+    <td><span class="b by">${aTotC}</span></td>
+    <td>${aTotFP>0?`<span class="b br">${aTotFP}</span>`:'—'}</td>
+    <td>${aTotTick>0?`<span class="b bb">🎫 ${aTotTick}</span>`:'—'}</td>
+    <td colspan="2"></td>
+    <td colspan="1"></td>
+    <td style="color:${aTotBn>0?'var(--grn)':'var(--dim)'}">${aTotBn>0?'€'+aTotBn.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${aTotCash>0?'€'+aTotCash.toFixed(2):'—'}</td>
+    <td>€${aTotFee.toFixed(2)}</td>
+    <td style="color:var(--pur);font-weight:600">€${aTotComp.toFixed(2)}</td>`;
+  aBody.appendChild(aTot);
 }
 
-// ── MEZZI MANAGER ──
-function toggleMezziPanel(){
-  const p=doc.getElementById('mezziPanel');
-  p.classList.toggle('hidden');
-  if(!p.classList.contains('hidden')) renderMezziList();
-}
-function renderMezziList(){
-  const list=doc.getElementById('mezziList');
-  list.innerHTML='';
-  MEZZI.forEach((m,i)=>{
-    if(m==='—')return;
-    const chip=doc.createElement('div');
-    chip.style.cssText='display:flex;align-items:center;gap:5px;background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:"DM Mono",monospace';
-    chip.innerHTML=`${m} <button onclick="removeMezzo(${i})" style="background:none;border:none;cursor:pointer;color:var(--acc3);font-size:12px;padding:0;line-height:1">✕</button>`;
-    list.appendChild(chip);
+// ── EXPORT CSV ──
+function exportCSV(){
+  if(!cur||!D[cur])return;
+  const s=D[cur].settings,e=D[cur].econ;
+  const rows=[['Fattorino','Modalità pag.','Mese','Data','Giorno','Turno','N.Ordine','Km','FuoriPaese','Pagamento','Totale','Tariffa','CashTrattenuto','Mezzo','Status','Note']];
+  activeOrders(cur).sort((a,b)=>a.date-b.date).forEach(o=>{
+    const isFP=isFuoriPaese(o,s);
+    const shift=getShift(o,s.cutHour);
+    const mz=D[cur].mezzo[o.dateStr]||{};
+    const mezzo=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
+    rows.push([cur,e.mode,mlabel(o.monthKey),o.dateStr,dayIt(o.dayEn),shift==='mat'?'Mattina':shift==='ser'?'Sera':'N/A',o.orderNum,o.km>0?o.km.toFixed(2):'',isFP?'SI':'NO',o.payMethod,o.total.toFixed(2),o.fee.toFixed(2),o.isCash?o.fee.toFixed(2):'0',mezzo,o.status,o.note||'']);
   });
+  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=doc.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`fattorino_${cur.replace(/\s+/g,'_')}.csv`;
+  a.click();
+} // fine exportCSV
+
+// ── SESSIONE: SALVA/CARICA ──
+
+// Serializza D in modo sicuro (Date → string)
+function serializeD(data){
+  const out={};
+  Object.keys(data).forEach(name=>{
+    out[name]={
+      mezzo: data[name].mezzo,
+      settings: data[name].settings,
+      econ: data[name].econ,
+      orders: data[name].orders.map(o=>({
+        ...o,
+        date: o.date ? o.date.toISOString() : null
+      }))
+    };
+  });
+  return out;
 }
-function addMezzo(){
-  const v=doc.getElementById('newMezzoInput').value.trim();
-  if(!v)return;
-  if(!MEZZI.includes(v)){MEZZI.push(v);saveMezzi();}
-  doc.getElementById('newMezzoInput').value='';
-  renderMezziList();
-  showToast(`✓ Mezzo "${v}" aggiunto`);
+
+// Deserializza: ricostruisce Date dagli ISO string
+function deserializeD(raw){
+  const out={};
+  Object.keys(raw).forEach(name=>{
+    out[name]={
+      mezzo: raw[name].mezzo||{},
+      settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:14},
+      econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
+      orders: (raw[name].orders||[]).map(o=>{
+        const dateObj = o.date ? new Date(o.date) : new Date();
+        return {
+          ...o,
+          date: dateObj,
+          dateStr: o.dateStr || fmtDate(dateObj),
+          monthKey: o.monthKey || `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
+          weekNum: o.weekNum || getWeekOfMonth(dateObj)
+        };
+      })
+    };
+  });
+  return out;
 }
-function removeMezzo(idx){
-  MEZZI.splice(idx,1);
-  saveMezzi();
-  renderMezziList();
+
+// ── SALVA SESSIONE (file JSON) ──
+function saveSession(){
+  if(!Object.keys(D).length){ alert('Nessun dato da salvare.'); return; }
+  const payload = { version:1, savedAt: new Date().toISOString(), data: serializeD(D) };
+  const json = JSON.stringify(payload, null, 2);
+
+  // Try standard download first
+  try {
+    const blob = new Blob([json], {type:'application/json;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = doc.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'fattorini_sessione_' + new Date().toISOString().slice(0,10) + '.json';
+    doc.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); doc.body.removeChild(a); }, 1500);
+  } catch(e){}
+
+  // Always show the save modal as fallback
+  showSaveModal(json);
+}
+
+function showSaveModal(json){
+  // Remove existing if any
+  const existing = doc.getElementById('saveModal');
+  if(existing) existing.remove();
+
+  const overlay = doc.createElement('div');
+  overlay.id = 'saveModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+
+  overlay.innerHTML = `
+    <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">💾 Salva sessione</div>
+        <button onclick="doc.getElementById('saveModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--mut);line-height:1.6">
+        <strong style="color:var(--txt)">Come salvare:</strong><br>
+        1. Clicca <strong>Copia tutto</strong> qui sotto<br>
+        2. Apri il <strong>Blocco Note</strong> (cerca "Notepad" nel menu Start)<br>
+        3. Incolla con <strong>CTRL+V</strong><br>
+        4. Salva il file con nome <strong>sessione.json</strong> (File → Salva con nome → tipo: "Tutti i file")
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="
+          navigator.clipboard.writeText(doc.getElementById('sessionJsonText').value)
+            .then(()=>{ this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); })
+            .catch(()=>{ doc.getElementById('sessionJsonText').select(); doc.execCommand('copy'); this.textContent='✅ Copiato!'; setTimeout(()=>this.textContent='📋 Copia tutto',2000); });
+        " style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;font-weight:600">📋 Copia tutto</button>
+        <span style="font-size:11px;color:var(--mut);line-height:2.2">${Object.keys(D).length} fattorini · ${Object.values(D).reduce((a,d)=>a+d.orders.filter(o=>!o.deleted).length,0)} ordini</span>
+      </div>
+      <textarea id="sessionJsonText" readonly style="flex:1;min-height:280px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:none;outline:none;line-height:1.4">${json.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+    </div>`;
+
+  // Fix textarea: set value directly (not via innerHTML to avoid escaping issues)
+  doc.body.appendChild(overlay);
+  doc.getElementById('sessionJsonText').value = json;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
+// ── MODALE CARICA SESSIONE ──
+function showLoadModal(){
+  const existing = doc.getElementById('loadModal');
+  if(existing) existing.remove();
+
+  const overlay = doc.createElement('div');
+  overlay.id = 'loadModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  overlay.innerHTML = `
+    <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:14px;padding:24px;width:680px;max-width:95vw;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">📂 Carica sessione</div>
+        <button onclick="doc.getElementById('loadModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">✕</button>
+      </div>
+      <div style="font-size:13px;color:var(--mut)">Incolla qui il contenuto del file sessione salvato, oppure carica il file .json direttamente.</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="doc.getElementById('sessionInput').click()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">📁 Scegli file .json</button>
+      </div>
+      <textarea id="pasteJsonText" placeholder="Oppure incolla qui il JSON copiato (CTRL+V)..." style="height:220px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:none;outline:none"></textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="doc.getElementById('loadModal').remove()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--mut)">Annulla</button>
+        <button onclick="loadFromPastedJSON()" style="background:var(--acc);color:#000;border:none;border-radius:7px;padding:7px 18px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:600">✓ Carica sessione</button>
+      </div>
+    </div>`;
+  doc.body.appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
+function loadFromPastedJSON(){
+  const text = doc.getElementById('pasteJsonText')?.value?.trim();
+  if(!text){ alert('Incolla prima il JSON della sessione.'); return; }
+  try {
+    const payload = JSON.parse(text);
+    if(!payload.data) throw new Error('Formato non valido');
+    D = deserializeD(payload.data);
+    cur=null; curMon=null;
+    renderSidebar();
+    doc.getElementById('upWrap').classList.add('hidden');
+    doc.getElementById('dash').classList.remove('hidden');
+    doc.getElementById('viewGlobal').classList.add('hidden');
+    doc.getElementById('loadModal')?.remove();
+    const first=Object.keys(D)[0];
+    if(first) selectDriver(first);
+    autoSaveToLocalStorage();
+    showToast('✅ Sessione caricata — ' + Object.keys(D).length + ' fattorini');
+  } catch(err){
+    alert('Errore: ' + err.message + '\nAssicurati di aver copiato tutto il testo.');
+  }
+}
+
+// ── CARICA SESSIONE (file JSON) ──
+function loadSession(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if(!payload.data) throw new Error('File non valido');
+      D = deserializeD(payload.data);
+      cur = null; curMon = null;
+      renderSidebar();
+      doc.getElementById('upWrap').classList.add('hidden');
+      doc.getElementById('dash').classList.remove('hidden');
+      doc.getElementById('viewGlobal').classList.add('hidden');
+      const first = Object.keys(D)[0];
+      if(first) selectDriver(first);
+      doc.getElementById('fileTag').textContent = file.name;
+      autoSaveToLocalStorage();
+      showToast('✅ Sessione caricata — ' + Object.keys(D).length + ' fattorini');
+    } catch(err){
+      alert('Errore nel caricamento della sessione: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── AUTO-SAVE localStorage ──
+const LS_KEY = 'fattorini_session_v1';
+
+function autoSaveToLocalStorage(){
+  try {
+    const payload = { version:1, savedAt: new Date().toISOString(), data: serializeD(D) };
+    const serialized = JSON.stringify(payload);
+    localStorage.setItem(LS_KEY, serialized);
+    // ☁️ Sync cloud (debounced)
+    if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
+    // Show green dot
+    const dot = doc.getElementById('autoSaveDot');
+    if(dot){
+      dot.style.display = 'flex';
+      const circle = doc.getElementById('autoSaveDotCircle');
+      const label = doc.getElementById('autoSaveDotLabel');
+      if(circle) circle.style.background = '#16a34a';
+      if(label) label.textContent = 'salvato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+      clearTimeout(dot._t);
+      dot._t = setTimeout(()=>{ if(circle) circle.style.background = '#9ca3af'; }, 3000);
+    }
+  } catch(e){
+    console.warn('localStorage non disponibile:', e);
+    showToast('⚠️ Salvataggio automatico non disponibile in questo browser');
+  }
+}
+
+function loadFromLocalStorage(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const payload = JSON.parse(raw);
+    if(!payload.data || !Object.keys(payload.data).length) return false;
+    D = deserializeD(payload.data);
+    cur = null; curMon = null;
+    renderSidebar();
+    doc.getElementById('upWrap').classList.add('hidden');
+    doc.getElementById('dash').classList.remove('hidden');
+    const first = Object.keys(D)[0];
+    if(first) selectDriver(first);
+    doc.getElementById('fileTag').textContent = 'Sessione del ' + new Date(payload.savedAt).toLocaleDateString('it-IT');
+    const lsDot=doc.getElementById('autoSaveDot'); if(lsDot) lsDot.style.display='flex';
+    showToast('✅ Sessione precedente ripristinata (' + Object.keys(D).length + ' fattorini)');
+    return true;
+  } catch(e){
+    console.warn('Errore caricamento localStorage:', e);
+    return false;
+  }
+}
+
+// Intercetta ogni modifica ai dati e autosalva
+function withAutoSave(fn){
+  return function(...args){
+    const result = fn.apply(this, args);
+    if(Object.keys(D).length) autoSaveToLocalStorage();
+    return result;
+  };
+}
+
+// ── TOAST NOTIFICATION ──
+function showToast(msg){
+  let t = doc.getElementById('toast');
+  if(!t){
+    t = doc.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--surf);border:1px solid var(--brd2);color:var(--txt);font-size:13px;font-family:DM Sans,sans-serif;padding:10px 18px;border-radius:8px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s';
+    doc.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.style.opacity='0'; }, 3000);
+}
+
+
+
+// ── AUTO-LOAD AL AVVIO ──
+window.addEventListener('load', ()=>{
+  const restored = loadFromLocalStorage();
+  if(!restored){
+    doc.getElementById('upWrap').classList.remove('hidden');
+    doc.getElementById('dash').classList.add('hidden');
+  }
+  initCloudFromSaved();
+});
+
+// ═══════════════════════════════════════════════════════════
+// ── LOGIN ──
+const APP_PWD_KEY = 'fattorini_pwd_v1';
+const DEFAULT_PWD = 'fattorini2026'; // password di default — cambiala dal pannello Cloud
+
+function checkLogin(){
+  const pwd = doc.getElementById('loginPwd')?.value?.trim();
+  const savedPwd = localStorage.getItem(APP_PWD_KEY) || DEFAULT_PWD;
+  if(pwd === savedPwd){
+    doc.getElementById('loginScreen').style.display = 'none';
+    sessionStorage.setItem('fattorini_auth', '1');
+    initApp();
+  } else {
+    const err = doc.getElementById('loginErr');
+    if(err){ err.textContent = '❌ Password errata'; }
+    const inp = doc.getElementById('loginPwd');
+    if(inp){ inp.value=''; inp.focus(); inp.style.borderColor='#dc2626'; setTimeout(()=>inp.style.borderColor='#dde0e8',1500); }
+  }
+}
+
+function setNewPassword(newPwd){
+  if(!newPwd||newPwd.length<4){ showToast('⚠️ Password troppo corta (min 4 caratteri)'); return; }
+  localStorage.setItem(APP_PWD_KEY, newPwd);
+  showToast('✅ Password aggiornata');
+}
+
+function initApp(){
+  // Init cloud from saved config
+  initCloudFromSaved();
+  // Load localStorage session
+  const restored = loadFromLocalStorage();
+  if(!restored){
+    doc.getElementById('upWrap').classList.remove('hidden');
+    doc.getElementById('dash').classList.add('hidden');
+  }
+}
+
+// On page load: check if already authenticated this session
+window.addEventListener('load', ()=>{
+  if(sessionStorage.getItem('fattorini_auth')==='1'){
+    doc.getElementById('loginScreen').style.display='none';
+    initApp();
+  } else {
+    doc.getElementById('loginScreen').style.display='flex';
+    setTimeout(()=>doc.getElementById('loginPwd')?.focus(), 100);
+  }
+});
+
+// ☁️  CLOUD SYNC — Firebase Realtime Database (gratuito)
+// ═══════════════════════════════════════════════════════════
+
+const CLOUD_CFG_KEY = 'fattorini_cloud_cfg_v1';
+let fbApp = null, fbDb = null, fbRef = null;
+let cloudConnected = false;
+let cloudSaving = false;
+let cloudSaveTimer = null;
+let cloudPaused = false;   // true durante caricamento Excel — blocca sovrascrittura
+
+function initCloudFromSaved(){
+  try{
+    const raw=localStorage.getItem(CLOUD_CFG_KEY);
+    if(!raw) return;
+    const cfg=JSON.parse(raw);
+    if(cfg&&cfg.firebase&&cfg.workspace) connectToFirebase(cfg);
+  }catch(e){ console.warn('Cloud cfg:',e); }
+}
+
+function connectToFirebase(cfg){
+  try{
+    if(fbApp){try{fbApp.delete();}catch(e){} fbApp=null;fbDb=null;fbRef=null;cloudConnected=false;}
+    fbApp=firebase.initializeApp(cfg.firebase,'fatt_'+Date.now());
+    fbDb=firebase.database(fbApp);
+    const key=cfg.workspace.trim().replace(/[^a-zA-Z0-9_-]/g,'_').toLowerCase();
+    fbRef=fbDb.ref('fattorini_ws/'+key);
+    fbRef.on('value',snapshot=>{
+      if(cloudSaving||cloudPaused) return;
+      const remote=snapshot.val();
+      if(!remote||!remote.data) return;
+      const remoteAt=remote.savedAt?new Date(remote.savedAt).getTime():0;
+      let localAt=0;
+      try{const lr=localStorage.getItem(LS_KEY);if(lr)localAt=new Date(JSON.parse(lr).savedAt).getTime();}catch(e){}
+      if(remoteAt>localAt+2000){
+        D=deserializeD(remote.data);
+        autoSaveToLocalStorage();
+        renderSidebar();
+        const keys=Object.keys(D);
+        if(keys.length){
+          doc.getElementById('upWrap').classList.add('hidden');
+          doc.getElementById('dash').classList.remove('hidden');
+          if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
+        }
+        showToast('☁️ Dati aggiornati da un altro dispositivo');
+      }
+    });
+    cloudConnected=true;
+    localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cfg));
+    updateCloudStatus('connected');
+    const btn=doc.getElementById('cloudBtn');
+    if(btn){btn.style.background='rgba(22,163,74,.1)';btn.style.borderColor='rgba(22,163,74,.3)';btn.style.color='#16a34a';}
+    return true;
+  }catch(e){
+    console.error('Firebase:',e);
+    cloudConnected=false;
+    updateCloudStatus('error');
+    return false;
+  }
+}
+
+function debouncedCloudSave(){
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(cloudSave,700);
+}
+function cloudSave(){
+  if(!fbRef||!cloudConnected||!Object.keys(D).length) return;
+  cloudSaving=true;
+  updateCloudStatus('saving');
+  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D)})
+    .then(()=>{cloudSaving=false;updateCloudStatus('synced');})
+    .catch(e=>{cloudSaving=false;updateCloudStatus('error');showToast('⚠️ Errore cloud: '+e.message);});
+}
+
+function updateCloudStatus(s){
+  const dot=doc.getElementById('cloudDot');
+  const circle=doc.getElementById('cloudDotCircle');
+  const label=doc.getElementById('cloudDotLabel');
+  if(!dot) return;
+  dot.style.display='flex';
+  const st={connected:{c:'#9ca3af',t:'cloud connesso'},saving:{c:'#f59e0b',t:'sync...'},synced:{c:'#16a34a',t:'sincronizzato'},error:{c:'#dc2626',t:'errore cloud'},disconnected:{c:'#6b7280',t:'cloud off'}};
+  const v=st[s]||st.disconnected;
+  if(circle) circle.style.background=v.c;
+  if(label)  label.textContent=v.t;
+  if(s==='synced'){
+    clearTimeout(dot._ct);
+    dot._ct=setTimeout(()=>{if(circle)circle.style.background='#9ca3af';if(label)label.textContent='cloud connesso';},3000);
+  }
+}
+
+function disconnectCloud(){
+  if(fbRef){try{fbRef.off();}catch(e){}}
+  if(fbApp){try{fbApp.delete();}catch(e){}}
+  fbApp=null;fbDb=null;fbRef=null;cloudConnected=false;
+  localStorage.removeItem(CLOUD_CFG_KEY);
+  const dot=doc.getElementById('cloudDot');if(dot)dot.style.display='none';
+  const btn=doc.getElementById('cloudBtn');
+  if(btn){btn.style.background='rgba(124,58,237,.08)';btn.style.borderColor='rgba(124,58,237,.3)';btn.style.color='var(--pur)';}
+  doc.getElementById('cloudModal')?.remove();
+  showToast('☁️ Cloud disconnesso');
+}
+
+function parseFirebaseCfg(raw){
+  // 1) Tentativo JSON diretto
+  try{return JSON.parse(raw);}catch(e){}
+  // 2) Estrai il primo oggetto { } bilanciato (ignora codice extra dopo)
+  const start=raw.indexOf('{');
+  if(start===-1) return null;
+  let depth=0,end=-1;
+  for(let i=start;i<raw.length;i++){
+    if(raw[i]==='{') depth++;
+    else if(raw[i]==='}'){depth--;if(depth===0){end=i;break;}}
+  }
+  if(end===-1) return null;
+  let obj=raw.slice(start,end+1)
+    .replace(/,(\s*})/g,'$1')
+    .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*):/g,'$1"$2"$3:');
+  try{return JSON.parse(obj);}catch(e){}
+  return null;
+}
+
+function tryConnectCloud(){
+  const raw=doc.getElementById('cloudConfigText')?.value?.trim();
+  const ws=doc.getElementById('cloudWorkspace')?.value?.trim();
+  const res=doc.getElementById('cloudTestResult');
+  if(!raw||!ws){if(res){res.textContent='⚠️ Compila entrambi i campi';res.style.color='var(--acc4)';}return;}
+  const fbCfg=parseFirebaseCfg(raw);
+  if(!fbCfg){if(res){res.textContent='❌ JSON non valido';res.style.color='var(--acc3)';}return;}
+  if(!fbCfg.apiKey){if(res){res.textContent='❌ Manca apiKey — copia l\'intero firebaseConfig dal passo 4';res.style.color='var(--acc3)';}return;}
+  if(!fbCfg.databaseURL){if(res){res.textContent='❌ Manca databaseURL — vai su Firebase → Realtime Database e verifica di averlo creato, poi ricopia il config';res.style.color='var(--acc3)';}return;}
+  if(res){res.textContent='⏳ Connessione...';res.style.color='var(--acc4)';}
+  const ok=connectToFirebase({firebase:fbCfg,workspace:ws});
+  if(ok){
+    if(res){res.textContent='✅ Connesso!';res.style.color='var(--grn)';}
+    setTimeout(()=>{
+      doc.getElementById('cloudModal')?.remove();
+      if(Object.keys(D).length){cloudSave();showToast('☁️ Cloud connesso — dati sincronizzati');}
+      else showToast('☁️ Cloud connesso — carica dati o attendi sync da altro PC');
+    },900);
+  }else{
+    if(res){res.textContent='❌ Connessione fallita — controlla config e regole database';res.style.color='var(--acc3)';}
+  }
+}
+
+function showCloudModal(){
+  doc.getElementById('cloudModal')?.remove();
+  let cfg=null;
+  try{const r=localStorage.getItem(CLOUD_CFG_KEY);if(r)cfg=JSON.parse(r);}catch(e){}
+  const ov=doc.createElement('div');
+  ov.id='cloudModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)';
+  const connBanner=cloudConnected?`
+    <div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="font-size:12px;color:#16a34a">&#x2705; <strong>Connesso</strong> &mdash; workspace: <code style="background:rgba(22,163,74,.1);padding:2px 7px;border-radius:4px">${cfg&&cfg.workspace?cfg.workspace:'&mdash;'}</code></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="cloudSave();showToast('&#x2601;&#xFE0F; Upload inviato');doc.getElementById('cloudModal').remove();" style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#16a34a;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2B06; Forza upload</button>
+        <button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2715; Disconnetti</button>
+      </div>
+    </div>`:'';
+  const disconnBtn=cloudConnected?`<button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">&#x2715; Disconnetti</button>`:'';
+  ov.innerHTML=`
+  <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:16px;padding:28px;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800">&#x2601;&#xFE0F; Cloud Sync &mdash; Multi-PC</div>
+      <button onclick="doc.getElementById('cloudModal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut)">&#x2715;</button>
+    </div>
+    ${connBanner}
+    <div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.12);border-radius:10px;padding:16px">
+      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:var(--acc);margin-bottom:10px">&#x1F4CB; Setup Firebase gratuito &mdash; 3 minuti</div>
+      <div style="display:grid;grid-template-columns:22px 1fr;gap:5px 10px;font-size:12px;color:var(--mut);line-height:1.75">
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">1.</b><span>Vai su <a href="https://console.firebase.google.com" target="_blank" style="color:var(--acc);font-weight:600">console.firebase.google.com</a> &rarr; <strong style="color:var(--txt)">Crea un progetto</strong></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">2.</b><span>Menu sinistro &rarr; <strong style="color:var(--txt)">Build &rarr; Realtime Database</strong> &rarr; "Crea database" &rarr; scegli <strong style="color:var(--txt)">Modalit&agrave; test</strong></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">3.</b><span>Icona &#x2699;&#xFE0F; &rarr; <strong style="color:var(--txt)">Impostazioni progetto &rarr; Generale</strong> &rarr; scorri fino a "Le tue app"</span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">4.</b><span>Clicca <strong style="color:var(--txt)">"&lt;/&gt; Aggiungi app"</strong> &rarr; Web &rarr; Registra &rarr; copia il blocco <code style="background:var(--surf3);padding:1px 5px;border-radius:3px">firebaseConfig</code></span>
+        <b style="color:var(--acc);font-family:'DM Mono',monospace">5.</b><span>Incolla qui sotto e clicca <strong style="color:var(--txt)">Connetti</strong></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace">FIREBASE CONFIG <span style="color:var(--dim)">(dal passo 4 &mdash; incolla l'intero blocco)</span></label>
+      <textarea id="cloudConfigText" spellcheck="false" placeholder="Incolla SOLO il blocco firebaseConfig = { ... }&#10;Non includere il codice sotto (initializeApp ecc.)&#10;&#10;Esempio:&#10;{&#10;  apiKey: &quot;AIzaSy...&quot;,&#10;  authDomain: &quot;...&quot;,&#10;  databaseURL: &quot;https://NOME-default-rtdb.firebaseio.com&quot;,&#10;  projectId: &quot;...&quot;,&#10;  storageBucket: &quot;...&quot;,&#10;  messagingSenderId: &quot;...&quot;,&#10;  appId: &quot;...&quot;&#10;}" style="height:140px;background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-family:'DM Mono',monospace;font-size:10.5px;padding:10px 12px;resize:vertical;outline:none;line-height:1.5">${cfg&&cfg.firebase?JSON.stringify(cfg.firebase,null,2):''}</textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace">NOME WORKSPACE <span style="color:var(--dim)">(uguale su tutti i PC)</span></label>
+      <input id="cloudWorkspace" type="text" value="${cfg&&cfg.workspace?cfg.workspace:''}" placeholder="es. fattorini-rossi-k7x2" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:8px 10px;outline:none;width:100%">
+      <div style="font-size:10px;color:var(--dim)">&#x1F4A1; Il workspace funge da chiave condivisa &mdash; scegli un nome non ovvio</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button onclick="tryConnectCloud()" style="background:var(--pur);color:#fff;border:none;border-radius:8px;padding:9px 24px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;font-weight:600">&#x2601;&#xFE0F; Connetti</button>
+      ${disconnBtn}
+      <span id="cloudTestResult" style="font-size:11px;color:var(--mut)"></span>
+    </div>
+    <div style="border-top:1px solid var(--brd);padding-top:14px">
+      <div style="font-size:11px;color:var(--mut);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔐 Cambia password di accesso</div>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="newPwdInput" placeholder="Nuova password (min 4 caratteri)" style="flex:1;background:var(--surf2);border:1px solid var(--brd2);border-radius:6px;color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:7px 10px;outline:none">
+        <button onclick="setNewPassword(doc.getElementById('newPwdInput').value);doc.getElementById('newPwdInput').value=''" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;color:var(--txt)">✓ Imposta</button>
+      </div>
+      <div style="font-size:10px;color:var(--dim);margin-top:5px">Password default: <code style="font-family:'DM Mono',monospace;background:var(--surf3);padding:1px 5px;border-radius:3px">fattorini2026</code> — cambiala subito dopo il primo accesso</div>
+    </div>
+  </div>`;
+  doc.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
 }
 </script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </body>
 </html>
