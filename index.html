@@ -169,6 +169,28 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 .obj-row span:first-child{color:var(--mut)}
 .obj-row span:last-child{font-family:'DM Mono',monospace}
 
+/* ACCORDION ORDINI */
+.acc-day{border-bottom:1px solid var(--brd)}
+.acc-day:last-child{border-bottom:none}
+.acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+.acc-hdr:hover{background:var(--surf2)}
+.acc-hdr.open{background:var(--surf2)}
+.acc-left{display:flex;align-items:center;gap:10px}
+.acc-arrow{font-size:10px;color:var(--dim);transition:transform .2s;display:inline-block;width:12px}
+.acc-hdr.open .acc-arrow{transform:rotate(90deg)}
+.acc-date{font-family:'Syne',sans-serif;font-size:13px;font-weight:800}
+.acc-day-lbl{font-size:10px;color:var(--mut);font-family:'DM Mono',monospace}
+.acc-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.acc-stat{font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)}
+.acc-stat b{color:var(--txt)}
+.acc-body{display:none}
+.acc-body.open{display:block}
+.acc-body table{width:100%;border-collapse:collapse}
+.acc-body thead th{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:5px 10px;text-align:left;background:var(--surf3);border-bottom:1px solid var(--brd);white-space:nowrap}
+.acc-body tbody td{padding:6px 10px;font-size:11px;border-bottom:1px solid var(--brd);vertical-align:middle}
+.acc-body tbody tr:last-child td{border-bottom:none}
+.acc-body tbody tr:hover td{background:var(--surf2)}
+
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
@@ -448,23 +470,14 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
         <div class="tw">
           <div class="th">
             <div class="tt" id="oTitle">—</div>
-            <div style="display:flex;gap:6px">
-              <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:200px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
-              <button id="oBulkDelete" class="btn btn-red" style="display:none;padding:4px 12px;font-size:11px;margin-left:8px" onclick="deleteSelected()">✕ Elimina selezionati</button>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="inp" type="text" id="oSearch" placeholder="Cerca ordine, indirizzo..." style="width:190px;padding:4px 8px;font-size:11px" oninput="renderOrders()">
+              <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="expandAllDays()">↕ Espandi tutti</button>
+              <button id="oBulkDelete" class="btn btn-red" style="display:none;padding:4px 12px;font-size:11px" onclick="deleteSelected()">✕ Elimina selezionati</button>
               <button class="btn btn-ghost" onclick="openAddOrder()">+ Aggiungi ordine</button>
             </div>
           </div>
-          <div class="ts"><table>
-            <thead><tr>
-              <th style="width:30px"><input type="checkbox" id="oSelectAll" onchange="toggleSelectAll()" title="Seleziona tutti"></th>
-              <th>Data</th><th>Ora</th><th>Turno</th><th>N° Ordine</th>
-              <th>Ritiro da</th><th>Consegna a</th>
-              <th>Km</th><th>F.P. (>soglia)</th>
-              <th>Pagam.</th><th>Totale €</th><th>Tariffa €</th><th>Mezzo</th><th>Status</th>
-              <th>Azioni</th>
-            </tr></thead>
-            <tbody id="oBody"></tbody>
-          </table></div>
+          <div id="oAccordion"></div>
         </div>
       </div>
 
@@ -610,15 +623,26 @@ function loadFile(file){
 function parseTimeHour(str){
   if(!str) return null;
   const s=String(str).trim().toLowerCase();
-  const m=s.match(/(\d+):(\d+)\s*(am|pm)/);
-  if(!m) return null;
-  let h=parseInt(m[1]),mi=parseInt(m[2]),ap=m[3];
-  if(ap==='pm'&&h!==12)h+=12;
-  if(ap==='am'&&h===12)h=0;
-  return h+mi/60;
+  // Formato 12h: "9:30 am", "2:15 pm"
+  const m12=s.match(/(\d+):(\d+)\s*(am|pm)/);
+  if(m12){
+    let h=parseInt(m12[1]),mi=parseInt(m12[2]),ap=m12[3];
+    if(ap==='pm'&&h!==12)h+=12;
+    if(ap==='am'&&h===12)h=0;
+    return h+mi/60;
+  }
+  // Formato 24h: "14:30", "09:15"
+  const m24=s.match(/^(\d{1,2}):(\d{2})$/);
+  if(m24){const h=parseInt(m24[1]),mi=parseInt(m24[2]);if(h>=0&&h<=23&&mi>=0&&mi<=59)return h+mi/60;}
+  // Numero decimale Excel (es. 0.604 = 14:30)
+  const num=parseFloat(str);
+  if(!isNaN(num)&&num>0&&num<1)return num*24;
+  return null;
 }
 
 function parseRows(rows){
+  const _newDates = new Set();
+  const _newOrders = [];
   for(let i=2;i<rows.length;i++){
     const r=rows[i];
     if(!r||!r[7]) continue;
@@ -639,7 +663,15 @@ function parseRows(rows){
     };
 
     const dateStr=fmtDate(dateObj);
-    const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
+    // Col K (r[10]) = tariffa di consegna (numero €)
+    // Cerca payMethod (CASH/CARD) scansionando la riga, escludendo col K
+    let payMethod='N/A';
+    for(let j=0;j<r.length;j++){
+      if(j===10) continue; // salta col K che è la tariffa
+      const val=r[j]?String(r[j]).trim().toUpperCase():'';
+      if(val==='CASH'){payMethod='CASH';break;}
+      if(val==='CARD'){payMethod='CARD';break;}
+    }
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
     // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
     let ticketCount = 0;    // valore ticket (per contatore ticket)
@@ -668,6 +700,7 @@ function parseRows(rows){
       consegnaA:r[5]?String(r[5]).trim():'—',
       payMethod, isCash:payMethod==='CASH',
       total:parseFloat(r[9])||0,
+      tariffaConsegna:parseFloat(r[10])||0,  // Col K = tariffa di consegna
       fee:parseFloat(r[11])||0,
       km:parseFloat(r[14])||0,
       status:r[38]?String(r[38]).trim():'—',
@@ -676,12 +709,27 @@ function parseRows(rows){
       deleted:false, note:''
     };
 
-    // Deduplicate only for real order numbers (not tickets/special rows)
-    const isRealOrderNum = orderNumRaw && !isTicket && orderNumRaw !== '€ NS' && !isNaN(orderNumRaw);
-    const exists = isRealOrderNum && D[name].orders.some(o=>!o.deleted&&o.orderNum===orderNumRaw&&o.dateStr===order.dateStr);
-    if(!exists) D[name].orders.push(order);
+    // Raccoglie le date presenti in questo file per il merge
+    _newDates.add(name+'|'+dateStr);
+    _newOrders.push({name, order});
     if(!D[name].mezzo[dateStr]) D[name].mezzo[dateStr]={mat:'—',ser:'—'};
   }
+
+  // MERGE PER DATA: per ogni (driver,data) nel file, sostituisce solo quegli ordini
+  // Gli ordini aggiunti manualmente (manualAdd=true) vengono sempre preservati
+  _newDates.forEach(key=>{
+    const[name,dateStr]=key.split('|');
+    if(!D[name]) return;
+    D[name].orders = D[name].orders.filter(o => o.dateStr!==dateStr || o.manualAdd===true);
+  });
+
+  // Aggiunge i nuovi ordini (deduplicazione per numero ordine reale)
+  _newOrders.forEach(({name,order})=>{
+    const isRealOrderNum = order.orderNum && !order.isTicket && order.orderNum !== '€ NS' && !isNaN(order.orderNum);
+    const exists = isRealOrderNum && D[name].orders.some(o=>!o.deleted&&o.orderNum===order.orderNum&&o.dateStr===order.dateStr);
+    if(!exists) D[name].orders.push(order);
+  });
+
   renderSidebar();
   doc.getElementById('upWrap').classList.add('hidden');
   doc.getElementById('dash').classList.remove('hidden');
@@ -1236,58 +1284,148 @@ function renderOrders(){
   makePills('oPills',months,()=>renderOrders());
   if(!curMon||!months.includes(curMon))curMon=months[0]||null;
   if(!curMon)return;
-  doc.getElementById('oTitle').textContent=mlabel(curMon)+' — Tutti gli ordini';
-  const s=D[cur].settings,e=D[cur].econ;
+  const s=D[cur].settings, e=D[cur].econ;
   const search=(doc.getElementById('oSearch').value||'').toLowerCase();
-  const orders=activeOrders(cur).filter(o=>o.monthKey===curMon)
-    .filter(o=>!search||o.orderNum.toString().includes(search)||(o.ritiroDa||'').toLowerCase().includes(search)||(o.consegnaA||'').toLowerCase().includes(search))
-    .sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0));
+  const allOrds=activeOrders(cur).filter(o=>o.monthKey===curMon);
 
-  // Update select-all checkbox state
-  const selAll=doc.getElementById('oSelectAll');
-  if(selAll) selAll.checked=false;
+  // Raggruppa per giorno
+  const byDay={};
+  allOrds.forEach(o=>{if(!byDay[o.dateStr])byDay[o.dateStr]=[];byDay[o.dateStr].push(o);});
+  const sortedDays=Object.keys(byDay).sort((a,b)=>parseDateStr(a)-parseDateStr(b));
 
-  // Update bulk delete button
-  const bulkBtn=doc.getElementById('oBulkDelete');
-  if(bulkBtn) bulkBtn.style.display='none';
-
-  const tb=doc.getElementById('oBody');tb.innerHTML='';
-  orders.forEach((o,i)=>{
-    const isFP=isFuoriPaese(o,s);
-    const shift=getShift(o,s.cutHour);
-    const shiftB=shift==='mat'?'<span class="sm sm-m">🌅</span>':shift==='ser'?'<span class="sm sm-s">🌙</span>':'<span style="color:var(--dim)">?</span>';
-    const payB=o.isCash?'<span class="b bca">CASH</span>':o.payMethod==='CARD'?'<span class="b bb">CARD</span>':`<span style="color:var(--dim)">${o.payMethod}</span>`;
-    const mz=D[cur].mezzo[o.dateStr]||{};
-    const mezzoVal=shift==='mat'?(mz.mat||'—'):shift==='ser'?(mz.ser||'—'):'—';
-    const realIdx=D[cur].orders.indexOf(o);
-    const tr=doc.createElement('tr');
-    if(o.isCash)tr.classList.add('tr-cash');
-    tr.innerHTML=`
-      <td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="${realIdx}" onchange="updateBulkBtn()"></td>
-      <td style="font-family:'DM Mono',monospace;font-size:10px">${o.dateStr}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${o.timeRaw}</td>
-      <td>${shiftB}</td>
-      <td>${o.isTicket?`<span class="b bg">🎫 ${o.orderNum}</span>`:`<span class="b bb">#${o.orderNum}</span>`}</td>
-      <td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.ritiroDa}">${o.ritiroDa||'—'}</td>
-      <td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.consegnaA}">${o.consegnaA||'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${isFP?'var(--acc3)':'var(--txt)'}">${o.km>0?o.km.toFixed(2)+'km':'n/d'}</td>
-      <td>${isFP?'<span class="b br">✓</span>':'—'}</td>
-      <td>${payB}</td>
-      <td>€${o.total.toFixed(2)}</td>
-      <td>€${o.fee.toFixed(2)}</td>
-      <td><span class="b bo">${mezzoVal}</span></td>
-      <td><span class="b ${o.status==='Delivered'?'bg':'br'}">${o.status}</span></td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder(${realIdx})">✏</button>
-        <button class="btn btn-red" style="padding:3px 8px;font-size:10px;margin-left:3px" onclick="deleteOrder(${realIdx})">✕</button>
-      </td>`;
-    tb.appendChild(tr);
+  // Con ricerca attiva apri automaticamente i giorni con risultati
+  if(search) sortedDays.forEach(ds=>{
+    const hit=byDay[ds].some(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.payMethod).toLowerCase().includes(search));
+    if(hit) _openDays.add(ds);
   });
-  if(!orders.length){
-    const tr=doc.createElement('tr');
-    tr.innerHTML=`<td colspan="15" style="text-align:center;color:var(--mut);padding:24px">Nessun ordine trovato</td>`;
-    tb.appendChild(tr);
-  }
+
+  const totAll=allOrds.length;
+  const totFiltered=search?allOrds.filter(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.payMethod).toLowerCase().includes(search)).length:totAll;
+  doc.getElementById('oTitle').textContent=mlabel(curMon)+' — '+(search?totFiltered+'/':'')+totAll+' ordini · '+sortedDays.length+' giorni';
+  doc.getElementById('oBulkDelete').style.display='none';
+
+  const acc=doc.getElementById('oAccordion');
+  acc.innerHTML='';
+  const mz=D[cur].mezzo;
+
+  sortedDays.forEach(ds=>{
+    const dayOrds=byDay[ds];
+    const filtered=search?dayOrds.filter(o=>(o.orderNum+o.ritiroDa+o.consegnaA+o.payMethod).toLowerCase().includes(search)):dayOrds;
+    if(search&&filtered.length===0) return;
+
+    const isOpen=_openDays.has(ds);
+    const dayLabel=dayIt(dayFromDateStr(ds));
+    const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
+    const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
+    const tariffaK=dayOrds.reduce((a,o)=>a+(o.tariffaConsegna||0),0);
+    const totCash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
+    const cashN=dayOrds.filter(o=>o.isCash).length;
+    const fpN=dayOrds.filter(o=>isFuoriPaese(o,s)).length;
+    const dayMezzo=mz[ds]||{};
+    const shifts=[];
+    if(hasMat) shifts.push('<span class="sm sm-m">🌅'+(dayMezzo.mat&&dayMezzo.mat!=='—'?' '+dayMezzo.mat:'')+'</span>');
+    if(hasSer)  shifts.push('<span class="sm sm-s">🌙'+(dayMezzo.ser&&dayMezzo.ser!=='—'?' '+dayMezzo.ser:'')+'</span>');
+
+    const dayDiv=doc.createElement('div');
+    dayDiv.className='acc-day';
+    dayDiv.dataset.ds=ds;
+
+    const hdr=doc.createElement('div');
+    hdr.className='acc-hdr'+(isOpen?' open':'');
+    hdr.innerHTML=
+      '<div class="acc-left">'+
+        '<span class="acc-arrow">▶</span>'+
+        '<span class="acc-date">'+ds+'</span>'+
+        '<span class="acc-day-lbl">'+dayLabel+'</span>'+
+        '<div style="display:flex;gap:4px">'+shifts.join('')+'</div>'+
+      '</div>'+
+      '<div class="acc-summary">'+
+        '<span class="acc-stat"><b>'+filtered.length+'</b> ordini</span>'+
+        (fpN>0?'<span class="acc-stat"><span class="b br">FP</span> <b>'+fpN+'</b></span>':'')+
+        (totCash>0?'<span class="acc-stat">💵 <b>€'+totCash.toFixed(2)+'</b> ('+cashN+')</span>':'')+
+        '<span class="acc-stat">Tar.K <b>€'+tariffaK.toFixed(2)+'</b></span>'+
+      '</div>';
+    hdr.onclick=()=>toggleDay(ds);
+
+    const body=doc.createElement('div');
+    body.className='acc-body'+(isOpen?' open':'');
+    body.id='acc-body-'+ds.replace(/\//g,'-');
+
+    const table=doc.createElement('table');
+    table.innerHTML='<thead><tr>'+
+      '<th><input type="checkbox" class="day-sel-all" onchange="toggleDayAll(this,\''+ds+'\')"></th>'+
+      '<th>Ora</th><th>Turno</th><th>N° Ordine</th>'+
+      '<th>Ritiro da</th><th>Consegna a</th>'+
+      '<th>Km</th><th>F.P.</th><th>Pagam.</th>'+
+      '<th>Totale €</th><th>Tar.K €</th><th>Fee €</th>'+
+      '<th>Mezzo</th><th>Status</th><th>Azioni</th>'+
+    '</tr></thead>';
+    const tbody=doc.createElement('tbody');
+
+    filtered.sort((a,b)=>a.date-b.date||(a.timeHour||0)-(b.timeHour||0)).forEach(o=>{
+      const isFP=isFuoriPaese(o,s);
+      const shift=getShift(o,s.cutHour);
+      const shiftB=shift==='mat'?'<span class="sm sm-m">🌅</span>':shift==='ser'?'<span class="sm sm-s">🌙</span>':'<span style="color:var(--dim)">?</span>';
+      const payB=o.isCash?'<span class="b bca">CASH</span>':o.payMethod==='CARD'?'<span class="b bb">CARD</span>':`<span style="color:var(--dim)">${o.payMethod}</span>`;
+      const mezzoVal=shift==='mat'?(dayMezzo.mat||'—'):shift==='ser'?(dayMezzo.ser||'—'):'—';
+      const realIdx=D[cur].orders.indexOf(o);
+      const tr=doc.createElement('tr');
+      if(o.isCash)tr.classList.add('tr-cash');
+      tr.innerHTML=
+        '<td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="'+realIdx+'" onchange="updateBulkBtn()"></td>'+
+        '<td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">'+o.timeRaw+'</td>'+
+        '<td>'+shiftB+'</td>'+
+        '<td>'+(o.isTicket?'<span class="b bg">🎫 '+o.orderNum+'</span>':'<span class="b bb">#'+o.orderNum+'</span>')+'</td>'+
+        '<td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.ritiroDa+'">'+o.ritiroDa+'</td>'+
+        '<td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.consegnaA+'">'+o.consegnaA+'</td>'+
+        '<td style="font-family:'DM Mono',monospace;font-size:10px;color:'+(isFP?'var(--acc3)':'var(--txt)')+'">'+( o.km>0?o.km.toFixed(2)+'km':'n/d')+'</td>'+
+        '<td>'+(isFP?'<span class="b br">✓</span>':'—')+'</td>'+
+        '<td>'+payB+'</td>'+
+        '<td>€'+o.total.toFixed(2)+'</td>'+
+        '<td><b>€'+(o.tariffaConsegna||0).toFixed(2)+'</b></td>'+
+        '<td>€'+o.fee.toFixed(2)+'</td>'+
+        '<td><span class="b bo">'+mezzoVal+'</span></td>'+
+        '<td><span class="b '+(o.status==='Delivered'?'bg':'br')+'">'+o.status+'</span></td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="openEditOrder('+realIdx+')">✏</button>'+
+          '<button class="btn btn-red" style="padding:3px 8px;font-size:10px;margin-left:3px" onclick="deleteOrder('+realIdx+')">✕</button>'+
+        '</td>';
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    body.appendChild(table);
+    dayDiv.appendChild(hdr);
+    dayDiv.appendChild(body);
+    acc.appendChild(dayDiv);
+  });
+}
+
+let _openDays = new Set();
+
+function toggleDay(ds){
+  const body=doc.getElementById('acc-body-'+ds.replace(/\//g,'-'));
+  const hdr=body&&body.previousElementSibling;
+  if(!body)return;
+  const open=body.classList.contains('open');
+  if(open){_openDays.delete(ds);body.classList.remove('open');hdr&&hdr.classList.remove('open');}
+  else{_openDays.add(ds);body.classList.add('open');hdr&&hdr.classList.add('open');}
+}
+
+function expandAllDays(){
+  const bodies=doc.querySelectorAll('.acc-body');
+  const allOpen=[...bodies].every(b=>b.classList.contains('open'));
+  bodies.forEach(b=>{
+    const ds=b.closest('.acc-day')&&b.closest('.acc-day').dataset.ds;
+    if(allOpen){b.classList.remove('open');b.previousElementSibling&&b.previousElementSibling.classList.remove('open');if(ds)_openDays.delete(ds);}
+    else{b.classList.add('open');b.previousElementSibling&&b.previousElementSibling.classList.add('open');if(ds)_openDays.add(ds);}
+  });
+}
+
+function toggleDayAll(chk,ds){
+  const body=doc.getElementById('acc-body-'+ds.replace(/\//g,'-'));
+  if(!body)return;
+  body.querySelectorAll('.o-chk').forEach(c=>c.checked=chk.checked);
+  updateBulkBtn();
 }
 
 function updateBulkBtn(){
