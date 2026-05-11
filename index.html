@@ -203,7 +203,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
   <div style="display:flex;align-items:center;gap:8px">
     <div class="hfile" id="fileTag">nessun file caricato</div>
     <button class="hbtn" onclick="document.getElementById('fileInput2').click()">+ Carica file</button>
-    <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none" onchange="loadFile(this.files[0])">
+    <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none" onclick="this.value=''" onchange="loadFile(this.files[0])">
     <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
     <button class="hbtn" onclick="saveSession()" title="Salva tutti i dati in un file JSON" style="background:rgba(37,99,235,.1);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
     <button class="hbtn" onclick="showLoadModal()" title="Carica una sessione salvata">📂 Carica sessione</button>
@@ -257,7 +257,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
     <div id="upWrap" class="hidden">
       <div class="up-wrap">
         <div class="up-zone" id="dropZone">
-          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <input type="file" id="fileInput" accept=".xlsx,.xls" onclick="this.value=''">
           <div class="up-icon">📊</div>
           <div class="up-h">Carica il report ordini</div>
           <div class="up-s">Trascina o clicca · <strong>Extended_order_report.xlsx</strong></div>
@@ -600,11 +600,7 @@ doc.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[
 function loadFile(file){
   if(!file) return;
   doc.getElementById('fileTag').textContent=file.name;
-  // Reset input values così si può ricaricare lo stesso file o uno nuovo
-  ['fileInput','fileInput2'].forEach(id=>{
-    const el=doc.getElementById(id);
-    if(el) el.value='';
-  });
+
   cloudPaused = true;
   const r=new FileReader();
   r.onload=e=>{
@@ -963,8 +959,8 @@ function computeMonth(name,mk){
 
   Object.entries(byDay).sort((a,b)=>parseDateStr(a[0])-parseDateStr(b[0])).forEach(([ds,dayOrds])=>{
     const fp=dayOrds.filter(o=>isFuoriPaese(o,s)&&!o.isTicket).length;
-    const cash=dayOrds.filter(o=>o.isCash).reduce((a,o)=>a+o.fee,0);
-    const cashN=dayOrds.filter(o=>o.isCash).length;
+    const cash=dayOrds.filter(o=>o.isCash||o.payMethod==='CASH').reduce((a,o)=>a+o.fee,0);
+    const cashN=dayOrds.filter(o=>o.isCash||o.payMethod==='CASH').length;
     const fee=dayOrds.reduce((a,o)=>a+o.fee,0);
     // Tickets (inclusi mezzi ticket = 0.5)
     const dayTickets=dayOrds.reduce((a,o)=>a+(o.ticketCount||0),0); // contatore ticket
@@ -1859,12 +1855,15 @@ function deserializeD(raw){
       econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
       orders: (raw[name].orders||[]).map(o=>{
         const dateObj = o.date ? new Date(o.date) : new Date();
+        const pm = o.payMethod ? String(o.payMethod).trim().toUpperCase() : 'N/A';
         return {
           ...o,
           date: dateObj,
           dateStr: o.dateStr || fmtDate(dateObj),
           monthKey: o.monthKey || `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
-          weekNum: o.weekNum || getWeekOfMonth(dateObj)
+          weekNum: o.weekNum || getWeekOfMonth(dateObj),
+          // Ricalcola sempre isCash dal payMethod — corregge dati vecchi dal cloud
+          isCash: pm.includes('CASH')
         };
       })
     };
