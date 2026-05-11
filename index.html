@@ -663,15 +663,9 @@ function parseRows(rows){
     };
 
     const dateStr=fmtDate(dateObj);
-    // Col K (r[10]) = tariffa di consegna (numero €)
-    // Cerca payMethod (CASH/CARD) scansionando la riga, escludendo col K
-    let payMethod='N/A';
-    for(let j=0;j<r.length;j++){
-      if(j===10) continue; // salta col K che è la tariffa
-      const val=r[j]?String(r[j]).trim().toUpperCase():'';
-      if(val==='CASH'){payMethod='CASH';break;}
-      if(val==='CARD'){payMethod='CARD';break;}
-    }
+    // Col K (r[10]) = modalità pagamento (CASH/CARD)
+    // Col L (r[11]) = tariffa di consegna (€)
+    const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
     // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
     let ticketCount = 0;    // valore ticket (per contatore ticket)
@@ -700,7 +694,7 @@ function parseRows(rows){
       consegnaA:r[5]?String(r[5]).trim():'—',
       payMethod, isCash:payMethod==='CASH',
       total:parseFloat(r[9])||0,
-      tariffaConsegna:parseFloat(r[10])||0,  // Col K = tariffa di consegna
+      tariffaConsegna:parseFloat(r[11])||0,  // Col L = tariffa di consegna
       fee:parseFloat(r[11])||0,
       km:parseFloat(r[14])||0,
       status:r[38]?String(r[38]).trim():'—',
