@@ -203,7 +203,8 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
   <div style="display:flex;align-items:center;gap:8px">
     <div class="hfile" id="fileTag">nessun file caricato</div>
     <button class="hbtn" onclick="document.getElementById('fileInput2').click()">+ Carica file</button>
-    <input type="file" id="fileInput2" accept=".xlsx,.xls" style="display:none" onclick="this.value=''" onchange="loadFile(this.files[0])">
+    <input type="file" id="fileInput2" accept=".xlsx,.xls,.csv" style="display:none" onclick="this.value=''" onchange="loadFile(this.files[0])">
+    <div id="loadStatus" style="display:none;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:6px;border:1px solid var(--brd2);color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
     <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
     <button class="hbtn" onclick="saveSession()" title="Salva tutti i dati in un file JSON" style="background:rgba(37,99,235,.1);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
     <button class="hbtn" onclick="showLoadModal()" title="Carica una sessione salvata">📂 Carica sessione</button>
@@ -599,22 +600,59 @@ doc.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[
 
 function loadFile(file){
   if(!file) return;
-  doc.getElementById('fileTag').textContent=file.name;
 
+  // Accetta solo xlsx/xls
+  const name = file.name.toLowerCase();
+  if(!name.endsWith('.xlsx') && !name.endsWith('.xls') && !name.endsWith('.csv')){
+    showToast('⚠️ Formato non supportato — usa .xlsx o .xls');
+    return;
+  }
+
+  doc.getElementById('fileTag').textContent=file.name;
+  showToast('⏳ Caricamento in corso...');
   cloudPaused = true;
+
   const r=new FileReader();
+  r.onerror = ()=>{ cloudPaused=false; showToast('⚠️ Errore lettura file — riprova'); };
   r.onload=e=>{
-    const wb=XLSX.read(e.target.result,{type:'array'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));
-    if(cloudConnected && fbRef){
-      cloudSaving = true;
-      updateCloudStatus('saving');
-      fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D)})
-        .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ Excel caricato e sincronizzato sul cloud'); })
-        .catch(e=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('⚠️ Excel caricato ma errore cloud: '+e.message); });
-    } else {
-      cloudPaused = false;
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      if(!wb.SheetNames.length){ showToast('⚠️ File vuoto o non valido'); cloudPaused=false; return; }
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:false});
+
+      // Debug: mostra struttura prime righe in console
+      console.log('[LOAD] File:', file.name, '— Righe totali:', rows.length);
+      if(rows[0]) console.log('[LOAD] Riga 0 (header):', rows[0]);
+      if(rows[2]) console.log('[LOAD] Riga 2 (primo ordine):', rows[2]);
+      if(rows[2]) console.log('[LOAD] Col H(7):', rows[2][7], '| Col K(10):', rows[2][10], '| Col L(11):', rows[2][11], '| Col S(18):', rows[2][18]);
+
+      const primaRiga = rows.find((r,i)=>i>=2 && r && r[7]);
+      if(!primaRiga){
+        showToast('⚠️ Nessun fattorino trovato — verifica che col H abbia i nomi');
+        cloudPaused=false;
+        return;
+      }
+
+      const ordiniPrima = Object.values(D).reduce((a,d)=>a+d.orders.length,0);
+      parseRows(rows);
+      const ordiniDopo = Object.values(D).reduce((a,d)=>a+d.orders.length,0);
+      const aggiunti = ordiniDopo - ordiniPrima;
+
+      if(cloudConnected && fbRef){
+        cloudSaving = true;
+        updateCloudStatus('saving');
+        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D)})
+          .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
+          .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
+      } else {
+        cloudPaused = false;
+        showToast('✓ '+aggiunti+' ordini aggiunti da '+file.name); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';}
+      }
+    } catch(err){
+      cloudPaused=false;
+      console.error('[LOAD ERROR]', err);
+      showToast('⚠️ Errore lettura Excel: '+err.message); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').style.color='var(--acc3)';doc.getElementById('loadStatus').textContent='⚠️ '+err.message.substring(0,40);}
     }
   };
   r.readAsArrayBuffer(file);
