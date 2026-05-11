@@ -598,15 +598,19 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if
 doc.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
 
 function loadFile(file){
+  if(!file) return;
   doc.getElementById('fileTag').textContent=file.name;
-  // Blocca il listener Firebase durante il caricamento
+  // Reset input values così si può ricaricare lo stesso file o uno nuovo
+  ['fileInput','fileInput2'].forEach(id=>{
+    const el=doc.getElementById(id);
+    if(el) el.value='';
+  });
   cloudPaused = true;
   const r=new FileReader();
   r.onload=e=>{
     const wb=XLSX.read(e.target.result,{type:'array'});
     const ws=wb.Sheets[wb.SheetNames[0]];
     parseRows(XLSX.utils.sheet_to_json(ws,{header:1,defval:null}));
-    // Forza upload immediato al cloud con i nuovi dati, poi riattiva il listener
     if(cloudConnected && fbRef){
       cloudSaving = true;
       updateCloudStatus('saving');
@@ -663,9 +667,10 @@ function parseRows(rows){
     };
 
     const dateStr=fmtDate(dateObj);
-    // Col K (r[10]) = modalità pagamento (CASH/CARD)
+    // Col K (r[10]) = modalità pagamento (CASH/CARD/N/A)
     // Col L (r[11]) = tariffa di consegna (€)
-    const payMethod=r[10]?String(r[10]).trim().toUpperCase():'N/A';
+    const _rawPay=r[10]?String(r[10]).trim().toUpperCase():'N/A';
+    const payMethod=_rawPay.includes('CASH')?'CASH':_rawPay.includes('CARD')?'CARD':'N/A';
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
     // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
     let ticketCount = 0;    // valore ticket (per contatore ticket)
@@ -728,6 +733,11 @@ function parseRows(rows){
   doc.getElementById('upWrap').classList.add('hidden');
   doc.getElementById('dash').classList.remove('hidden');
   if(!cur||!D[cur]) cur=Object.keys(D)[0];
+  // Aggiorna curMon al mese più recente disponibile per il driver corrente
+  if(cur && D[cur]){
+    const months=getMonths(cur);
+    if(months.length) curMon=months[months.length-1];
+  }
   selectDriver(cur);
   autoSaveToLocalStorage();
   debouncedCloudSave();
