@@ -1373,12 +1373,12 @@ function renderOrders(){
       if(o.isCash)tr.classList.add('tr-cash');
       tr.innerHTML=
         '<td style="padding:4px 6px"><input type="checkbox" class="o-chk" data-idx="'+realIdx+'" onchange="updateBulkBtn()"></td>'+
-        '<td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">'+o.timeRaw+'</td>'+
+        '<td style="font-family:monospace;font-size:10px;color:var(--mut)">'+o.timeRaw+'</td>'+
         '<td>'+shiftB+'</td>'+
         '<td>'+(o.isTicket?'<span class="b bg">🎫 '+o.orderNum+'</span>':'<span class="b bb">#'+o.orderNum+'</span>')+'</td>'+
         '<td style="font-size:10px;color:var(--mut);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.ritiroDa+'">'+o.ritiroDa+'</td>'+
         '<td style="font-size:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+o.consegnaA+'">'+o.consegnaA+'</td>'+
-        '<td style="font-family:'DM Mono',monospace;font-size:10px;color:'+(isFP?'var(--acc3)':'var(--txt)')+'">'+( o.km>0?o.km.toFixed(2)+'km':'n/d')+'</td>'+
+        '<td style="font-size:10px;color:'+(isFP?'var(--acc3)':'var(--txt)')+'">'+( o.km>0?o.km.toFixed(2)+'km':'n/d')+'</td>'+
         '<td>'+(isFP?'<span class="b br">✓</span>':'—')+'</td>'+
         '<td>'+payB+'</td>'+
         '<td>€'+o.total.toFixed(2)+'</td>'+
