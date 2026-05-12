@@ -2247,8 +2247,10 @@ function connectToFirebase(cfg){
       const remoteAt=remote.savedAt?new Date(remote.savedAt).getTime():0;
       let localAt=0;
       try{const lr=localStorage.getItem(LS_KEY);if(lr)localAt=new Date(JSON.parse(lr).savedAt).getTime();}catch(e){}
-      if(remoteAt>localAt+2000){
+      const noLocalData = !Object.keys(D).length && localAt===0;
+      if(noLocalData || remoteAt>localAt+2000){
         D=deserializeD(remote.data);
+        if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
         autoSaveToLocalStorage();
         renderSidebar();
         const keys=Object.keys(D);
@@ -2257,7 +2259,7 @@ function connectToFirebase(cfg){
           doc.getElementById('dash').classList.remove('hidden');
           if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
         }
-        showToast('☁️ Dati aggiornati da un altro dispositivo');
+        showToast(noLocalData?'☁️ Dati caricati dal cloud':'☁️ Dati aggiornati da un altro dispositivo');
       }
     });
     cloudConnected=true;
@@ -2301,6 +2303,26 @@ function updateCloudStatus(s){
     clearTimeout(dot._ct);
     dot._ct=setTimeout(()=>{if(circle)circle.style.background='#9ca3af';if(label)label.textContent='cloud connesso';},3000);
   }
+}
+
+function forcePullFromCloud(){
+  if(!fbRef||!cloudConnected){ showToast('⚠️ Non connesso al cloud'); return; }
+  cloudSaving=false; cloudPaused=false;
+  fbRef.once('value').then(snapshot=>{
+    const remote=snapshot.val();
+    if(!remote||!remote.data){ showToast('ℹ️ Nessun dato trovato sul cloud'); return; }
+    D=deserializeD(remote.data);
+    if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
+    autoSaveToLocalStorage();
+    renderSidebar();
+    const keys=Object.keys(D);
+    if(keys.length){
+      doc.getElementById('upWrap').classList.add('hidden');
+      doc.getElementById('dash').classList.remove('hidden');
+      if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
+    }
+    showToast('☁️ Dati scaricati dal cloud — '+keys.length+' fattorini');
+  }).catch(e=>showToast('⚠️ Errore scaricamento: '+e.message));
 }
 
 function disconnectCloud(){
@@ -2372,7 +2394,8 @@ function showCloudModal(){
         <button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">&#x2715; Disconnetti</button>
       </div>
     </div>`:'';
-  const disconnBtn=cloudConnected?`<button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">&#x2715; Disconnetti</button>`:'';
+  const disconnBtn=cloudConnected?`<button onclick="disconnectCloud()" style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);color:var(--acc3);border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">&#x2715; Disconnetti</button>
+    <button onclick="forcePullFromCloud()" style="background:rgba(8,145,178,.07);border:1px solid rgba(8,145,178,.2);color:#0891b2;border-radius:7px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer">&#x2B07; Scarica dal cloud</button>`:'';
   ov.innerHTML=`
   <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:16px;padding:28px;width:700px;max-width:96vw;max-height:92vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
     <div style="display:flex;align-items:center;justify-content:space-between">
