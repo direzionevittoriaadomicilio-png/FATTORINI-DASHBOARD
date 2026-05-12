@@ -1903,8 +1903,13 @@ function exportCSV(){
 function serializeD(data){
   const out={};
   Object.keys(data).forEach(name=>{
+    // Firebase non accetta "/" nelle chiavi — converti "DD/MM/YYYY" in "DD-MM-YYYY"
+    const mezzoSafe={};
+    Object.keys(data[name].mezzo||{}).forEach(k=>{
+      mezzoSafe[k.replace(/\//g,'-')]=data[name].mezzo[k];
+    });
     out[name]={
-      mezzo: data[name].mezzo,
+      mezzo: mezzoSafe,
       settings: data[name].settings,
       econ: data[name].econ,
       orders: data[name].orders.map(o=>({
@@ -1921,7 +1926,14 @@ function deserializeD(raw){
   const out={};
   Object.keys(raw).forEach(name=>{
     out[name]={
-      mezzo: raw[name].mezzo||{},
+      mezzo: (()=>{
+        // Ripristina chiavi da "DD-MM-YYYY" a "DD/MM/YYYY"
+        const m={};
+        Object.keys(raw[name].mezzo||{}).forEach(k=>{
+          m[k.replace(/-/g,'/')]=raw[name].mezzo[k];
+        });
+        return m;
+      })(),
       settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:14},
       econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
       orders: (raw[name].orders||[]).map(o=>{
