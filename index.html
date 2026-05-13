@@ -735,17 +735,25 @@ function parseRows(rows){
     const _rawPay=r[10]?String(r[10]).trim().toUpperCase():'N/A';
     const payMethod=_rawPay.includes('CASH')?'CASH':_rawPay.includes('CARD')?'CARD':'N/A';
     const orderNumRaw = r[2]!==null&&r[2]!==undefined ? String(r[2]).trim() : '';
-    // Count asterisks — each * = 1 ticket, "* 1/2" or "*1/2" = 0.5 ticket
-    let ticketCount = 0;    // valore ticket (per contatore ticket)
-    let ticketConsegne = 0; // valore consegna (per totale consegne)
+    // Conta asterischi:
+    //   *     = 1 ticket, 1 consegna
+    //   **    = 2 ticket, 2 consegne
+    //   * 1/2 = 1.5 ticket, 1 consegna
+    let ticketCount = 0;
+    let ticketConsegne = 0;
     if(orderNumRaw.includes('*')){
       const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
+      const doubleMatch = orderNumRaw.match(/\*{2,}/) || (orderNumRaw.match(/\*/g)||[]).length >= 2;
       if(halfMatch){
-        ticketCount = 1.5;    // * 1/2 = 1.5 ticket
-        ticketConsegne = 1;   // * 1/2 = 1 consegna
+        ticketCount = 1.5;
+        ticketConsegne = 1;
+      } else if(doubleMatch){
+        const numStars = (orderNumRaw.match(/\*/g)||[]).length;
+        ticketCount = numStars;      // ** = 2, *** = 3, ecc.
+        ticketConsegne = 1;          // sempre 1 consegna, FP se km > soglia
       } else {
-        ticketCount = 1;      // * = 1 ticket
-        ticketConsegne = 1;   // * = 1 consegna
+        ticketCount = 1;
+        ticketConsegne = 1;
       }
     }
     const isTicket = ticketCount > 0;
