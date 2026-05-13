@@ -195,6 +195,15 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
 </style>
+
+  <!-- PWA Manifest inline -->
+  <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Fattorini%20Dashboard%22%2C%22short_name%22%3A%22Fattorini%22%2C%22description%22%3A%22Gestione%20fattorini%20e%20consegne%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f5f7%22%2C%22theme_color%22%3A%22%232563eb%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAA%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Fattorini">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2563eb">
 </head>
 <body>
 
@@ -207,6 +216,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
     <div id="loadStatus" style="display:none;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:6px;border:1px solid var(--brd2);color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
     <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
     <button class="hbtn" onclick="saveSession()" title="Salva tutti i dati in un file JSON" style="background:rgba(37,99,235,.1);border-color:var(--acc);color:var(--acc)">💾 Salva sessione</button>
+    <button id="installBtn" onclick="installApp()" style="display:none;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.3);color:#16a34a;border-radius:7px;padding:5px 10px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer">📲 Installa app</button>
     <button class="hbtn" onclick="showLoadModal()" title="Carica una sessione salvata">📂 Carica sessione</button>
     <input type="file" id="sessionInput" accept=".json" style="display:none" onchange="loadSession(this.files[0])">
     <div style="width:1px;height:20px;background:var(--brd2)"></div>
@@ -1947,14 +1957,26 @@ function deserializeD(raw){
       orders: (raw[name].orders||[]).map(o=>{
         const dateObj = o.date ? new Date(o.date) : new Date();
         const pm = o.payMethod ? String(o.payMethod).trim().toUpperCase() : 'N/A';
+        // Ricalcola ticket da orderNum
+        const oNum = o.orderNum || '';
+        let ticketCount = 0, ticketConsegne = 0;
+        if(oNum.includes('*')){
+          const halfMatch = oNum.match(/\*\s*1\s*\/\s*2/);
+          const numStars = (oNum.match(/\*/g)||[]).length;
+          if(halfMatch){ ticketCount=1.5; ticketConsegne=1; }
+          else if(numStars>=2){ ticketCount=numStars; ticketConsegne=1; }
+          else { ticketCount=1; ticketConsegne=1; }
+        }
         return {
           ...o,
           date: dateObj,
           dateStr: o.dateStr || fmtDate(dateObj),
           monthKey: o.monthKey || `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`,
           weekNum: o.weekNum || getWeekOfMonth(dateObj),
-          // Ricalcola sempre isCash dal payMethod — corregge dati vecchi dal cloud
-          isCash: pm.includes('CASH')
+          isCash: pm.includes('CASH'),
+          isTicket: ticketCount > 0,
+          ticketCount: ticketCount || o.ticketCount || 0,
+          ticketConsegne: ticketConsegne || o.ticketConsegne || 0,
         };
       })
     };
@@ -2480,5 +2502,56 @@ function showCloudModal(){
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+// ── PWA Service Worker ──
+if('serviceWorker' in navigator){
+  const swCode = `
+const CACHE = 'fattorini-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll([location.pathname || '/']))
+  );
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
+});
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl)
+    .then(() => console.log('[PWA] Service worker registrato'))
+    .catch(e => console.warn('[PWA] SW error:', e));
+}
+
+// Mostra bottone "Installa app" quando disponibile
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'none';
+  _deferredPrompt = null;
+});
+function installApp(){
+  if(!_deferredPrompt){ alert('Per installare: clicca i tre puntini del browser → "Installa app" o "Aggiungi a schermata Home"'); return; }
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(() => { _deferredPrompt = null; });
+}
+</script>
+
 </body>
 </html>
