@@ -289,6 +289,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
           <button class="btn btn-ghost" onclick="openEconPanel()">💼 Condizioni economiche</button>
           <button class="btn btn-ghost" onclick="openSettingsPanel()">⚙ Impostazioni tecniche</button>
+          <button class="btn btn-ghost" onclick="openAccontiPanel()" style="color:var(--acc3);border-color:rgba(220,38,38,.3)">💸 Acconti</button>
         </div>
       </div>
 
@@ -451,7 +452,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <div class="ts"><table>
             <thead><tr>
               <th>Settimana</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Gio</th><th>Ven</th><th>Sab</th><th>Dom</th>
-              <th>Cons. (tot.)</th><th>Bonus★</th><th>🌅</th><th>🌙</th>
+              <th>Cons. (tot.)</th><th>Bonus★</th><th>🎫 Ticket</th><th>🌅</th><th>🌙</th>
               <th>Attese</th><th>Extra</th><th>Bonus €</th><th>Cash ord.</th><th>💵 Cash €</th>
             </tr></thead>
             <tbody id="wBody"></tbody>
@@ -868,17 +869,57 @@ function getDays(name,mk){return[...new Set(activeOrders(name).filter(o=>o.month
 function renderSidebar(){
   const list=doc.getElementById('drvList');
   list.innerHTML='';
-  Object.keys(D).forEach((name,i)=>{
+  const allNames=Object.keys(D);
+  const active=allNames.filter(n=>D[n]&&!D[n].standby);
+  const standby=allNames.filter(n=>D[n]&&D[n].standby);
+
+  const makeBtn=(name,i)=>{
     const btn=doc.createElement('button');
-    btn.className='drv-btn'+(name===cur?' on':'');
+    const isOn=name===cur;
+    const isSb=D[name].standby;
+    btn.className='drv-btn'+(isOn?' on':'');
+    if(isSb) btn.style.opacity='0.55';
     const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     const col=COLORS[i%COLORS.length];
-    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}</span><span class="drv-del" title="Elimina fattorino" onclick="event.stopPropagation();deleteDriver('${name}')" style="opacity:0;font-size:13px;padding:0 2px;color:var(--acc3);line-height:1">✕</span>`;
-    btn.onmouseenter=()=>btn.querySelector('.drv-del').style.opacity='1';
-    btn.onmouseleave=()=>btn.querySelector('.drv-del').style.opacity='0';
+    btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div>`+
+      `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}${isSb?' <span style="font-size:9px;color:var(--dim)">(standby)</span>':''}</span>`+
+      `<span class="drv-sb" title="${isSb?'Riattiva':'Metti in standby'}" style="opacity:0;font-size:11px;padding:0 2px;color:var(--dim);line-height:1">${isSb?'▶':'⏸'}</span>`+
+      `<span class="drv-del" title="Elimina" style="opacity:0;font-size:13px;padding:0 2px;color:var(--acc3);line-height:1">✕</span>`;
+    btn.onmouseenter=()=>{btn.querySelector('.drv-del').style.opacity='1';btn.querySelector('.drv-sb').style.opacity='1';};
+    btn.onmouseleave=()=>{btn.querySelector('.drv-del').style.opacity='0';btn.querySelector('.drv-sb').style.opacity='0';};
+    btn.querySelector('.drv-del').onclick=ev=>{ev.stopPropagation();deleteDriver(name);};
+    btn.querySelector('.drv-sb').onclick=ev=>{ev.stopPropagation();toggleStandby(name);};
     btn.onclick=()=>selectDriver(name);
-    list.appendChild(btn);
-  });
+    return btn;
+  };
+
+  active.forEach((name,i)=>list.appendChild(makeBtn(name,i)));
+
+  if(standby.length){
+    const sep=doc.createElement('div');
+    sep.style.cssText='margin:8px 4px 4px;font-family:"DM Mono",monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none';
+    sep.innerHTML='<span style="flex:1;height:1px;background:var(--brd)"></span>Standby<span style="flex:1;height:1px;background:var(--brd)"></span>';
+    let sbVisible=false;
+    const sbList=doc.createElement('div');
+    sbList.style.cssText='display:none;flex-direction:column;gap:3px';
+    standby.forEach((name,i)=>sbList.appendChild(makeBtn(name,active.length+i)));
+    sep.onclick=()=>{sbVisible=!sbVisible;sbList.style.display=sbVisible?'flex':'none';};
+    list.appendChild(sep);
+    list.appendChild(sbList);
+  }
+}
+
+function toggleStandby(name){
+  if(!D[name]) return;
+  D[name].standby=!D[name].standby;
+  renderSidebar();
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+  showToast(`${name} ${D[name].standby?'messo in standby':'riattivato'}`);
+  if(D[name].standby && cur===name){
+    const active=Object.keys(D).find(n=>!D[n].standby);
+    if(active) selectDriver(active);
+  }
 }
 
 function selectDriver(name){
@@ -1281,14 +1322,16 @@ function renderWeekly(){
     const cnt=[1,2,3,4,5,6,0].map(dow=>wd.filter(d=>{
       const o=activeOrders(cur).find(o=>o.dateStr===d.ds);return o?.date.getDay()===dow;
     }).reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0));
+    const wTick=wd.reduce((a,d)=>a+(d.dayOrds||[]).reduce((b,o)=>b+(o.ticketCount||0),0),0);
     rtC+=wC;rtFP+=wFP;rtM+=wM;rtS+=wS;rtAt+=wAtt;rtEx+=wEx;rtBn+=wBn;rtCO+=wCO;rtCa+=wCa;
-    rtCBonus+=wCBonus;
+    rtCBonus+=wCBonus;rtTick+=wTick;
     const tr=doc.createElement('tr');
     tr.innerHTML=`
       <td><span class="b bb">Sett.${wk}</span></td>
       ${cnt.map(c=>c>0?`<td><span class="b bg">${Number(c).toFixed(c%1?1:0)}</span></td>`:'<td><span style="color:var(--dim)">—</span></td>').join('')}
       <td><span class="b by">${wC}</span>${wFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${wFP}fp</span>`:''}</td>
       <td><span class="b bb" title="Ai fini del bonus">${wCBonus.toFixed(1)}★</span></td>
+      <td>${wTick>0?`<span class="b bg">🎫 ${wTick%1?wTick.toFixed(1):wTick}</span>`:'—'}</td>
       <td><span class="sm sm-m">${wM}</span></td><td><span class="sm sm-s">${wS}</span></td>
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${wAtt.toFixed(1)}</td>
       <td style="color:${wEx>0?'var(--grn)':'var(--dim)'}">+${wEx.toFixed(1)}</td>
@@ -1301,6 +1344,7 @@ function renderWeekly(){
   tot.innerHTML=`<td style="color:var(--acc);font-size:9px;font-family:'DM Mono',monospace">TOTALE</td><td colspan="7"></td>
     <td><span class="b by">${rtC}</span>${rtFP>0?`<span class="b br" style="font-size:9px;margin-left:3px">${rtFP}fp</span>`:''}</td>
     <td><span class="b bb">${ms.totCBonus.toFixed(1)}★</span></td>
+    <td>${rtTick>0?`<span class="b bg">🎫 ${rtTick%1?rtTick.toFixed(1):rtTick}</span>`:'—'}</td>
     <td><span class="sm sm-m">${rtM}</span></td><td><span class="sm sm-s">${rtS}</span></td>
     <td style="font-family:'DM Mono',monospace">${rtAt.toFixed(1)}</td>
     <td style="color:${rtEx>0?'var(--grn)':'var(--dim)'}">+${rtEx.toFixed(1)}</td>
@@ -1930,6 +1974,8 @@ function serializeD(data){
       mezzo: mezzoSafe,
       settings: data[name].settings,
       econ: data[name].econ,
+      acconti: data[name].acconti || [],
+      standby: data[name].standby || false,
       orders: data[name].orders.map(o=>({
         ...o,
         date: o.date ? o.date.toISOString() : null
@@ -2504,34 +2550,7 @@ function showCloudModal(){
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-// ── PWA Service Worker ──
-if('serviceWorker' in navigator){
-  const swCode = `
-const CACHE = 'fattorini-v1';
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll([location.pathname || '/']))
-  );
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
-  );
-});
-  `;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl)
-    .then(() => console.log('[PWA] Service worker registrato'))
-    .catch(e => console.warn('[PWA] SW error:', e));
-}
+// ── PWA: solo install prompt (service worker richiede file separato su GitHub Pages) ──
 
 // Mostra bottone "Installa app" quando disponibile
 let _deferredPrompt = null;
