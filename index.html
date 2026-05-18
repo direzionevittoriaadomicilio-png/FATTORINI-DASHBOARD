@@ -378,9 +378,20 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <button class="btn btn-acc" onclick="addAcconto()">+ Aggiungi</button>
         </div>
         <div id="accontiList" style="display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto"></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
-          <span style="font-size:11px;color:var(--mut)">Totale acconti mese selezionato:</span>
-          <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--acc3)" id="accontiTotale">€0.00</span>
+        <div style="background:var(--surf2);border:1px solid var(--brd2);border-radius:10px;padding:12px 14px;margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:11px;color:var(--mut)">💼 Compenso mensile</span>
+            <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--pur)" id="accontiCompenso">€0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:11px;color:var(--mut)">💸 Totale acconti dati</span>
+            <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--acc3)" id="accontiTotale">€0.00</span>
+          </div>
+          <div style="height:1px;background:var(--brd);margin-bottom:8px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;font-weight:700">💰 Ancora da pagare</span>
+            <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800" id="accontiSaldo">€0.00</span>
+          </div>
         </div>
       </div>
 
@@ -2653,6 +2664,22 @@ function renderAccontiList(){
   const tot=filtrati.reduce((s,a)=>s+a.importo,0);
   const totEl=doc.getElementById('accontiTotale');
   if(totEl) totEl.textContent='€'+tot.toFixed(2);
+
+  // Compenso del mese selezionato
+  let compenso=0;
+  if(cur && D[cur] && curMon){
+    try{ compenso=computeMonth(cur,curMon).compTot||0; }catch(e){}
+  }
+  const compEl=doc.getElementById('accontiCompenso');
+  if(compEl) compEl.textContent='€'+compenso.toFixed(2);
+
+  // Saldo = compenso - acconti
+  const saldo=compenso-tot;
+  const saldoEl=doc.getElementById('accontiSaldo');
+  if(saldoEl){
+    saldoEl.textContent='€'+saldo.toFixed(2);
+    saldoEl.style.color=saldo<0?'var(--acc3)':saldo===0?'var(--dim)':'var(--grn)';
+  }
 }
 
 </script>
