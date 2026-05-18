@@ -1327,7 +1327,7 @@ function renderWeekly(){
   });
 
   const tb=doc.getElementById('wBody');tb.innerHTML='';
-  let rtC=0,rtFP=0,rtCBonus=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0;
+  let rtC=0,rtFP=0,rtCBonus=0,rtM=0,rtS=0,rtAt=0,rtEx=0,rtBn=0,rtCO=0,rtCa=0,rtTick=0;
 
   Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
     const wd=byWeek[wk];
