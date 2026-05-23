@@ -2663,113 +2663,6 @@ function showCloudModal(){
   doc.body.appendChild(ov);
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
 }
-</script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<script>
-// ── PWA: solo install prompt (service worker richiede file separato su GitHub Pages) ──
-
-// Mostra bottone "Installa app" quando disponibile
-let _deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  _deferredPrompt = e;
-  const btn = document.getElementById('installBtn');
-  if(btn) btn.style.display = 'flex';
-});
-window.addEventListener('appinstalled', () => {
-  const btn = document.getElementById('installBtn');
-  if(btn) btn.style.display = 'none';
-  _deferredPrompt = null;
-});
-function installApp(){
-  if(!_deferredPrompt){ alert('Per installare: clicca i tre puntini del browser → "Installa app" o "Aggiungi a schermata Home"'); return; }
-  _deferredPrompt.prompt();
-  _deferredPrompt.userChoice.then(() => { _deferredPrompt = null; });
-}
-
-// ── ACCONTI ──
-function openAccontiPanel(){
-  if(!cur||!D[cur]) return;
-  if(!D[cur].acconti) D[cur].acconti=[];
-  doc.getElementById('accontiDriverName').textContent=cur;
-  const today=new Date();
-  doc.getElementById('accontoData').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  doc.getElementById('accontoImporto').value='';
-  doc.getElementById('accontoNote').value='';
-  doc.getElementById('econPanel').classList.add('hidden');
-  doc.getElementById('settPanel').classList.add('hidden');
-  doc.getElementById('accontiPanel').classList.remove('hidden');
-  renderAccontiList();
-}
-function closeAccontiPanel(){
-  doc.getElementById('accontiPanel').classList.add('hidden');
-}
-function addAcconto(){
-  const dataVal=doc.getElementById('accontoData').value;
-  const importo=parseFloat(doc.getElementById('accontoImporto').value)||0;
-  const note=doc.getElementById('accontoNote').value.trim();
-  if(!dataVal||importo<=0){ showToast('⚠️ Inserisci data e importo'); return; }
-  if(!D[cur].acconti) D[cur].acconti=[];
-  D[cur].acconti.push({id:Date.now(),data:dataVal,importo,note});
-  D[cur].acconti.sort((a,b)=>a.data.localeCompare(b.data));
-  renderAccontiList();
-  autoSaveToLocalStorage();
-  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
-  showToast(`💸 Acconto €${importo.toFixed(2)} aggiunto`);
-  doc.getElementById('accontoImporto').value='';
-  doc.getElementById('accontoNote').value='';
-}
-function deleteAcconto(id){
-  if(!D[cur]||!D[cur].acconti) return;
-  D[cur].acconti=D[cur].acconti.filter(a=>a.id!==id);
-  renderAccontiList();
-  autoSaveToLocalStorage();
-  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
-}
-function renderAccontiList(){
-  if(!cur||!D[cur]) return;
-  const list=doc.getElementById('accontiList');
-  if(!list) return;
-  const acconti=D[cur].acconti||[];
-  const filtrati=curMon?acconti.filter(a=>a.data.startsWith(curMon)):acconti;
-  list.innerHTML='';
-  if(!filtrati.length){
-    list.innerHTML='<div style="font-size:11px;color:var(--dim);padding:8px 0">Nessun acconto per '+(curMon?mlabel(curMon):'questo periodo')+'</div>';
-  }
-  filtrati.forEach(a=>{
-    const row=doc.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:10px;background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 10px';
-    const d=new Date(a.data+'T12:00:00');
-    row.innerHTML=
-      `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut);flex:0 0 80px">${d.toLocaleDateString('it-IT')}</span>`+
-      `<span style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--acc3);flex:0 0 80px">€${a.importo.toFixed(2)}</span>`+
-      `<span style="font-size:11px;color:var(--mut);flex:1">${a.note||'—'}</span>`+
-      `<button onclick="deleteAcconto(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:13px;padding:0 4px" title="Elimina">✕</button>`;
-    list.appendChild(row);
-  });
-  const tot=filtrati.reduce((s,a)=>s+a.importo,0);
-  const totEl=doc.getElementById('accontiTotale');
-  if(totEl) totEl.textContent='€'+tot.toFixed(2);
-
-  // Compenso del mese selezionato
-  let compenso=0;
-  if(cur && D[cur] && curMon){
-    try{ compenso=computeMonth(cur,curMon).compTot||0; }catch(e){}
-  }
-  const compEl=doc.getElementById('accontiCompenso');
-  if(compEl) compEl.textContent='€'+compenso.toFixed(2);
-
-  // Saldo = compenso - acconti
-  const saldo=compenso-tot;
-  const saldoEl=doc.getElementById('accontiSaldo');
-  if(saldoEl){
-    saldoEl.textContent='€'+saldo.toFixed(2);
-    saldoEl.style.color=saldo<0?'var(--acc3)':saldo===0?'var(--dim)':'var(--grn)';
-  }
-}
-
 
 // ══════════════════════════════════════════
 // SCHEDA TURNI
@@ -2819,11 +2712,22 @@ function getWeekNum(offset){
 
 // ── Navigazione ──
 function selectTurni(){
-  ['dash','viewGlobal','upWrap'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('hidden'); });
-  document.getElementById('viewTurni').classList.remove('hidden');
-  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('btnTurni').classList.add('on');
-  cur=null; loadTurni(); renderTurni();
+  // Debug: nascondi tutto
+  const ids=['dash','viewGlobal','upWrap'];
+  ids.forEach(id=>{ const el=document.getElementById(id)||doc.getElementById(id); if(el) el.classList.add('hidden'); });
+  // Mostra viewTurni
+  const vt=document.getElementById('viewTurni')||doc.getElementById('viewTurni');
+  if(!vt){ showToast('ERRORE: viewTurni non trovato!'); return; }
+  vt.classList.remove('hidden');
+  vt.style.display='block'; // forza display
+  // Aggiorna bottone
+  try{ document.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on')); }catch(e){}
+  try{ document.getElementById('btnTurni').classList.add('on'); }catch(e){}
+  cur=null;
+  // Carica e renderizza
+  try{ loadTurni(); }catch(e){ showToast('loadTurni err: '+e.message); return; }
+  try{ renderTurni(); }catch(e){ showToast('renderTurni err: '+e.message); return; }
+  showToast('✓ Turni caricati');
 }
 function navigateWeek(dir){ curWeekOffset+=dir; renderTurni(); }
 function goToCurrentWeek(){ curWeekOffset=0; renderTurni(); }
@@ -3029,6 +2933,115 @@ function removeFromShift(wk,giorno,shiftId,idx){
   TURNI[wk][giorno][shiftId].splice(idx,1);
   saveTurni(); renderTurniGrid(); renderTurniRiepilogo();
 }
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+// ── PWA: solo install prompt (service worker richiede file separato su GitHub Pages) ──
+
+// Mostra bottone "Installa app" quando disponibile
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'none';
+  _deferredPrompt = null;
+});
+function installApp(){
+  if(!_deferredPrompt){ alert('Per installare: clicca i tre puntini del browser → "Installa app" o "Aggiungi a schermata Home"'); return; }
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(() => { _deferredPrompt = null; });
+}
+
+// ── ACCONTI ──
+function openAccontiPanel(){
+  if(!cur||!D[cur]) return;
+  if(!D[cur].acconti) D[cur].acconti=[];
+  doc.getElementById('accontiDriverName').textContent=cur;
+  const today=new Date();
+  doc.getElementById('accontoData').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  doc.getElementById('accontoImporto').value='';
+  doc.getElementById('accontoNote').value='';
+  doc.getElementById('econPanel').classList.add('hidden');
+  doc.getElementById('settPanel').classList.add('hidden');
+  doc.getElementById('accontiPanel').classList.remove('hidden');
+  renderAccontiList();
+}
+function closeAccontiPanel(){
+  doc.getElementById('accontiPanel').classList.add('hidden');
+}
+function addAcconto(){
+  const dataVal=doc.getElementById('accontoData').value;
+  const importo=parseFloat(doc.getElementById('accontoImporto').value)||0;
+  const note=doc.getElementById('accontoNote').value.trim();
+  if(!dataVal||importo<=0){ showToast('⚠️ Inserisci data e importo'); return; }
+  if(!D[cur].acconti) D[cur].acconti=[];
+  D[cur].acconti.push({id:Date.now(),data:dataVal,importo,note});
+  D[cur].acconti.sort((a,b)=>a.data.localeCompare(b.data));
+  renderAccontiList();
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+  showToast(`💸 Acconto €${importo.toFixed(2)} aggiunto`);
+  doc.getElementById('accontoImporto').value='';
+  doc.getElementById('accontoNote').value='';
+}
+function deleteAcconto(id){
+  if(!D[cur]||!D[cur].acconti) return;
+  D[cur].acconti=D[cur].acconti.filter(a=>a.id!==id);
+  renderAccontiList();
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+}
+function renderAccontiList(){
+  if(!cur||!D[cur]) return;
+  const list=doc.getElementById('accontiList');
+  if(!list) return;
+  const acconti=D[cur].acconti||[];
+  const filtrati=curMon?acconti.filter(a=>a.data.startsWith(curMon)):acconti;
+  list.innerHTML='';
+  if(!filtrati.length){
+    list.innerHTML='<div style="font-size:11px;color:var(--dim);padding:8px 0">Nessun acconto per '+(curMon?mlabel(curMon):'questo periodo')+'</div>';
+  }
+  filtrati.forEach(a=>{
+    const row=doc.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 10px';
+    const d=new Date(a.data+'T12:00:00');
+    row.innerHTML=
+      `<span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut);flex:0 0 80px">${d.toLocaleDateString('it-IT')}</span>`+
+      `<span style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--acc3);flex:0 0 80px">€${a.importo.toFixed(2)}</span>`+
+      `<span style="font-size:11px;color:var(--mut);flex:1">${a.note||'—'}</span>`+
+      `<button onclick="deleteAcconto(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--dim);font-size:13px;padding:0 4px" title="Elimina">✕</button>`;
+    list.appendChild(row);
+  });
+  const tot=filtrati.reduce((s,a)=>s+a.importo,0);
+  const totEl=doc.getElementById('accontiTotale');
+  if(totEl) totEl.textContent='€'+tot.toFixed(2);
+
+  // Compenso del mese selezionato
+  let compenso=0;
+  if(cur && D[cur] && curMon){
+    try{ compenso=computeMonth(cur,curMon).compTot||0; }catch(e){}
+  }
+  const compEl=doc.getElementById('accontiCompenso');
+  if(compEl) compEl.textContent='€'+compenso.toFixed(2);
+
+  // Saldo = compenso - acconti
+  const saldo=compenso-tot;
+  const saldoEl=doc.getElementById('accontiSaldo');
+  if(saldoEl){
+    saldoEl.textContent='€'+saldo.toFixed(2);
+    saldoEl.style.color=saldo<0?'var(--acc3)':saldo===0?'var(--dim)':'var(--grn)';
+  }
+}
+
+
+
 
 </script>
 
