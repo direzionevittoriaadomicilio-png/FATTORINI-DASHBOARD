@@ -191,6 +191,26 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 .acc-body tbody tr:last-child td{border-bottom:none}
 .acc-body tbody tr:hover td{background:var(--surf2)}
 
+/* TURNI */
+.turni-grid{display:grid;grid-template-columns:90px repeat(7,1fr);gap:0;border:1px solid var(--brd);border-radius:10px;overflow:hidden;background:var(--surf)}
+.turni-th{background:var(--surf2);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:7px 6px;text-align:center;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd)}
+.turni-th:last-child{border-right:none}
+.turni-shift-lbl{background:var(--surf2);padding:8px 6px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px}
+.turni-shift-lbl:last-of-type{border-bottom:none}
+.turni-shift-name{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--txt)}
+.turni-shift-time{font-family:'DM Mono',monospace;font-size:8px;color:var(--dim)}
+.turni-cell{padding:5px 5px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:52px;vertical-align:top;cursor:pointer;transition:background .12s;position:relative}
+.turni-cell:last-child{border-right:none}
+.turni-cell:hover{background:rgba(37,99,235,.03)}
+.turni-cell.last-row{border-bottom:none}
+.drv-chip{display:inline-flex;align-items:center;gap:3px;background:var(--surf3);border:1px solid var(--brd2);border-radius:4px;padding:2px 5px;font-size:9px;font-family:'DM Mono',monospace;margin:1px;white-space:nowrap;cursor:default}
+.drv-chip .chip-del{cursor:pointer;color:var(--dim);font-size:10px;line-height:1;padding:0 1px}
+.drv-chip .chip-del:hover{color:var(--acc3)}
+.chip-mat{background:rgba(253,224,71,.15);border-color:rgba(253,224,71,.4);color:#92400e}
+.chip-pom{background:rgba(8,145,178,.08);border-color:rgba(8,145,178,.25);color:var(--acc2)}
+.turni-add-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;border:1px dashed var(--brd2);background:transparent;color:var(--dim);font-size:10px;cursor:pointer;margin:1px;transition:all .12s}
+.turni-add-btn:hover{border-color:var(--acc);color:var(--acc);background:rgba(37,99,235,.05)}
+
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
@@ -255,6 +275,10 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 <div class="layout">
   <aside>
     <div class="aside-title">Fattorini</div>
+    <button class="drv-btn" id="btnTurni" onclick="selectTurni()" style="margin-bottom:3px;border:1px solid var(--brd2)">
+      <div class="drv-av" style="background:rgba(8,145,178,.12);color:var(--acc2)">📅</div>
+      <span>Turni</span>
+    </button>
     <button class="drv-btn" id="btnGlobal" onclick="selectGlobal()" style="margin-bottom:6px;border:1px solid var(--brd2)">
       <div class="drv-av" style="background:rgba(37,99,235,.15);color:var(--acc)">📊</div>
       <span>Riepilogo totale</span>
@@ -574,7 +598,68 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
       </div>
     </div>
 
-    </main>
+  
+    <!-- TURNI VIEW -->
+    <div id="viewTurni" class="hidden" style="padding-bottom:40px">
+
+      <!-- Header navigazione settimana -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onclick="navigateWeek(-1)" style="background:var(--surf);border:1px solid var(--brd2);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:14px">‹</button>
+          <div style="text-align:center">
+            <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800" id="turniWeekTitle">—</div>
+            <div style="font-size:11px;color:var(--mut)" id="turniWeekDates">—</div>
+          </div>
+          <button onclick="navigateWeek(1)" style="background:var(--surf);border:1px solid var(--brd2);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:14px">›</button>
+          <button onclick="goToCurrentWeek()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:6px 10px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">Oggi</button>
+        </div>
+        <!-- Zone tabs -->
+        <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:8px;padding:5px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--acc);font-weight:700">📍 Vittoria</div>
+      </div>
+
+      <!-- Griglia turni -->
+      <div class="turni-grid" id="turniGrid"></div>
+
+      <!-- Riepilogo settimana -->
+      <div style="margin-top:14px;background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:14px" id="turniRiepilogo"></div>
+
+    </div>
+
+    <!-- POPUP aggiungi fattorino a turno -->
+    <div id="turniPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center">
+      <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:12px;padding:20px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.15)">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;margin-bottom:4px" id="popupTitle">Aggiungi fattorino</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:14px" id="popupSubtitle">—</div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Fattorino</label>
+          <select class="inp" id="popupDriver" style="font-size:12px"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <div class="field">
+            <label>Mezzo</label>
+            <select class="inp" id="popupMezzo" style="font-size:12px">
+              <option value="">—</option>
+              <option>Ford</option>
+              <option>Citroen</option>
+              <option>Auto propria</option>
+              <option>Scooter</option>
+              <option>Moto</option>
+              <option>Bici</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Note</label>
+            <input class="inp" type="text" id="popupNote" placeholder="es. pulizia..." style="font-size:12px">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button onclick="closePopup()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer">Annulla</button>
+          <button onclick="confirmAddToShift()" style="background:var(--acc);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:700">✓ Aggiungi</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
 </div>
 
 <!-- EDIT/ADD ORDER MODAL -->
@@ -950,6 +1035,7 @@ function toggleStandby(name){
 function selectDriver(name){
   cur=name;
   doc.getElementById('viewGlobal').classList.add('hidden');
+  doc.getElementById('viewTurni').classList.add('hidden');
   doc.getElementById('dash').classList.remove('hidden');
   doc.getElementById('upWrap').classList.add('hidden');
   doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on',b.id!=='btnGlobal'&&b.querySelector('span').textContent===name));
@@ -1845,6 +1931,7 @@ function selectGlobal(){
   doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.toggle('on', b.id==='btnGlobal'));
   // Hide driver dashboard, show global
   doc.getElementById('dash').classList.add('hidden');
+  doc.getElementById('viewTurni').classList.add('hidden');
   const vg=doc.getElementById('viewGlobal');
   vg.classList.remove('hidden');
   vg.scrollIntoView({behavior:'smooth',block:'start'});
@@ -2681,6 +2768,258 @@ function renderAccontiList(){
     saldoEl.textContent='€'+saldo.toFixed(2);
     saldoEl.style.color=saldo<0?'var(--acc3)':saldo===0?'var(--dim)':'var(--grn)';
   }
+}
+
+
+// ══════════════════════════════════════════
+// SCHEDA TURNI
+// ══════════════════════════════════════════
+let TURNI = {};
+const TURNI_KEY = 'fattorini_turni_v1';
+const GIORNI     = ['lun','mar','mer','gio','ven','sab','dom'];
+const GIORNI_IT  = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+
+// Definizione turni con slot attesi per giorno
+const SHIFTS = [
+  {id:'09-14', label:'Mattina',    time:'09:00–14:00', cls:'chip-mat',
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:1,dom:1}},
+  {id:'11-14', label:'½ Mattina',  time:'11:00–14:00', cls:'chip-mat',
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:1,dom:1}},
+  {id:'17-22', label:'Pomeriggio', time:'17:00–22:00', cls:'chip-pom',
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:0,sab:0,dom:0}},
+  {id:'18-23', label:'Tardo pom.', time:'18:00–23:00', cls:'chip-pom',
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:0,dom:0}},
+  {id:'18-22', label:'Dom. pom.',  time:'18:00–22:00', cls:'chip-pom',
+   attesi:{lun:0,mar:0,mer:0,gio:0,ven:0,sab:0,dom:1}},
+  {id:'19-23', label:'Sera',       time:'19:00–23:00', cls:'chip-pom',
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:2,sab:5,dom:5}},
+];
+
+let curWeekOffset = 0;
+let popupCtx = null;
+
+// ── Utility ──
+function getWeekKey(offset){
+  const d=new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate()-(d.getDay()||7)+1+offset*7);
+  const y=d.getFullYear(), jan4=new Date(y,0,4);
+  const w=Math.ceil(((d-jan4)/86400000+(jan4.getDay()||7))/7);
+  return y+'-W'+String(w).padStart(2,'0');
+}
+function getWeekDates(offset){
+  const d=new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate()-(d.getDay()||7)+1+offset*7);
+  return Array.from({length:7},(_,i)=>{ const dd=new Date(d); dd.setDate(d.getDate()+i); return dd; });
+}
+function fmtShort(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); }
+function getWeekNum(offset){
+  const d=getWeekDates(offset)[0], y=d.getFullYear(), jan4=new Date(y,0,4);
+  return Math.ceil(((d-jan4)/86400000+(jan4.getDay()||7))/7);
+}
+
+// ── Navigazione ──
+function selectTurni(){
+  ['dash','viewGlobal','upWrap'].forEach(id=>{ const el=doc.getElementById(id); if(el) el.classList.add('hidden'); });
+  doc.getElementById('viewTurni').classList.remove('hidden');
+  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on'));
+  doc.getElementById('btnTurni').classList.add('on');
+  cur=null; loadTurni(); renderTurni();
+}
+function navigateWeek(dir){ curWeekOffset+=dir; renderTurni(); }
+function goToCurrentWeek(){ curWeekOffset=0; renderTurni(); }
+
+// ── Persistenza ──
+function saveTurni(){
+  try{ localStorage.setItem(TURNI_KEY,JSON.stringify(TURNI)); }catch(e){}
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+}
+function loadTurni(){
+  try{ const s=localStorage.getItem(TURNI_KEY); if(s) TURNI=JSON.parse(s); }catch(e){}
+}
+function getWeekData(wk){
+  if(!TURNI[wk]) TURNI[wk]={};
+  GIORNI.forEach(g=>{ if(!TURNI[wk][g]) TURNI[wk][g]={}; SHIFTS.forEach(s=>{ if(!TURNI[wk][g][s.id]) TURNI[wk][g][s.id]=[]; }); });
+  return TURNI[wk];
+}
+
+// ── Render ──
+function renderTurni(){
+  const dates=getWeekDates(curWeekOffset);
+  doc.getElementById('turniWeekTitle').textContent='Settimana '+getWeekNum(curWeekOffset);
+  doc.getElementById('turniWeekDates').textContent=fmtShort(dates[0])+' – '+fmtShort(dates[6])+' '+dates[0].getFullYear();
+  renderTurniGrid();
+  renderTurniRiepilogo();
+}
+
+function renderTurniGrid(){
+  const wk=getWeekKey(curWeekOffset);
+  const dates=getWeekDates(curWeekOffset);
+  const data=getWeekData(wk);
+  const grid=doc.getElementById('turniGrid');
+  grid.innerHTML='';
+  const today=fmtShort(new Date());
+
+  // Header
+  const th0=doc.createElement('div'); th0.className='turni-th'; th0.textContent='TURNO'; grid.appendChild(th0);
+  GIORNI.forEach((g,i)=>{
+    const th=doc.createElement('div'); th.className='turni-th';
+    const isT=fmtShort(dates[i])===today;
+    if(isT){th.style.cssText='background:rgba(37,99,235,.1);color:var(--acc);font-weight:800';}
+    th.innerHTML=GIORNI_IT[i].substring(0,3).toUpperCase()+'<br><span style="font-size:8px;font-weight:400;opacity:.7">'+fmtShort(dates[i])+'</span>';
+    grid.appendChild(th);
+  });
+
+  // Righe turni
+  SHIFTS.forEach((shift,si)=>{
+    const isLast=si===SHIFTS.length-1;
+
+    // Label turno
+    const lbl=doc.createElement('div');
+    lbl.className='turni-shift-lbl'+(isLast?' last-row':'');
+    lbl.innerHTML='<span class="turni-shift-name">'+shift.label+'</span><span class="turni-shift-time">'+shift.time+'</span>';
+    grid.appendChild(lbl);
+
+    // Celle
+    GIORNI.forEach((g,gi)=>{
+      const cell=doc.createElement('div');
+      cell.className='turni-cell'+(isLast?' last-row':'');
+      const attesi=shift.attesi[g]||0;
+      const slots=data[g][shift.id]||[];
+
+      // Chip fattorini assegnati
+      slots.forEach((slot,idx)=>{
+        const chip=doc.createElement('span');
+        chip.className='drv-chip '+shift.cls;
+        chip.innerHTML=
+          slot.name+
+          (slot.mezzo?' <span style="opacity:.55;font-size:8px">'+slot.mezzo+'</span>':'')+
+          (slot.note?' <span style="opacity:.55;font-size:8px;font-style:italic">'+slot.note+'</span>':'')+
+          '<span class="chip-del" onclick="removeFromShift(''+wk+'',''+g+'',''+shift.id+'','+idx+');event.stopPropagation()">✕</span>';
+        cell.appendChild(chip);
+      });
+
+      // Indicatore slot mancanti
+      if(attesi>0 && slots.length<attesi){
+        const missing=attesi-slots.length;
+        for(let m=0;m<missing;m++){
+          const ph=doc.createElement('span');
+          ph.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;border:1.5px dashed var(--brd2);background:rgba(0,0,0,.02);font-size:9px;color:var(--brd2);margin:1px;cursor:pointer';
+          ph.textContent='+';
+          ph.title='Slot atteso';
+          ph.onclick=(e)=>{e.stopPropagation();openShiftPopup(wk,g,shift.id,gi,si);};
+          cell.appendChild(ph);
+        }
+      } else {
+        // Bottone + extra
+        const addBtn=doc.createElement('button');
+        addBtn.className='turni-add-btn'; addBtn.textContent='+';
+        addBtn.onclick=(e)=>{e.stopPropagation();openShiftPopup(wk,g,shift.id,gi,si);};
+        cell.appendChild(addBtn);
+      }
+
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function renderTurniRiepilogo(){
+  const wk=getWeekKey(curWeekOffset);
+  const el=doc.getElementById('turniRiepilogo');
+  if(!el) return;
+  const data=TURNI[wk]||{};
+  const counter={};
+  GIORNI.forEach(g=>{
+    SHIFTS.forEach(s=>{
+      ((data[g]||{})[s.id]||[]).forEach(slot=>{
+        if(!counter[slot.name]) counter[slot.name]={mat:0,pom:0,tot:0,giorni:new Set()};
+        if(s.id==='09-14'||s.id==='11-14') counter[slot.name].mat++;
+        else counter[slot.name].pom++;
+        counter[slot.name].tot++;
+        counter[slot.name].giorni.add(g);
+      });
+    });
+  });
+
+  // Controllo copertura turni attesi
+  const scoperti=[];
+  GIORNI.forEach((g,gi)=>{
+    SHIFTS.forEach(s=>{
+      const attesi=s.attesi[g]||0;
+      const assegnati=((data[g]||{})[s.id]||[]).length;
+      if(attesi>0 && assegnati<attesi){
+        scoperti.push(GIORNI_IT[gi].substring(0,3)+' '+s.time+' ('+assegnati+'/'+attesi+')');
+      }
+    });
+  });
+
+  const names=Object.keys(counter).sort();
+  let html='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
+
+  // Riepilogo fattorini
+  html+='<div style="flex:1;min-width:260px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Turni assegnati</div>';
+  if(!names.length){
+    html+='<div style="font-size:11px;color:var(--dim)">Nessun fattorino assegnato ancora</div>';
+  } else {
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    names.forEach(n=>{
+      html+='<div style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:6px 10px;font-size:10px">'+
+        '<span style="font-family:'DM Mono',monospace;font-weight:700">'+n+'</span> '+
+        '<span style="color:var(--mut)">🌅'+counter[n].mat+' 🌙'+counter[n].pom+' · <b>'+counter[n].tot+' turni</b></span>'+
+        '</div>';
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // Alert copertura
+  if(scoperti.length){
+    html+='<div style="min-width:200px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--acc3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠ Turni scoperti</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:3px">';
+    scoperti.forEach(s=>{ html+='<div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--acc3)">'+s+'</div>'; });
+    html+='</div></div>';
+  } else if(names.length){
+    html+='<div style="font-size:11px;color:var(--grn);font-weight:700">✓ Tutti i turni coperti</div>';
+  }
+
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ── Popup ──
+function openShiftPopup(wk,giorno,shiftId,gi,si){
+  popupCtx={wk,giorno,shiftId};
+  const shift=SHIFTS.find(s=>s.id===shiftId);
+  doc.getElementById('popupTitle').textContent='Aggiungi fattorino';
+  doc.getElementById('popupSubtitle').textContent=GIORNI_IT[gi]+' · '+shift.time;
+  const sel=doc.getElementById('popupDriver');
+  sel.innerHTML='';
+  const driverNames=[...new Set(Object.keys(D))].sort();
+  // Aggiungi anche nomi non ancora in D ma presenti nei turni passati
+  const extra=new Set();
+  Object.values(TURNI).forEach(wkData=>{ Object.values(wkData).forEach(dayData=>{ Object.values(dayData).forEach(slots=>{ slots.forEach(s=>extra.add(s.name)); }); }); });
+  [...new Set([...driverNames,...extra])].sort().forEach(n=>{ const o=doc.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+  const selM=doc.getElementById('popupMezzo');
+  selM.innerHTML='<option value="">—</option>';
+  (typeof MEZZI!=='undefined'?MEZZI:[]).filter(m=>m&&m!=='—').forEach(m=>{ const o=doc.createElement('option'); o.value=m; o.textContent=m; selM.appendChild(o); });
+  doc.getElementById('popupNote').value='';
+  doc.getElementById('turniPopup').style.display='flex';
+}
+function closePopup(){ doc.getElementById('turniPopup').style.display='none'; popupCtx=null; }
+function confirmAddToShift(){
+  if(!popupCtx) return;
+  const name=doc.getElementById('popupDriver').value;
+  const mezzo=doc.getElementById('popupMezzo').value;
+  const note=doc.getElementById('popupNote').value.trim();
+  if(!name){ showToast('⚠️ Seleziona un fattorino'); return; }
+  const {wk,giorno,shiftId}=popupCtx;
+  getWeekData(wk)[giorno][shiftId].push({name,mezzo,note});
+  saveTurni(); closePopup(); renderTurniGrid(); renderTurniRiepilogo();
+  showToast('✓ '+name+' aggiunto');
+}
+function removeFromShift(wk,giorno,shiftId,idx){
+  if(!TURNI[wk]||!TURNI[wk][giorno]||!TURNI[wk][giorno][shiftId]) return;
+  TURNI[wk][giorno][shiftId].splice(idx,1);
+  saveTurni(); renderTurniGrid(); renderTurniRiepilogo();
 }
 
 </script>
