@@ -634,24 +634,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <label>Fattorino</label>
           <select class="inp" id="popupDriver" style="font-size:12px"></select>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-          <div class="field">
-            <label>Mezzo</label>
-            <select class="inp" id="popupMezzo" style="font-size:12px">
-              <option value="">—</option>
-              <option>Ford</option>
-              <option>Citroen</option>
-              <option>Auto propria</option>
-              <option>Scooter</option>
-              <option>Moto</option>
-              <option>Bici</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Note</label>
-            <input class="inp" type="text" id="popupNote" placeholder="es. pulizia..." style="font-size:12px">
-          </div>
-        </div>
+
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button onclick="closePopup()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer">Annulla</button>
           <button onclick="confirmAddToShift()" style="background:var(--acc);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:700">✓ Aggiungi</button>
@@ -2868,8 +2851,6 @@ function renderTurniGrid(){
         chip.style.cssText='background:'+dc.bg+';border-color:'+dc.border+';color:'+dc.text;
         chip.innerHTML=
           '<b>'+slot.name+'</b>'+
-          (slot.mezzo?' <span style="opacity:.6;font-size:8px">·'+slot.mezzo+'</span>':'')+
-          (slot.note?' <span style="opacity:.6;font-size:8px;font-style:italic">·'+slot.note+'</span>':'')+
           '<span class="chip-del" onclick="removeFromShift(\'' + wk + '\',\'' + g + '\',\'' + shift.id + '\',' + idx + ');event.stopPropagation()">✕</span>';
         cell.appendChild(chip);
       });
@@ -2974,21 +2955,16 @@ function openShiftPopup(wk,giorno,shiftId,gi,si){
   const extra=new Set();
   Object.values(TURNI).forEach(wkData=>{ Object.values(wkData).forEach(dayData=>{ Object.values(dayData).forEach(slots=>{ slots.forEach(s=>extra.add(s.name)); }); }); });
   [...new Set([...driverNames,...extra])].sort().forEach(n=>{ const o=doc.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
-  const selM=document.getElementById('popupMezzo');
-  selM.innerHTML='<option value="">—</option>';
-  (typeof MEZZI!=='undefined'?MEZZI:[]).filter(m=>m&&m!=='—').forEach(m=>{ const o=doc.createElement('option'); o.value=m; o.textContent=m; selM.appendChild(o); });
-  document.getElementById('popupNote').value='';
+
   document.getElementById('turniPopup').style.display='flex';
 }
 function closePopup(){ document.getElementById('turniPopup').style.display='none'; popupCtx=null; }
 function confirmAddToShift(){
   if(!popupCtx) return;
   const name=document.getElementById('popupDriver').value;
-  const mezzo=document.getElementById('popupMezzo').value;
-  const note=document.getElementById('popupNote').value.trim();
   if(!name){ showToast('⚠️ Seleziona un fattorino'); return; }
   const {wk,giorno,shiftId}=popupCtx;
-  getWeekData(wk)[giorno][shiftId].push({name,mezzo,note});
+  getWeekData(wk)[giorno][shiftId].push({name});
   saveTurni(); closePopup(); renderTurniGrid(); renderTurniRiepilogo();
   showToast('✓ '+name+' aggiunto');
 }
