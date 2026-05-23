@@ -2806,7 +2806,7 @@ function renderTurniGrid(){
           slot.name+
           (slot.mezzo?' <span style="opacity:.55;font-size:8px">'+slot.mezzo+'</span>':'')+
           (slot.note?' <span style="opacity:.55;font-size:8px;font-style:italic">'+slot.note+'</span>':'')+
-          '<span class="chip-del" onclick="removeFromShift(''+wk+'',''+g+'',''+shift.id+'','+idx+');event.stopPropagation()">✕</span>';
+          '<span class="chip-del" onclick="removeFromShift(\'' + wk + '\',\'' + g + '\',\'' + shift.id + '\',' + idx + ');event.stopPropagation()">✕</span>';
         cell.appendChild(chip);
       });
 
@@ -2868,14 +2868,14 @@ function renderTurniRiepilogo(){
   let html='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">';
 
   // Riepilogo fattorini
-  html+='<div style="flex:1;min-width:260px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Turni assegnati</div>';
+  html+='<div style="flex:1;min-width:260px"><div style="font-family:monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Turni assegnati</div>';
   if(!names.length){
     html+='<div style="font-size:11px;color:var(--dim)">Nessun fattorino assegnato ancora</div>';
   } else {
     html+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
     names.forEach(n=>{
       html+='<div style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:6px 10px;font-size:10px">'+
-        '<span style="font-family:'DM Mono',monospace;font-weight:700">'+n+'</span> '+
+        '<span style="font-family:monospace;font-weight:700">'+n+'</span> '+
         '<span style="color:var(--mut)">🌅'+counter[n].mat+' 🌙'+counter[n].pom+' · <b>'+counter[n].tot+' turni</b></span>'+
         '</div>';
     });
@@ -2885,9 +2885,9 @@ function renderTurniRiepilogo(){
 
   // Alert copertura
   if(scoperti.length){
-    html+='<div style="min-width:200px"><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--acc3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠ Turni scoperti</div>';
+    html+='<div style="min-width:200px"><div style="font-family:monospace;font-size:9px;color:var(--acc3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">⚠ Turni scoperti</div>';
     html+='<div style="display:flex;flex-direction:column;gap:3px">';
-    scoperti.forEach(s=>{ html+='<div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--acc3)">'+s+'</div>'; });
+    scoperti.forEach(s=>{ html+='<div style="font-size:10px;font-family:monospace;color:var(--acc3)">'+s+'</div>'; });
     html+='</div></div>';
   } else if(names.length){
     html+='<div style="font-size:11px;color:var(--grn);font-weight:700">✓ Tutti i turni coperti</div>';
