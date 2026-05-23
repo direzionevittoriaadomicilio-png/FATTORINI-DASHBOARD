@@ -2691,6 +2691,45 @@ const SHIFTS = [
 let curWeekOffset = 0;
 let popupCtx = null;
 
+// Colori per fattorino — consistenti tra sessioni
+const DRIVER_COLORS = [
+  {bg:'rgba(37,99,235,.12)',  border:'rgba(37,99,235,.35)',  text:'#1d4ed8'},
+  {bg:'rgba(220,38,38,.1)',   border:'rgba(220,38,38,.3)',   text:'#b91c1c'},
+  {bg:'rgba(22,163,74,.1)',   border:'rgba(22,163,74,.3)',   text:'#15803d'},
+  {bg:'rgba(217,119,6,.12)',  border:'rgba(217,119,6,.35)',  text:'#b45309'},
+  {bg:'rgba(124,58,237,.1)',  border:'rgba(124,58,237,.3)',  text:'#6d28d9'},
+  {bg:'rgba(8,145,178,.1)',   border:'rgba(8,145,178,.3)',   text:'#0e7490'},
+  {bg:'rgba(236,72,153,.1)',  border:'rgba(236,72,153,.3)',  text:'#be185d'},
+  {bg:'rgba(5,150,105,.1)',   border:'rgba(5,150,105,.3)',   text:'#065f46'},
+];
+let _driverColorMap = {};
+function getDriverColor(name){
+  if(!_driverColorMap[name]){
+    const allNames = Object.keys(_driverColorMap);
+    _driverColorMap[name] = DRIVER_COLORS[allNames.length % DRIVER_COLORS.length];
+  }
+  return _driverColorMap[name];
+}
+function initDriverColors(){
+  // Assegna colori in ordine alfabetico per consistenza
+  const names = [...new Set([
+    ...Object.keys(typeof D !== 'undefined' ? D : {}),
+    ...getAllTurniDrivers()
+  ])].sort();
+  names.forEach(n => getDriverColor(n));
+}
+function getAllTurniDrivers(){
+  const names = new Set();
+  Object.values(TURNI).forEach(wk=>{
+    Object.values(wk).forEach(day=>{
+      Object.values(day).forEach(slots=>{
+        slots.forEach(s=>names.add(s.name));
+      });
+    });
+  });
+  return [...names];
+}
+
 // ── Utility ──
 function getWeekKey(offset){
   const d=new Date(); d.setHours(0,0,0,0);
@@ -2725,9 +2764,8 @@ function selectTurni(){
   try{ document.getElementById('btnTurni').classList.add('on'); }catch(e){}
   cur=null;
   // Carica e renderizza
-  try{ loadTurni(); }catch(e){ showToast('loadTurni err: '+e.message); return; }
+  try{ loadTurni(); initDriverColors(); }catch(e){ showToast('loadTurni err: '+e.message); return; }
   try{ renderTurni(); }catch(e){ showToast('renderTurni err: '+e.message); return; }
-  showToast('✓ Turni caricati');
 }
 function navigateWeek(dir){ curWeekOffset+=dir; renderTurni(); }
 function goToCurrentWeek(){ curWeekOffset=0; renderTurni(); }
@@ -2740,10 +2778,34 @@ function saveTurni(){
 function loadTurni(){
   try{ const s=localStorage.getItem(TURNI_KEY); if(s) TURNI=JSON.parse(s); }catch(e){}
 }
-function getWeekData(wk){
-  if(!TURNI[wk]) TURNI[wk]={};
+function getWeekData(wk, autoCopyFromPrev){
+  const isNew = !TURNI[wk];
+  if(isNew) TURNI[wk]={};
   GIORNI.forEach(g=>{ if(!TURNI[wk][g]) TURNI[wk][g]={}; SHIFTS.forEach(s=>{ if(!TURNI[wk][g][s.id]) TURNI[wk][g][s.id]=[]; }); });
+  // Auto-copia dalla settimana precedente se la settimana è nuova
+  if(isNew && autoCopyFromPrev){
+    const prevWk = getPrevWeekKey(wk);
+    if(TURNI[prevWk]){
+      GIORNI.forEach(g=>{
+        SHIFTS.forEach(s=>{
+          const prevSlots = (TURNI[prevWk][g]||{})[s.id]||[];
+          if(prevSlots.length) TURNI[wk][g][s.id] = prevSlots.map(sl=>({...sl}));
+        });
+      });
+      saveTurni();
+    }
+  }
   return TURNI[wk];
+}
+
+function getPrevWeekKey(wk){
+  // Calcola la chiave della settimana precedente
+  const [y,w] = wk.split('-W').map(Number);
+  const d = new Date(y, 0, 1 + (w-1)*7);
+  d.setDate(d.getDate() - 7);
+  const ny = d.getFullYear(), jan4 = new Date(ny,0,4);
+  const nw = Math.ceil(((d-jan4)/86400000+(jan4.getDay()||7))/7);
+  return ny+'-W'+String(nw).padStart(2,'0');
 }
 
 // ── Render ──
@@ -2766,7 +2828,7 @@ function renderTurni(){
 function renderTurniGrid(){
   const wk=getWeekKey(curWeekOffset);
   const dates=getWeekDates(curWeekOffset);
-  const data=getWeekData(wk);
+  const data=getWeekData(wk, true);
   const grid=document.getElementById('turniGrid');
   grid.innerHTML='';
   const today=fmtShort(new Date());
@@ -2801,11 +2863,13 @@ function renderTurniGrid(){
       // Chip fattorini assegnati
       slots.forEach((slot,idx)=>{
         const chip=doc.createElement('span');
-        chip.className='drv-chip '+shift.cls;
+        const dc=getDriverColor(slot.name);
+        chip.className='drv-chip';
+        chip.style.cssText='background:'+dc.bg+';border-color:'+dc.border+';color:'+dc.text;
         chip.innerHTML=
-          slot.name+
-          (slot.mezzo?' <span style="opacity:.55;font-size:8px">'+slot.mezzo+'</span>':'')+
-          (slot.note?' <span style="opacity:.55;font-size:8px;font-style:italic">'+slot.note+'</span>':'')+
+          '<b>'+slot.name+'</b>'+
+          (slot.mezzo?' <span style="opacity:.6;font-size:8px">·'+slot.mezzo+'</span>':'')+
+          (slot.note?' <span style="opacity:.6;font-size:8px;font-style:italic">·'+slot.note+'</span>':'')+
           '<span class="chip-del" onclick="removeFromShift(\'' + wk + '\',\'' + g + '\',\'' + shift.id + '\',' + idx + ');event.stopPropagation()">✕</span>';
         cell.appendChild(chip);
       });
