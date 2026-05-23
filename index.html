@@ -2819,10 +2819,10 @@ function getWeekNum(offset){
 
 // ── Navigazione ──
 function selectTurni(){
-  ['dash','viewGlobal','upWrap'].forEach(id=>{ const el=doc.getElementById(id); if(el) el.classList.add('hidden'); });
-  doc.getElementById('viewTurni').classList.remove('hidden');
-  doc.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on'));
-  doc.getElementById('btnTurni').classList.add('on');
+  ['dash','viewGlobal','upWrap'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('hidden'); });
+  document.getElementById('viewTurni').classList.remove('hidden');
+  document.querySelectorAll('.drv-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('btnTurni').classList.add('on');
   cur=null; loadTurni(); renderTurni();
 }
 function navigateWeek(dir){ curWeekOffset+=dir; renderTurni(); }
@@ -2844,18 +2844,26 @@ function getWeekData(wk){
 
 // ── Render ──
 function renderTurni(){
-  const dates=getWeekDates(curWeekOffset);
-  doc.getElementById('turniWeekTitle').textContent='Settimana '+getWeekNum(curWeekOffset);
-  doc.getElementById('turniWeekDates').textContent=fmtShort(dates[0])+' – '+fmtShort(dates[6])+' '+dates[0].getFullYear();
-  renderTurniGrid();
-  renderTurniRiepilogo();
+  try{
+    const dates=getWeekDates(curWeekOffset);
+    const wTitle=document.getElementById('turniWeekTitle');
+    const wDates=document.getElementById('turniWeekDates');
+    if(wTitle) wTitle.textContent='Settimana '+getWeekNum(curWeekOffset);
+    if(wDates) wDates.textContent=fmtShort(dates[0])+' – '+fmtShort(dates[6])+' '+dates[0].getFullYear();
+    renderTurniGrid();
+    renderTurniRiepilogo();
+  }catch(err){
+    console.error('[TURNI ERROR]',err);
+    const g=document.getElementById('turniGrid');
+    if(g) g.innerHTML='<div style="padding:20px;color:red;font-family:monospace;font-size:12px">Errore: '+err.message+'</div>';
+  }
 }
 
 function renderTurniGrid(){
   const wk=getWeekKey(curWeekOffset);
   const dates=getWeekDates(curWeekOffset);
   const data=getWeekData(wk);
-  const grid=doc.getElementById('turniGrid');
+  const grid=document.getElementById('turniGrid');
   grid.innerHTML='';
   const today=fmtShort(new Date());
 
@@ -2924,7 +2932,7 @@ function renderTurniGrid(){
 
 function renderTurniRiepilogo(){
   const wk=getWeekKey(curWeekOffset);
-  const el=doc.getElementById('turniRiepilogo');
+  const el=document.getElementById('turniRiepilogo');
   if(!el) return;
   const data=TURNI[wk]||{};
   const counter={};
@@ -2989,27 +2997,27 @@ function renderTurniRiepilogo(){
 function openShiftPopup(wk,giorno,shiftId,gi,si){
   popupCtx={wk,giorno,shiftId};
   const shift=SHIFTS.find(s=>s.id===shiftId);
-  doc.getElementById('popupTitle').textContent='Aggiungi fattorino';
-  doc.getElementById('popupSubtitle').textContent=GIORNI_IT[gi]+' · '+shift.time;
-  const sel=doc.getElementById('popupDriver');
+  document.getElementById('popupTitle').textContent='Aggiungi fattorino';
+  document.getElementById('popupSubtitle').textContent=GIORNI_IT[gi]+' · '+shift.time;
+  const sel=document.getElementById('popupDriver');
   sel.innerHTML='';
   const driverNames=[...new Set(Object.keys(D))].sort();
   // Aggiungi anche nomi non ancora in D ma presenti nei turni passati
   const extra=new Set();
   Object.values(TURNI).forEach(wkData=>{ Object.values(wkData).forEach(dayData=>{ Object.values(dayData).forEach(slots=>{ slots.forEach(s=>extra.add(s.name)); }); }); });
   [...new Set([...driverNames,...extra])].sort().forEach(n=>{ const o=doc.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
-  const selM=doc.getElementById('popupMezzo');
+  const selM=document.getElementById('popupMezzo');
   selM.innerHTML='<option value="">—</option>';
   (typeof MEZZI!=='undefined'?MEZZI:[]).filter(m=>m&&m!=='—').forEach(m=>{ const o=doc.createElement('option'); o.value=m; o.textContent=m; selM.appendChild(o); });
-  doc.getElementById('popupNote').value='';
-  doc.getElementById('turniPopup').style.display='flex';
+  document.getElementById('popupNote').value='';
+  document.getElementById('turniPopup').style.display='flex';
 }
-function closePopup(){ doc.getElementById('turniPopup').style.display='none'; popupCtx=null; }
+function closePopup(){ document.getElementById('turniPopup').style.display='none'; popupCtx=null; }
 function confirmAddToShift(){
   if(!popupCtx) return;
-  const name=doc.getElementById('popupDriver').value;
-  const mezzo=doc.getElementById('popupMezzo').value;
-  const note=doc.getElementById('popupNote').value.trim();
+  const name=document.getElementById('popupDriver').value;
+  const mezzo=document.getElementById('popupMezzo').value;
+  const note=document.getElementById('popupNote').value.trim();
   if(!name){ showToast('⚠️ Seleziona un fattorino'); return; }
   const {wk,giorno,shiftId}=popupCtx;
   getWeekData(wk)[giorno][shiftId].push({name,mezzo,note});
