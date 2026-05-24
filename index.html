@@ -193,24 +193,45 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 
 /* TURNI */
 .turni-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--brd);border-radius:10px}
-.turni-grid{display:grid;grid-template-columns:80px repeat(7,minmax(90px,1fr));gap:0;background:var(--surf);min-width:720px}
-.turni-th{background:var(--surf2);font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);padding:7px 5px;text-align:center;border-bottom:1px solid var(--brd);border-right:1px solid var(--brd)}
+.turni-grid{display:grid;grid-template-columns:86px repeat(7,minmax(96px,1fr));gap:0;background:var(--surf);min-width:760px}
+
+/* Header giorni */
+.turni-th{background:#f8f9fa;font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#374151;font-weight:700;padding:9px 6px;text-align:center;border-bottom:2px solid var(--brd);border-right:1px solid var(--brd)}
 .turni-th:last-child{border-right:none}
-.turni-shift-lbl{background:var(--surf2);padding:7px 5px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;min-width:80px}
+
+/* Label turno (colonna sinistra) */
+.turni-shift-lbl{padding:9px 8px;border-right:2px solid var(--brd);border-bottom:1px solid var(--brd);display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:86px}
 .turni-shift-lbl.last-row{border-bottom:none}
-.turni-shift-name{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--txt)}
-.turni-shift-time{font-family:'DM Mono',monospace;font-size:8px;color:var(--dim)}
-.turni-cell{padding:4px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:48px;cursor:pointer;transition:background .12s}
-.turni-cell:last-child{border-right:none}
-.turni-cell:hover{background:rgba(37,99,235,.03)}
-.turni-cell.last-row{border-bottom:none}
-.drv-chip{display:inline-flex;align-items:center;gap:2px;border-radius:4px;padding:2px 5px;font-size:9px;font-family:'DM Mono',monospace;margin:1px;white-space:nowrap;cursor:default;border:1px solid transparent}
-.drv-chip .chip-del{cursor:pointer;color:rgba(0,0,0,.3);font-size:10px;line-height:1;padding:0 1px}
+.turni-shift-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:800;color:#111827}
+.turni-shift-time{font-family:'DM Mono',monospace;font-size:10px;font-weight:600;color:#6b7280}
+
+/* MATTINA — sfondo caldo giallo/ambra */
+.turni-shift-lbl.shift-mat{background:#fffbeb;border-right-color:#f59e0b}
+.turni-cell.shift-mat{background:#fffdf5;border-bottom:1px solid #fde68a;border-right:1px solid #fde68a}
+.turni-cell.shift-mat:last-child{border-right:none}
+.turni-cell.shift-mat.last-row{border-bottom:none}
+.turni-cell.shift-mat:hover{background:#fef3c7}
+
+/* SERA — sfondo freddo blu/indaco */
+.turni-shift-lbl.shift-ser{background:#eff6ff;border-right-color:#3b82f6}
+.turni-cell.shift-ser{background:#f0f7ff;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe}
+.turni-cell.shift-ser:last-child{border-right:none}
+.turni-cell.shift-ser.last-row{border-bottom:none}
+.turni-cell.shift-ser:hover{background:#dbeafe}
+
+.turni-cell{padding:5px;min-height:52px;cursor:pointer;transition:background .12s}
+
+/* Chip fattorini */
+.drv-chip{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:3px 7px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;margin:2px;white-space:nowrap;cursor:default;border:1.5px solid transparent}
+.drv-chip .chip-del{cursor:pointer;color:rgba(0,0,0,.25);font-size:11px;line-height:1;padding:0 2px;margin-left:2px}
 .drv-chip .chip-del:hover{color:var(--acc3)}
-.chip-mat{background:rgba(253,224,71,.15);border-color:rgba(253,224,71,.4);color:#92400e}
-.chip-pom{background:rgba(8,145,178,.08);border-color:rgba(8,145,178,.25);color:var(--acc2)}
-.turni-add-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;border:1px dashed var(--brd2);background:transparent;color:var(--dim);font-size:11px;cursor:pointer;margin:1px;transition:all .12s;line-height:1}
-.turni-add-btn:hover{border-color:var(--acc);color:var(--acc);background:rgba(37,99,235,.05)}
+
+/* Placeholder slot attesi */
+.turni-add-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:1.5px dashed;background:transparent;font-size:13px;cursor:pointer;margin:2px;transition:all .12s;line-height:1}
+.shift-mat .turni-add-btn{border-color:#f59e0b;color:#d97706}
+.shift-mat .turni-add-btn:hover{background:#fef3c7;border-color:#d97706}
+.shift-ser .turni-add-btn{border-color:#3b82f6;color:#2563eb}
+.shift-ser .turni-add-btn:hover{background:#dbeafe;border-color:#1d4ed8}
 
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -2657,44 +2678,43 @@ const GIORNI_IT  = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sab
 
 // Definizione turni con slot attesi per giorno
 const SHIFTS = [
-  {id:'09-14', label:'Mattina',    time:'09:00–14:00', cls:'chip-mat',
+  {id:'09-14', label:'Mattina',    time:'09:00–14:00', cls:'chip-mat', mat:true,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:1,dom:1}},
-  {id:'11-14', label:'½ Mattina',  time:'11:00–14:00', cls:'chip-mat',
+  {id:'11-14', label:'½ Mattina',  time:'11:00–14:00', cls:'chip-mat', mat:true,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:1,dom:1}},
-  {id:'17-22', label:'Pomeriggio', time:'17:00–22:00', cls:'chip-pom',
+  {id:'17-22', label:'Pomeriggio', time:'17:00–22:00', cls:'chip-pom', mat:false,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:0,sab:0,dom:0}},
-  {id:'18-23', label:'Tardo pom.', time:'18:00–23:00', cls:'chip-pom',
+  {id:'18-23', label:'Tardo pom.', time:'18:00–23:00', cls:'chip-pom', mat:false,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:1,sab:0,dom:0}},
-  {id:'18-22', label:'Dom. pom.',  time:'18:00–22:00', cls:'chip-pom',
+  {id:'18-22', label:'Dom. pom.',  time:'18:00–22:00', cls:'chip-pom', mat:false,
    attesi:{lun:0,mar:0,mer:0,gio:0,ven:0,sab:0,dom:1}},
-  {id:'19-23', label:'Sera',       time:'19:00–23:00', cls:'chip-pom',
+  {id:'19-23', label:'Sera',       time:'19:00–23:00', cls:'chip-pom', mat:false,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:2,sab:5,dom:5}},
 ];
 
 let curWeekOffset = 0;
 let popupCtx = null;
 
-// Colori per fattorino — consistenti tra sessioni
-const DRIVER_COLORS = [
-  {bg:'rgba(37,99,235,.12)',  border:'rgba(37,99,235,.35)',  text:'#1d4ed8'},
-  {bg:'rgba(220,38,38,.1)',   border:'rgba(220,38,38,.3)',   text:'#b91c1c'},
-  {bg:'rgba(22,163,74,.1)',   border:'rgba(22,163,74,.3)',   text:'#15803d'},
-  {bg:'rgba(217,119,6,.12)',  border:'rgba(217,119,6,.35)',  text:'#b45309'},
-  {bg:'rgba(124,58,237,.1)',  border:'rgba(124,58,237,.3)',  text:'#6d28d9'},
-  {bg:'rgba(8,145,178,.1)',   border:'rgba(8,145,178,.3)',   text:'#0e7490'},
-  {bg:'rgba(236,72,153,.1)',  border:'rgba(236,72,153,.3)',  text:'#be185d'},
-  {bg:'rgba(5,150,105,.1)',   border:'rgba(5,150,105,.3)',   text:'#065f46'},
-];
+// Colori per fattorino — 20 hue distanziati, assegnati in ordine alfabetico (no duplicati)
+const DRIVER_HUES = [220,0,142,35,270,185,330,160,50,200,310,90,15,240,170,60,300,110,25,250];
 let _driverColorMap = {};
+let _driverColorIdx = 0;
 function getDriverColor(name){
   if(!_driverColorMap[name]){
-    const allNames = Object.keys(_driverColorMap);
-    _driverColorMap[name] = DRIVER_COLORS[allNames.length % DRIVER_COLORS.length];
+    const h = DRIVER_HUES[_driverColorIdx % DRIVER_HUES.length];
+    _driverColorIdx++;
+    _driverColorMap[name] = {
+      bg: `hsla(${h},70%,42%,.13)`,
+      border: `hsla(${h},70%,42%,.45)`,
+      text: `hsl(${h},65%,32%)`
+    };
   }
   return _driverColorMap[name];
 }
 function initDriverColors(){
-  // Assegna colori in ordine alfabetico per consistenza
+  // Reset e riassegna in ordine alfabetico — garantisce nessun duplicato
+  _driverColorMap = {};
+  _driverColorIdx = 0;
   const names = [...new Set([
     ...Object.keys(typeof D !== 'undefined' ? D : {}),
     ...getAllTurniDrivers()
@@ -2831,15 +2851,16 @@ function renderTurniGrid(){
     const isLast=si===SHIFTS.length-1;
 
     // Label turno
+    const shiftCls=shift.mat?'shift-mat':'shift-ser';
     const lbl=doc.createElement('div');
-    lbl.className='turni-shift-lbl'+(isLast?' last-row':'');
+    lbl.className='turni-shift-lbl '+shiftCls+(isLast?' last-row':'');
     lbl.innerHTML='<span class="turni-shift-name">'+shift.label+'</span><span class="turni-shift-time">'+shift.time+'</span>';
     grid.appendChild(lbl);
 
     // Celle
     GIORNI.forEach((g,gi)=>{
       const cell=doc.createElement('div');
-      cell.className='turni-cell'+(isLast?' last-row':'');
+      cell.className='turni-cell '+shiftCls+(isLast?' last-row':'');
       const attesi=shift.attesi[g]||0;
       const slots=data[g][shift.id]||[];
 
