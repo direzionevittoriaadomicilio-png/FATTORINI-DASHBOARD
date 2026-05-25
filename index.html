@@ -932,7 +932,14 @@ function parseRows(rows){
   // Aggiunge i nuovi ordini (deduplicazione per numero ordine reale)
   _newOrders.forEach(({name,order})=>{
     const isRealOrderNum = order.orderNum && !order.isTicket && order.orderNum !== '€ NS' && !isNaN(order.orderNum);
-    const exists = isRealOrderNum && D[name].orders.some(o=>!o.deleted&&o.orderNum===order.orderNum&&o.dateStr===order.dateStr);
+    // Doppia consegna: stesso ordine, stesso indirizzo, ma tariffa K=0 sul secondo → entrambe contate
+    // Duplicato vero: stesso ordine + stessa data + stessa tariffa K → salta (upload stesso file)
+    const exists = isRealOrderNum && D[name].orders.some(o=>
+      !o.deleted &&
+      o.orderNum          === order.orderNum &&
+      o.dateStr           === order.dateStr  &&
+      (o.tariffaConsegna||0) === (order.tariffaConsegna||0)  // tariffa diversa = doppia consegna
+    );
     if(!exists) D[name].orders.push(order);
   });
 
