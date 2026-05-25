@@ -2202,8 +2202,17 @@ function exportExcel(){
 
   // ── Scarica ──
   const date = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, 'fattorini_backup_'+date+'.xlsx');
-  showToast('📊 Excel esportato con '+(ordiniRows.length-1)+' ordini');
+  // Download compatibile con tutti i browser (incluso mobile)
+  const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  const blob = new Blob([wbout], {type:'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'fattorini_backup_'+date+'.xlsx';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  showToast('📊 Excel scaricato — '+(ordiniRows.length-1)+' ordini');
   }catch(err){
     console.error('[EXPORT ERROR]',err);
     showToast('⚠️ Errore export: '+err.message);
