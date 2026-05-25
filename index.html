@@ -2089,6 +2089,7 @@ function exportCSV(){
 
 function exportExcel(){
   if(!Object.keys(D).length){ showToast('⚠️ Nessun dato da esportare'); return; }
+  try{
   const wb = XLSX.utils.book_new();
 
   // ── FOGLIO 1: Riepilogo mensile tutti i fattorini ──
@@ -2202,7 +2203,11 @@ function exportExcel(){
   // ── Scarica ──
   const date = new Date().toISOString().slice(0,10);
   XLSX.writeFile(wb, 'fattorini_backup_'+date+'.xlsx');
-  showToast('📊 Excel esportato con '+ordiniRows.length+' ordini');
+  showToast('📊 Excel esportato con '+(ordiniRows.length-1)+' ordini');
+  }catch(err){
+    console.error('[EXPORT ERROR]',err);
+    showToast('⚠️ Errore export: '+err.message);
+  }
 }
 
 // ── SESSIONE: SALVA/CARICA ──
