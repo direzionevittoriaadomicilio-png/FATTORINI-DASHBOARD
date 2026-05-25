@@ -546,7 +546,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
             <thead><tr>
               <th>Data</th><th>Giorno</th><th>Turno</th>
               <th>In paese</th><th>F.paese</th><th>Bonus★</th><th>Attese</th><th>Extra</th><th>Bonus €</th>
-              <th>Cash ord.</th><th>💵 Cash €</th><th>Tariffa €</th><th>Compenso base €</th>
+              <th>Cash ord.</th><th>💵 Cash €</th><th>Cons. totali</th><th>Compenso base €</th>
             </tr></thead>
             <tbody id="dSumBody"></tbody>
           </table></div>
@@ -600,7 +600,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
           <th>🌅 Mat</th><th>🌙 Sera</th>
           <th>Attese</th><th>Extra</th><th>Bonus €</th>
-          <th>💵 Cash €</th><th>Tariffa €</th><th>Compenso €</th>
+          <th>💵 Cash €</th><th>Cons. totali</th><th>Compenso €</th>
         </tr></thead>
         <tbody id="globalMonthBody"></tbody>
         </table></div>
@@ -2159,6 +2159,78 @@ function exportExcel(){
       const ws = XLSX.utils.aoa_to_sheet(rows);
       XLSX.utils.book_append_sheet(wb, ws, 'Acconti');
     }catch(e){ console.warn('Foglio 4 errore:',e); }
+
+    // ── FOGLI PER FATTORINO: scheda settimanale ──
+    try{
+      Object.keys(D).sort().forEach(name=>{
+        const sheetName = name.substring(0,28).replace(/[:\/?*\[\]]/g,''); // max 31 chars, no special
+        const rows = [
+          [name.toUpperCase() + ' — Scheda settimanale'],
+          [],
+          ['MESE','SETTIMANA','LUN','MAR','MER','GIO','VEN','SAB','DOM','CONS.TOT','F.PAESE','BONUS★','TICKET','T.MAT','T.SER','ATTESE','EXTRA','BONUS €','CASH ORD.','CASH €']
+        ];
+        const DAYS_EN=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        getMonths(name).forEach(mk=>{
+          try{
+            const ms = computeMonth(name, mk);
+            const byWeek={};
+            (ms.days||[]).forEach(day=>{
+              const d = parseDateStr(day.ds);
+              const wn = getWeekOfMonth(d);
+              if(!byWeek[wn]) byWeek[wn]=[];
+              byWeek[wn].push(day);
+            });
+            Object.keys(byWeek).sort((a,b)=>a-b).forEach(wn=>{
+              const wd = byWeek[wn];
+              const e = ms.e||{};
+              const wM=wd.filter(d=>d.hasMat).length, wS=wd.filter(d=>d.hasSer).length;
+              const wAtt=wM*(e.sogliaMat||12.5)+wS*(e.sogliaSer||14);
+              const wC=wd.reduce((a,d)=>a+n(d.cTot||d.c),0);
+              const wFP=wd.reduce((a,d)=>a+n(d.cFuoriPaese||d.fp),0);
+              const wCBonus=wd.reduce((a,d)=>a+n(d.cBonus||d.c),0);
+              const wTick=wd.reduce((a,d)=>a+(d.dayOrds||[]).reduce((b,o)=>b+n(o.ticketCount),0),0);
+              const wEx=Math.max(0,wCBonus-wAtt);
+              const wBn=wEx*(e.bonusEuro||1);
+              const wCO=wd.reduce((a,d)=>a+n(d.cashOrds),0);
+              const wCa=wd.reduce((a,d)=>a+n(d.cash),0);
+              // Cons per giorno
+              const dayMap={};
+              wd.forEach(d=>{ dayMap[dayFromDateStr(d.ds)]=n(d.cTot||d.c); });
+              const row=[
+                mlabel(mk),'Sett.'+wn,
+                n(dayMap['Monday']),n(dayMap['Tuesday']),n(dayMap['Wednesday']),
+                n(dayMap['Thursday']),n(dayMap['Friday']),n(dayMap['Saturday']),n(dayMap['Sunday']),
+                wC, parseFloat(wFP.toFixed(1)), parseFloat(wCBonus.toFixed(1)),
+                parseFloat(wTick.toFixed(1)),wM,wS,
+                parseFloat(wAtt.toFixed(1)), parseFloat(wEx.toFixed(1)),
+                parseFloat(wBn.toFixed(2)), wCO, parseFloat(wCa.toFixed(2))
+              ];
+              rows.push(row);
+            });
+            // Totale mese
+            const wTotTick=wd=>wd.reduce((a,d)=>a+(d.dayOrds||[]).reduce((b,o)=>b+n(o.ticketCount),0),0);
+            const allDays=ms.days||[];
+            rows.push([
+              mlabel(mk),'TOTALE MESE','','','','','','','',
+              n(ms.totC), parseFloat(n(ms.totFP).toFixed(1)), parseFloat(n(ms.totCBonus).toFixed(1)),
+              parseFloat(allDays.reduce((a,d)=>(a+(d.dayOrds||[]).reduce((b,o)=>b+n(o.ticketCount),0)),0).toFixed(1)),
+              n(ms.daysWithMat), n(ms.daysWithSer),
+              parseFloat(n(ms.attesa).toFixed(1)), parseFloat(n(ms.extra).toFixed(1)),
+              parseFloat(n(ms.bonus).toFixed(2)), n(ms.cashOrds), parseFloat(n(ms.totCash).toFixed(2))
+            ]);
+            rows.push([]); // spazio tra mesi
+          }catch(e){ rows.push([mlabel(mk),'ERRORE: '+e.message]); }
+        });
+        try{
+          const ws = XLSX.utils.aoa_to_sheet(rows);
+          ws['!cols']=[14,10,5,5,5,5,5,5,5,9,8,9,7,6,6,8,8,9,9,9].map(w=>({wch:w}));
+          // Stile header (merge prima riga)
+          if(!ws['!merges']) ws['!merges']=[];
+          ws['!merges'].push({s:{r:0,c:0},e:{r:0,c:19}});
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        }catch(e){ console.warn('Foglio '+name+' errore:',e); }
+      });
+    }catch(e){ console.warn('Fogli fattorini errore:',e); }
 
     // ── FOGLIO 5: Turni ──
     try{
