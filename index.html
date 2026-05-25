@@ -2101,18 +2101,18 @@ function exportExcel(){
       const ms = computeMonth(name, mk);
       const accontiMese = (D[name].acconti||[]).filter(a=>a.data&&a.data.startsWith(mk)).reduce((s,a)=>s+a.importo,0);
       riepilogoRows.push([
-        name, mlabel(mk), ms.e.mode,
-        ms.totC, parseFloat(ms.totFP.toFixed(1)), parseFloat(ms.totCBonus.toFixed(1)),
-        ms.daysWithMat, ms.daysWithSer,
-        parseFloat(ms.attesa.toFixed(1)), parseFloat(ms.extra.toFixed(1)),
-        parseFloat(ms.bonus.toFixed(2)),
-        ms.cashOrds, parseFloat(ms.totCash.toFixed(2)),
-        parseFloat(ms.totTariffaK.toFixed(2)),
-        parseFloat(ms.compBase.toFixed(2)),
-        parseFloat(ms.bonus.toFixed(2)),
-        parseFloat(ms.compTot.toFixed(2)),
-        parseFloat(accontiMese.toFixed(2)),
-        parseFloat((ms.compTot - accontiMese).toFixed(2))
+        name, mlabel(mk), ms.e?.mode||'—',
+        ms.totC||0, parseFloat((ms.totFP||0).toFixed(1)), parseFloat((ms.totCBonus||0).toFixed(1)),
+        ms.daysWithMat||0, ms.daysWithSer||0,
+        parseFloat((ms.attesa||0).toFixed(1)), parseFloat((ms.extra||0).toFixed(1)),
+        parseFloat((ms.bonus||0).toFixed(2)),
+        ms.cashOrds||0, parseFloat((ms.totCash||0).toFixed(2)),
+        parseFloat((ms.totTariffaK||0).toFixed(2)),
+        parseFloat((ms.compBase||0).toFixed(2)),
+        parseFloat((ms.bonus||0).toFixed(2)),
+        parseFloat((ms.compTot||0).toFixed(2)),
+        parseFloat((accontiMese||0).toFixed(2)),
+        parseFloat(((ms.compTot||0) - (accontiMese||0)).toFixed(2))
       ]);
     });
   });
@@ -2152,15 +2152,15 @@ function exportExcel(){
       const ms = computeMonth(name, mk);
       ms.days.forEach(day=>{
         giornalieroRows.push([
-          name, day.ds, dayIt(day.dayOrds[0]?.dayEn||''),
-          parseFloat(day.cInPaese.toFixed(1)),
-          parseFloat(day.cFuoriPaese.toFixed(1)),
-          parseFloat(day.cBonus.toFixed(1)),
+          name, day.ds||'', dayIt(day.dayOrds?.[0]?.dayEn||'')||'',
+          parseFloat((day.cInPaese||0).toFixed(1)),
+          parseFloat((day.cFuoriPaese||0).toFixed(1)),
+          parseFloat((day.cBonus||0).toFixed(1)),
           day.hasMat?'✓':'',
           day.hasSer?'✓':'',
           day.cashOrds||0,
-          parseFloat(day.cash.toFixed(2)),
-          parseFloat(day.tariffaK.toFixed(2)),
+          parseFloat((day.cash||0).toFixed(2)),
+          parseFloat((day.tariffaK||0).toFixed(2)),
           parseFloat((day.turnoComp||0).toFixed(2))
         ]);
       });
