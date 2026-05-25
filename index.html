@@ -2090,129 +2090,105 @@ function exportCSV(){
 function exportExcel(){
   if(!Object.keys(D).length){ showToast('⚠️ Nessun dato da esportare'); return; }
   try{
-  const wb = XLSX.utils.book_new();
+    const wb = XLSX.utils.book_new();
+    const n = v => (v===undefined||v===null||isNaN(v)) ? 0 : Number(v);
+    const s = v => v===undefined||v===null ? '' : String(v);
 
-  // ── FOGLIO 1: Riepilogo mensile tutti i fattorini ──
-  const riepilogoRows = [
-    ['FATTORINO','MESE','MOD.PAG.','CONSEGNE TOT.','FUORI PAESE','BONUS★','TURNI MATTINA','TURNI SERA','ATTESE BONUS','EXTRA CONS.','BONUS €','CASH ORD.','CASH €','TAR.K €','COMPENSO BASE €','BONUS €','COMPENSO TOT. €','ACCONTI €','DA PAGARE €']
-  ];
-  Object.keys(D).sort().forEach(name=>{
-    getMonths(name).forEach(mk=>{
-      const ms = computeMonth(name, mk);
-      const accontiMese = (D[name].acconti||[]).filter(a=>a.data&&a.data.startsWith(mk)).reduce((s,a)=>s+a.importo,0);
-      riepilogoRows.push([
-        name, mlabel(mk), ms.e?.mode||'—',
-        ms.totC||0, parseFloat((ms.totFP||0).toFixed(1)), parseFloat((ms.totCBonus||0).toFixed(1)),
-        ms.daysWithMat||0, ms.daysWithSer||0,
-        parseFloat((ms.attesa||0).toFixed(1)), parseFloat((ms.extra||0).toFixed(1)),
-        parseFloat((ms.bonus||0).toFixed(2)),
-        ms.cashOrds||0, parseFloat((ms.totCash||0).toFixed(2)),
-        parseFloat((ms.totTariffaK||0).toFixed(2)),
-        parseFloat((ms.compBase||0).toFixed(2)),
-        parseFloat((ms.bonus||0).toFixed(2)),
-        parseFloat((ms.compTot||0).toFixed(2)),
-        parseFloat((accontiMese||0).toFixed(2)),
-        parseFloat(((ms.compTot||0) - (accontiMese||0)).toFixed(2))
-      ]);
-    });
-  });
-  const wsRiepilogo = XLSX.utils.aoa_to_sheet(riepilogoRows);
-  wsRiepilogo['!cols'] = riepilogoRows[0].map((_,i)=>({wch: i===0?18:i===1?14:12}));
-  XLSX.utils.book_append_sheet(wb, wsRiepilogo, 'Riepilogo mensile');
-
-  // ── FOGLIO 2: Tutti gli ordini ──
-  const ordiniRows = [
-    ['FATTORINO','DATA','GIORNO','TURNO','N° ORDINE','RITIRO DA','CONSEGNA A','KM','F.PAESE','PAGAMENTO','TOTALE €','TAR.K €','FEE €','STATUS','NOTE']
-  ];
-  Object.keys(D).sort().forEach(name=>{
-    const s = D[name].settings;
-    activeOrders(name).sort((a,b)=>a.date-b.date).forEach(o=>{
-      const shift = getShift(o, s.cutHour);
-      const fp = isFuoriPaese(o, s) ? 'Sì' : 'No';
-      ordiniRows.push([
-        name, o.dateStr, dayIt(o.dayEn),
-        shift==='mat'?'Mattina':shift==='ser'?'Sera':'—',
-        o.orderNum, o.ritiroDa, o.consegnaA,
-        o.km||'', fp, o.payMethod,
-        o.total, o.tariffaConsegna||0, o.fee,
-        o.status, o.note||''
-      ]);
-    });
-  });
-  const wsOrdini = XLSX.utils.aoa_to_sheet(ordiniRows);
-  wsOrdini['!cols'] = [18,11,10,10,14,22,22,6,8,8,9,8,8,12,20].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb, wsOrdini, 'Ordini');
-
-  // ── FOGLIO 3: Giornaliero dettagliato ──
-  const giornalieroRows = [
-    ['FATTORINO','DATA','GIORNO','IN PAESE','FUORI PAESE','CONS.BONUS★','TURNO MAT','TURNO SER','CASH ORD.','CASH €','TAR.K €','COMP.BASE €']
-  ];
-  Object.keys(D).sort().forEach(name=>{
-    getMonths(name).forEach(mk=>{
-      const ms = computeMonth(name, mk);
-      ms.days.forEach(day=>{
-        giornalieroRows.push([
-          name, day.ds||'', dayIt(day.dayOrds?.[0]?.dayEn||'')||'',
-          parseFloat((day.cInPaese||0).toFixed(1)),
-          parseFloat((day.cFuoriPaese||0).toFixed(1)),
-          parseFloat((day.cBonus||0).toFixed(1)),
-          day.hasMat?'✓':'',
-          day.hasSer?'✓':'',
-          day.cashOrds||0,
-          parseFloat((day.cash||0).toFixed(2)),
-          parseFloat((day.tariffaK||0).toFixed(2)),
-          parseFloat((day.turnoComp||0).toFixed(2))
-        ]);
+    // ── FOGLIO 1: Riepilogo mensile ──
+    try{
+      const rows = [['FATTORINO','MESE','MOD.PAG.','CONSEGNE','F.PAESE','BONUS★','T.MAT','T.SER','ATTESE','EXTRA','BONUS €','CASH ORD.','CASH €','TAR.K €','COMP.BASE €','BONUS €','COMP.TOT €','ACCONTI €','DA PAGARE €']];
+      Object.keys(D).sort().forEach(name=>{
+        getMonths(name).forEach(mk=>{
+          try{
+            const ms = computeMonth(name,mk);
+            const acc = (D[name].acconti||[]).filter(a=>a.data&&a.data.startsWith(mk)).reduce((s,a)=>s+(a.importo||0),0);
+            rows.push([s(name),s(mlabel(mk)),s(ms.e&&ms.e.mode),n(ms.totC),n(ms.totFP),n(ms.totCBonus),n(ms.daysWithMat),n(ms.daysWithSer),n(ms.attesa),n(ms.extra),n(ms.bonus),n(ms.cashOrds),n(ms.totCash),n(ms.totTariffaK),n(ms.compBase),n(ms.bonus),n(ms.compTot),n(acc),n((ms.compTot||0)-(acc||0))]);
+          }catch(e){ rows.push([name,mk,'ERRORE: '+e.message]); }
+        });
       });
-    });
-  });
-  const wsGiorn = XLSX.utils.aoa_to_sheet(giornalieroRows);
-  wsGiorn['!cols'] = [18,11,10,9,9,9,9,9,9,9,9,10].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb, wsGiorn, 'Giornaliero');
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Riepilogo mensile');
+    }catch(e){ console.warn('Foglio 1 errore:',e); }
 
-  // ── FOGLIO 4: Acconti ──
-  const accontiRows = [['FATTORINO','DATA','IMPORTO €','NOTE']];
-  Object.keys(D).sort().forEach(name=>{
-    (D[name].acconti||[]).sort((a,b)=>a.data.localeCompare(b.data)).forEach(a=>{
-      accontiRows.push([name, a.data, a.importo, a.note||'']);
-    });
-  });
-  const wsAcconti = XLSX.utils.aoa_to_sheet(accontiRows);
-  wsAcconti['!cols'] = [{wch:18},{wch:12},{wch:12},{wch:30}];
-  XLSX.utils.book_append_sheet(wb, wsAcconti, 'Acconti');
-
-  // ── FOGLIO 5: Turni settimanali ──
-  const turniRows = [['SETTIMANA','ZONA','GIORNO','TURNO','ORA INIZIO-FINE','FATTORINI']];
-  const GIORNI_LABEL = {lun:'Lunedì',mar:'Martedì',mer:'Mercoledì',gio:'Giovedì',ven:'Venerdì',sab:'Sabato',dom:'Domenica'};
-  const SHIFT_LABELS = {'09-14':'09:00–14:00','11-14':'11:00–14:00','17-22':'17:00–22:00','18-23':'18:00–23:00','18-22':'18:00–22:00','19-23':'19:00–23:00'};
-  Object.keys(TURNI||{}).sort().forEach(wk=>{
-    const wkData = TURNI[wk]||{};
-    ['lun','mar','mer','gio','ven','sab','dom'].forEach(g=>{
-      Object.keys(SHIFT_LABELS).forEach(sid=>{
-        const slots = ((wkData[g])||{})[sid]||[];
-        if(slots.length){
-          turniRows.push([wk,'Vittoria',GIORNI_LABEL[g],sid,SHIFT_LABELS[sid],slots.map(s=>s.name).join(', ')]);
-        }
+    // ── FOGLIO 2: Ordini ──
+    try{
+      const rows = [['FATTORINO','DATA','GIORNO','TURNO','N° ORDINE','RITIRO DA','CONSEGNA A','KM','F.PAESE','PAGAMENTO','TOTALE €','TAR.K €','FEE €','STATUS','NOTE']];
+      Object.keys(D).sort().forEach(name=>{
+        const cfg = D[name].settings||{};
+        const ch = cfg.cutHour||14;
+        activeOrders(name).sort((a,b)=>a.date-b.date).forEach(o=>{
+          try{
+            const shift = getShift(o,ch);
+            const fp = isFuoriPaese(o,cfg)?'Sì':'No';
+            rows.push([s(name),s(o.dateStr),s(dayIt(o.dayEn)),shift==='mat'?'Mattina':shift==='ser'?'Sera':'—',s(o.orderNum),s(o.ritiroDa),s(o.consegnaA),n(o.km),fp,s(o.payMethod),n(o.total),n(o.tariffaConsegna),n(o.fee),s(o.status),s(o.note)]);
+          }catch(e){}
+        });
       });
-    });
-  });
-  const wsTurni = XLSX.utils.aoa_to_sheet(turniRows);
-  wsTurni['!cols'] = [{wch:12},{wch:10},{wch:12},{wch:8},{wch:14},{wch:40}];
-  XLSX.utils.book_append_sheet(wb, wsTurni, 'Turni');
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols']=[18,11,10,10,14,22,22,6,8,8,9,8,8,12,20].map(w=>({wch:w}));
+      XLSX.utils.book_append_sheet(wb, ws, 'Ordini');
+    }catch(e){ console.warn('Foglio 2 errore:',e); }
 
-  // ── Scarica ──
-  const date = new Date().toISOString().slice(0,10);
-  // Download compatibile con tutti i browser (incluso mobile)
-  const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-  const blob = new Blob([wbout], {type:'application/octet-stream'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'fattorini_backup_'+date+'.xlsx';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-  showToast('📊 Excel scaricato — '+(ordiniRows.length-1)+' ordini');
+    // ── FOGLIO 3: Giornaliero ──
+    try{
+      const rows = [['FATTORINO','DATA','GIORNO','IN PAESE','F.PAESE','BONUS★','T.MAT','T.SER','CASH ORD.','CASH €','TAR.K €']];
+      Object.keys(D).sort().forEach(name=>{
+        getMonths(name).forEach(mk=>{
+          try{
+            const ms = computeMonth(name,mk);
+            (ms.days||[]).forEach(day=>{
+              try{
+                rows.push([s(name),s(day.ds),s(dayIt((day.dayOrds&&day.dayOrds[0])?day.dayOrds[0].dayEn:'')),n(day.cInPaese),n(day.cFuoriPaese),n(day.cBonus),day.hasMat?'✓':'',day.hasSer?'✓':'',n(day.cashOrds),n(day.cash),n(day.tariffaK)]);
+              }catch(e){}
+            });
+          }catch(e){}
+        });
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Giornaliero');
+    }catch(e){ console.warn('Foglio 3 errore:',e); }
+
+    // ── FOGLIO 4: Acconti ──
+    try{
+      const rows = [['FATTORINO','DATA','IMPORTO €','NOTE']];
+      Object.keys(D).sort().forEach(name=>{
+        (D[name].acconti||[]).sort((a,b)=>(a.data||'').localeCompare(b.data||'')).forEach(a=>{
+          rows.push([s(name),s(a.data),n(a.importo),s(a.note)]);
+        });
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Acconti');
+    }catch(e){ console.warn('Foglio 4 errore:',e); }
+
+    // ── FOGLIO 5: Turni ──
+    try{
+      const rows = [['SETTIMANA','GIORNO','TURNO ORA','FATTORINI']];
+      const GL={'lun':'Lunedì','mar':'Martedì','mer':'Mercoledì','gio':'Giovedì','ven':'Venerdì','sab':'Sabato','dom':'Domenica'};
+      const SL={'09-14':'09:00–14:00','11-14':'11:00–14:00','17-22':'17:00–22:00','18-23':'18:00–23:00','18-22':'18:00–22:00','19-23':'19:00–23:00'};
+      Object.keys(TURNI||{}).sort().forEach(wk=>{
+        const wkData=TURNI[wk]||{};
+        ['lun','mar','mer','gio','ven','sab','dom'].forEach(g=>{
+          Object.keys(SL).forEach(sid=>{
+            const slots=((wkData[g]||{})[sid]||[]);
+            if(slots.length) rows.push([wk,GL[g]||g,SL[sid]||sid,slots.map(ss=>ss.name||'').join(', ')]);
+          });
+        });
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Turni');
+    }catch(e){ console.warn('Foglio 5 errore:',e); }
+
+    // ── Download ──
+    const date = new Date().toISOString().slice(0,10);
+    const wbout = XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const blob = new Blob([wbout],{type:'application/octet-stream'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='fattorini_backup_'+date+'.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },1000);
+    const totOrd = Object.values(D).reduce((s,d)=>s+(d.orders||[]).filter(o=>!o.deleted).length,0);
+    showToast('📊 Excel scaricato — '+totOrd+' ordini totali');
   }catch(err){
     console.error('[EXPORT ERROR]',err);
     showToast('⚠️ Errore export: '+err.message);
