@@ -415,7 +415,10 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
       <!-- ACCONTI PANEL -->
       <div class="panel hidden" id="accontiPanel">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="panel-title" style="margin-bottom:0">💸 Acconti — <span id="accontiDriverName"></span></div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="panel-title" style="margin-bottom:0">💸 Acconti — <span id="accontiDriverName"></span></div>
+            <div id="accontiMonthPills" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+          </div>
           <button class="btn btn-ghost" onclick="closeAccontiPanel()" style="font-size:11px">✕ Chiudi</button>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end;flex-wrap:wrap">
@@ -3208,6 +3211,8 @@ function installApp(){
 }
 
 // ── ACCONTI ──
+let curAccontiMon = null; // mese selezionato nel pannello acconti (indipendente da curMon)
+
 function openAccontiPanel(){
   if(!cur||!D[cur]) return;
   if(!D[cur].acconti) D[cur].acconti=[];
@@ -3216,11 +3221,38 @@ function openAccontiPanel(){
   doc.getElementById('accontoData').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   doc.getElementById('accontoImporto').value='';
   doc.getElementById('accontoNote').value='';
+  // Imposta il mese acconti: usa curMon se disponibile, altrimenti il mese corrente
+  const todayMon=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const availableMonths=getMonths(cur);
+  // Mostra anche il mese corrente anche se non ci sono ordini
+  if(!availableMonths.includes(todayMon)) availableMonths.push(todayMon);
+  availableMonths.sort();
+  if(!curAccontiMon||!availableMonths.includes(curAccontiMon))
+    curAccontiMon=curMon||availableMonths[availableMonths.length-1];
   doc.getElementById('econPanel').classList.add('hidden');
   doc.getElementById('settPanel').classList.add('hidden');
   doc.getElementById('accontiPanel').classList.remove('hidden');
+  renderAccontiMonthPills();
   renderAccontiList();
 }
+function renderAccontiMonthPills(){
+  const today=new Date();
+  const todayMon=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const months=getMonths(cur)||[];
+  if(!months.includes(todayMon)) months.push(todayMon);
+  months.sort();
+  const pills=doc.getElementById('accontiMonthPills');
+  if(!pills) return;
+  pills.innerHTML='';
+  months.forEach(mk=>{
+    const p=doc.createElement('button');
+    p.className='pill'+(mk===curAccontiMon?' on':'');
+    p.textContent=mlabel(mk);
+    p.onclick=()=>{curAccontiMon=mk;renderAccontiMonthPills();renderAccontiList();};
+    pills.appendChild(p);
+  });
+}
+
 function closeAccontiPanel(){
   doc.getElementById('accontiPanel').classList.add('hidden');
 }
@@ -3251,7 +3283,7 @@ function renderAccontiList(){
   const list=doc.getElementById('accontiList');
   if(!list) return;
   const acconti=D[cur].acconti||[];
-  const filtrati=curMon?acconti.filter(a=>a.data.startsWith(curMon)):acconti;
+  const filtrati=(curAccontiMon?acconti.filter(a=>a.data&&a.data.startsWith(curAccontiMon)):acconti);
   list.innerHTML='';
   if(!filtrati.length){
     list.innerHTML='<div style="font-size:11px;color:var(--dim);padding:8px 0">Nessun acconto per '+(curMon?mlabel(curMon):'questo periodo')+'</div>';
@@ -3273,8 +3305,9 @@ function renderAccontiList(){
 
   // Compenso del mese selezionato
   let compenso=0;
-  if(cur && D[cur] && curMon){
-    try{ compenso=computeMonth(cur,curMon).compTot||0; }catch(e){}
+  const _amon=curAccontiMon||curMon;
+  if(cur && D[cur] && _amon){
+    try{ compenso=computeMonth(cur,_amon).compTot||0; }catch(e){}
   }
   const compEl=doc.getElementById('accontiCompenso');
   if(compEl) compEl.textContent='€'+compenso.toFixed(2);
