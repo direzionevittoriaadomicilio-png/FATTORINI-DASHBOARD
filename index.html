@@ -3194,6 +3194,67 @@ function removeFromShift(wk,giorno,shiftId,idx){
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
+// ── Turni pre-caricati settimana 23 (01/06-07/06 2026) ──
+(function(){
+  const wk = '2026-W23';
+  const stored = localStorage.getItem('fattorini_turni_v1');
+  const turni = stored ? JSON.parse(stored) : {};
+  if(!turni[wk]){
+    turni[wk] = {
+      lun: {
+        '09-14': [{name:'IVAN'}],
+        '11-14': [],
+        '17-22': [{name:'IVAN'}],
+        '18-22': [],
+        '19-23': [{name:'Valerio Frasca'},{name:'Martino Salerno'}]
+      },
+      mar: {
+        '09-14': [{name:'IVAN'}],
+        '11-14': [{name:'Martino Salerno'}],
+        '17-22': [{name:'IVAN'}],
+        '18-22': [],
+        '19-23': [{name:'Martino Salerno'},{name:'Davide Amodei'},{name:'MAKARIOUS'},{name:'Marco'}]
+      },
+      mer: {
+        '09-14': [{name:'Davide Amodei'}],
+        '11-14': [{name:'Martino Salerno'}],
+        '17-22': [{name:'Davide Amodei'}],
+        '18-22': [],
+        '19-23': [{name:'Martino Salerno'},{name:'Marco'}]
+      },
+      gio: {
+        '09-14': [{name:'IVAN'}],
+        '11-14': [{name:'Davide Amodei'}],
+        '17-22': [{name:'Davide Amodei'}],
+        '18-22': [],
+        '19-23': [{name:'IVAN'},{name:'MAKARIOUS'}]
+      },
+      ven: {
+        '09-14': [{name:'IVAN'}],
+        '11-14': [{name:'Davide Amodei'}],
+        '17-22': [{name:'IVAN'}],
+        '18-22': [],
+        '19-23': [{name:'Davide Amodei'},{name:'MAKARIOUS'},{name:'Pollara Davide'}]
+      },
+      sab: {
+        '09-14': [{name:'IVAN'}],
+        '11-14': [{name:'Davide Amodei'}],
+        '17-22': [{name:'IVAN'}],
+        '18-22': [],
+        '19-23': [{name:'Martino Salerno'},{name:'Pollara Davide'},{name:'Valerio Frasca'},{name:'Davide Amodei'},{name:'MAKARIOUS'}]
+      },
+      dom: {
+        '09-14': [{name:'Davide Amodei'}],
+        '11-14': [{name:'Martino Salerno'}],
+        '17-22': [],
+        '18-22': [{name:'Martino Salerno'}],
+        '19-23': [{name:'Pollara Davide'},{name:'Davide Amodei'},{name:'MAKARIOUS'},{name:'Marco'}]
+      }
+    };
+    localStorage.setItem('fattorini_turni_v1', JSON.stringify(turni));
+  }
+})();
+
 // ── PWA: solo install prompt (service worker richiede file separato su GitHub Pages) ──
 
 // Mostra bottone "Installa app" quando disponibile
