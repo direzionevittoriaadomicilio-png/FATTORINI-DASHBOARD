@@ -1015,11 +1015,13 @@ function renderSidebar(){
     btn.innerHTML=`<div class="drv-av" style="background:${col}22;color:${col}">${initials}</div>`+
       `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${name}${isSb?' <span style="font-size:9px;color:var(--dim)">(standby)</span>':''}</span>`+
       `<span class="drv-sb" title="${isSb?'Riattiva':'Metti in standby'}" style="opacity:0;font-size:11px;padding:0 2px;color:var(--dim);line-height:1">${isSb?'▶':'⏸'}</span>`+
+      `<span class="drv-merge" title="Unisci con altro fattorino" style="opacity:0;font-size:11px;padding:0 2px;color:var(--acc2);line-height:1">⇄</span>`+
       `<span class="drv-del" title="Elimina" style="opacity:0;font-size:13px;padding:0 2px;color:var(--acc3);line-height:1">✕</span>`;
-    btn.onmouseenter=()=>{btn.querySelector('.drv-del').style.opacity='1';btn.querySelector('.drv-sb').style.opacity='1';};
-    btn.onmouseleave=()=>{btn.querySelector('.drv-del').style.opacity='0';btn.querySelector('.drv-sb').style.opacity='0';};
+    btn.onmouseenter=()=>{btn.querySelector('.drv-del').style.opacity='1';btn.querySelector('.drv-sb').style.opacity='1';btn.querySelector('.drv-merge').style.opacity='1';};
+    btn.onmouseleave=()=>{btn.querySelector('.drv-del').style.opacity='0';btn.querySelector('.drv-sb').style.opacity='0';btn.querySelector('.drv-merge').style.opacity='0';};
     btn.querySelector('.drv-del').onclick=ev=>{ev.stopPropagation();deleteDriver(name);};
     btn.querySelector('.drv-sb').onclick=ev=>{ev.stopPropagation();toggleStandby(name);};
+    btn.querySelector('.drv-merge').onclick=ev=>{ev.stopPropagation();openMergeModal(name);};
     btn.onclick=()=>selectDriver(name);
     return btn;
   };
@@ -3324,7 +3326,125 @@ function renderAccontiList(){
 
 
 
+
+// ── MERGE FATTORINI ──
+let _mergingFrom = null;
+
+function openMergeModal(name){
+  _mergingFrom = name;
+  doc.getElementById('mergeFrom').textContent = name;
+  const sel = doc.getElementById('mergeInto');
+  sel.innerHTML = '';
+  Object.keys(D).filter(n=>n!==name).sort().forEach(n=>{
+    const o = doc.createElement('option');
+    o.value = n; o.textContent = n;
+    sel.appendChild(o);
+  });
+  updateMergePreview();
+  sel.onchange = updateMergePreview;
+  doc.getElementById('mergeModal').classList.remove('hidden');
+}
+
+function updateMergePreview(){
+  const from = _mergingFrom;
+  const into = doc.getElementById('mergeInto').value;
+  if(!from||!into||!D[from]||!D[into]){ return; }
+  const fromOrds = activeOrders(from).length;
+  const intoOrds = activeOrders(into).length;
+  const fromAcc  = (D[from].acconti||[]).length;
+  const preview  = doc.getElementById('mergePreview');
+  preview.innerHTML =
+    '<b style="color:var(--acc3)">'+from+'</b> ('+fromOrds+' ordini, '+fromAcc+' acconti)<br>'+
+    '+ <b style="color:var(--grn)">'+into+'</b> ('+intoOrds+' ordini)<br>'+
+    '= <b>'+into+'</b> con '+(fromOrds+intoOrds)+' ordini totali<br><br>'+
+    '<span style="color:var(--acc3)">Le impostazioni (condizioni economiche, mezzo) di <b>'+into+'</b> verranno mantenute.</span>';
+}
+
+function closeMergeModal(){
+  doc.getElementById('mergeModal').classList.add('hidden');
+  _mergingFrom = null;
+}
+
+function confirmMerge(){
+  const from = _mergingFrom;
+  const into = doc.getElementById('mergeInto').value;
+  if(!from||!into||!D[from]||!D[into]){
+    showToast('⚠️ Seleziona un fattorino valido');
+    return;
+  }
+  if(!confirm('Unire tutti i dati di "'+from+'" in "'+into+'"? Il fattorino "'+from+'" verrà eliminato.')){
+    return;
+  }
+
+  // Sposta ordini — aggiorna anche dayEn e monthKey dove necessario
+  D[from].orders.forEach(o=>{
+    o.deleted = o.deleted || false;
+    D[into].orders.push(o);
+  });
+
+  // Sposta mezzo — non sovrascrivere date già presenti in "into"
+  Object.entries(D[from].mezzo||{}).forEach(([date, val])=>{
+    if(!D[into].mezzo[date]) D[into].mezzo[date] = val;
+  });
+
+  // Sposta acconti
+  (D[from].acconti||[]).forEach(a=>{
+    if(!D[into].acconti) D[into].acconti = [];
+    D[into].acconti.push(a);
+  });
+
+  // Elimina il vecchio
+  delete D[from];
+
+  // Aggiorna turni: sostituisci il nome nei turni settimanali
+  if(typeof TURNI !== 'undefined'){
+    Object.values(TURNI).forEach(wkData=>{
+      Object.values(wkData).forEach(dayData=>{
+        Object.values(dayData).forEach(slots=>{
+          slots.forEach(slot=>{
+            if(slot.name===from) slot.name=into;
+          });
+        });
+      });
+    });
+    saveTurni();
+  }
+
+  closeMergeModal();
+  renderSidebar();
+  cur = into;
+  const months = getMonths(into);
+  curMon = months[months.length-1]||null;
+  selectDriver(into);
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+  showToast('✓ '+from+' unito in '+into+' — '+(D[into]?activeOrders(into).length:'?')+' ordini totali');
+}
+
 </script>
 
+
+<!-- MERGE FATTORINI MODAL -->
+<div class="modal-overlay hidden" id="mergeModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">
+      ⇄ Unisci fattorini
+      <button class="modal-close" onclick="closeMergeModal()">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--mut);margin-bottom:16px">
+      Tutti gli ordini, acconti e impostazioni di <b id="mergeFrom" style="color:var(--acc3)"></b> 
+      verranno spostati nel fattorino selezionato qui sotto. Il fattorino originale verrà eliminato.
+    </div>
+    <div class="field" style="margin-bottom:16px">
+      <label>Unisci IN questo fattorino (il nome che vuoi mantenere)</label>
+      <select class="inp" id="mergeInto" style="font-size:13px"></select>
+    </div>
+    <div id="mergePreview" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:8px;padding:12px;font-size:11px;color:var(--mut);margin-bottom:16px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMergeModal()">Annulla</button>
+      <button class="btn" onclick="confirmMerge()" style="background:var(--acc2);color:#fff">⇄ Unisci</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
