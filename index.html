@@ -777,7 +777,7 @@ function loadFile(file){
       if(cloudConnected && fbRef){
         cloudSaving = true;
         updateCloudStatus('saving');
-        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D)})
+        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{})})
           .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
           .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
       } else {
@@ -2598,6 +2598,8 @@ function setNewPassword(newPwd){
 function initApp(){
   // Init cloud from saved config
   initCloudFromSaved();
+  // Carica turni dal localStorage subito (non solo quando si apre la scheda Turni)
+  if(typeof loadTurni === 'function') loadTurni();
   // Load localStorage session
   const restored = loadFromLocalStorage();
   if(!restored){
@@ -2654,6 +2656,7 @@ function connectToFirebase(cfg){
       const noLocalData = !Object.keys(D).length && localAt===0;
       if(noLocalData || remoteAt>localAt+2000){
         D=deserializeD(remote.data);
+        if(remote.turni && typeof TURNI!=='undefined') TURNI=remote.turni;
         if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
         autoSaveToLocalStorage();
         renderSidebar();
@@ -2697,7 +2700,7 @@ function cloudSave(showFeedback){
   cloudSaving=false;
   cloudSaving=true;
   updateCloudStatus('saving');
-  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D)})
+  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{})})
     .then(()=>{
       cloudSaving=false;
       updateCloudStatus('synced');
@@ -3396,8 +3399,9 @@ function confirmMerge(){
   // Elimina il vecchio
   delete D[from];
 
-  // Aggiorna turni: sostituisci il nome nei turni settimanali
-  if(typeof TURNI !== 'undefined'){
+  // Aggiorna turni: carica prima dal localStorage, poi sostituisci il nome
+  if(typeof TURNI !== 'undefined' && typeof loadTurni === 'function'){
+    loadTurni(); // assicura che TURNI sia aggiornato prima di modificarlo
     Object.values(TURNI).forEach(wkData=>{
       Object.values(wkData).forEach(dayData=>{
         Object.values(dayData).forEach(slots=>{
