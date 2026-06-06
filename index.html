@@ -1465,7 +1465,7 @@ function renderWeekly(){
       <td style="color:${wEx>0?'var(--grn)':'var(--dim)'}">+${wEx.toFixed(1)}</td>
       <td style="color:${wBn>0?'var(--grn)':'var(--dim)'}">${wBn>0?'€'+wBn.toFixed(2):'—'}</td>
       <td>${wCO>0?`<span class="b bca">${wCO}</span>`:'—'}</td>
-      <td style="color:var(--cash)">${wCa>0?'€'+wCa.toFixed(2):'—'}</td>`;
+      <td style="color:var(--cash)">${wCa!==0?'<span style="color:'+(wCa<0?'var(--acc3)':'var(--cash)')+'">€'+wCa.toFixed(2)+'</span>':'—'}</td>`;
     tb.appendChild(tr);
   });
   const tot=doc.createElement('tr');tot.className='tr-tot';
@@ -1478,7 +1478,7 @@ function renderWeekly(){
     <td style="color:${rtEx>0?'var(--grn)':'var(--dim)'}">+${rtEx.toFixed(1)}</td>
     <td style="color:${rtBn>0?'var(--grn)':'var(--dim)'}">${rtBn>0?'€'+rtBn.toFixed(2):'—'}</td>
     <td>${rtCO>0?`<span class="b bca">${rtCO}</span>`:'—'}</td>
-    <td style="color:var(--cash)">${rtCa>0?'€'+rtCa.toFixed(2):'—'}</td>`;
+    <td style="color:var(--cash)">${rtCa!==0?'<span style="color:'+(rtCa<0?'var(--acc3)':'var(--cash)')+'">€'+rtCa.toFixed(2)+'</span>':'—'}</td>`;
   tb.appendChild(tot);
 }
 
@@ -1517,8 +1517,8 @@ function renderDaily(){
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${att.toFixed(1)}</td>
       <td style="color:${ext>0?'var(--grn)':'var(--dim)'}">+${ext.toFixed(1)}</td>
       <td style="color:${bon>0?'var(--grn)':'var(--dim)'}">${bon>0?'€'+bon.toFixed(2):'—'}</td>
-      <td>${day.cashOrds>0?`<span class="b bca">${day.cashOrds}</span>`:'—'}</td>
-      <td style="color:var(--cash)">${day.cash>0?'€'+day.cash.toFixed(2):'—'}</td>
+      <td>${(day.cashOrds>0||day.cash<0)?`<span class="b bca">${day.cashOrds}</span>`:'—'}</td>
+      <td style="color:var(--cash)">${day.cash!==0?'<span style="color:'+(day.cash<0?'var(--acc3)':'var(--cash)')+'">€'+day.cash.toFixed(2)+'</span>':'—'}</td>
       <td>€${day.fee.toFixed(2)}</td>
       <td style="color:var(--pur);font-family:'DM Mono',monospace">€${cmpBase.toFixed(2)}</td>
       <td><button onclick="deleteDay('${day.ds}')" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:5px;padding:2px 8px;font-size:9px;color:var(--acc3);cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap">🗑 Giorno</button></td>`;
@@ -1532,7 +1532,7 @@ function renderDaily(){
     <td style="color:${rEx>0?'var(--grn)':'var(--dim)'}">+${rEx.toFixed(1)}</td>
     <td style="color:${rBn>0?'var(--grn)':'var(--dim)'}">${rBn>0?'€'+rBn.toFixed(2):'—'}</td>
     <td>${rCO>0?`<span class="b bca">${rCO}</span>`:'—'}</td>
-    <td style="color:var(--cash)">${rCa>0?'€'+rCa.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${rCa!==0?'<span style="color:'+(rCa<0?'var(--acc3)':'var(--cash)')+'">€'+rCa.toFixed(2)+'</span>':'—'}</td>
     <td>€${rFee.toFixed(2)}</td>
     <td style="color:var(--pur)">€${rCmp.toFixed(2)}</td>`;
   tb.appendChild(tot);
@@ -1603,7 +1603,7 @@ function renderOrders(){
       '<div class="acc-summary">'+
         '<span class="acc-stat"><b>'+filtered.length+'</b> ordini</span>'+
         (fpN>0?'<span class="acc-stat"><span class="b br">FP</span> <b>'+fpN+'</b></span>':'')+
-        (totCash>0?'<span class="acc-stat">💵 <b>€'+totCash.toFixed(2)+'</b> ('+cashN+')</span>':'')+
+        (totCash!==0?'<span class="acc-stat"><b style="color:'+(totCash<0?'var(--acc3)':'var(--cash)')+'">💵 €'+totCash.toFixed(2)+'</b> ('+cashN+')</span>':'')+
         '<span class="acc-stat">Tar.K <b>€'+tariffaK.toFixed(2)+'</b></span>'+
       '</div>';
     hdr.onclick=()=>toggleDay(ds);
@@ -1999,7 +1999,7 @@ function renderGlobal(){
       <td style="font-family:'DM Mono',monospace;color:var(--mut)">${ms.attesa.toFixed(1)}</td>
       <td style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)}</td>
       <td style="color:${ms.bonus>0?'var(--grn)':'var(--dim)'}">${ms.bonus>0?'€'+ms.bonus.toFixed(2):'—'}</td>
-      <td style="color:var(--cash)">${ms.totCash>0?'€'+ms.totCash.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${ms.totCash!==0?'<span style="color:'+(ms.totCash<0?'var(--acc3)':'var(--cash)')+'">€'+ms.totCash.toFixed(2)+'</span>':'—'}</td>
       <td>€${ms.totFee.toFixed(2)}</td>
       <td style="color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</td>`;
     mBody.appendChild(tr);
@@ -2018,7 +2018,7 @@ function renderGlobal(){
     <td style="font-family:'DM Mono',monospace">${mTotAtt.toFixed(1)}</td>
     <td style="color:${mTotEx>0?'var(--grn)':'var(--dim)'}">+${mTotEx.toFixed(1)}</td>
     <td style="color:${mTotBn>0?'var(--grn)':'var(--dim)'}">${mTotBn>0?'€'+mTotBn.toFixed(2):'—'}</td>
-    <td style="color:var(--cash)">${mTotCash>0?'€'+mTotCash.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${mTotCash!==0?'<span style="color:'+(mTotCash<0?'var(--acc3)':'var(--cash)')+'">€'+mTotCash.toFixed(2)+'</span>':'—'}</td>
     <td>€${mTotFee.toFixed(2)}</td>
     <td style="color:var(--pur);font-weight:600">€${mTotComp.toFixed(2)}</td>`;
   mBody.appendChild(mTot);
@@ -2050,7 +2050,7 @@ function renderGlobal(){
       <td>${mesiOk}</td>
       <td style="font-family:'DM Mono',monospace">${media}</td>
       <td style="color:${tBn>0?'var(--grn)':'var(--dim)'}">${tBn>0?'€'+tBn.toFixed(2):'—'}</td>
-      <td style="color:var(--cash)">${tCash>0?'€'+tCash.toFixed(2):'—'}</td>
+      <td style="color:var(--cash)">${tCash!==0?'<span style="color:'+(tCash<0?'var(--acc3)':'var(--cash)')+'">€'+tCash.toFixed(2)+'</span>':'—'}</td>
       <td>€${tFee.toFixed(2)}</td>
       <td style="color:var(--pur);font-weight:600">€${tComp.toFixed(2)}</td>`;
     aBody.appendChild(tr);
@@ -2067,7 +2067,7 @@ function renderGlobal(){
     <td colspan="2"></td>
     <td colspan="1"></td>
     <td style="color:${aTotBn>0?'var(--grn)':'var(--dim)'}">${aTotBn>0?'€'+aTotBn.toFixed(2):'—'}</td>
-    <td style="color:var(--cash)">${aTotCash>0?'€'+aTotCash.toFixed(2):'—'}</td>
+    <td style="color:var(--cash)">${aTotCash!==0?'<span style="color:'+(aTotCash<0?'var(--acc3)':'var(--cash)')+'">€'+aTotCash.toFixed(2)+'</span>':'—'}</td>
     <td>€${aTotFee.toFixed(2)}</td>
     <td style="color:var(--pur);font-weight:600">€${aTotComp.toFixed(2)}</td>`;
   aBody.appendChild(aTot);
