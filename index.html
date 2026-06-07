@@ -234,6 +234,26 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 .shift-ser .turni-add-btn:hover{background:#dbeafe;border-color:#1d4ed8}
 
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* MOBILE: sidebar stretta + turni ottimizzati */
+@media(max-width:600px){
+  aside{width:60px!important;min-width:60px!important;padding:8px 4px}
+  .drv-btn span{display:none}
+  .drv-btn .drv-av{width:32px;height:32px;font-size:11px}
+  .aside-title{display:none}
+  #btnTurni span, #btnGlobal span{display:none}
+  .turni-grid{grid-template-columns:64px repeat(7,minmax(72px,1fr))!important;min-width:570px!important}
+  .turni-shift-lbl{min-width:64px!important;padding:5px 4px!important}
+  .turni-shift-name{font-size:9px!important}
+  .turni-shift-time{font-size:7px!important}
+  .turni-th{padding:5px 3px!important;font-size:8px!important}
+  .turni-cell{padding:3px!important;min-height:40px!important}
+  .drv-chip{font-size:9px!important;padding:2px 4px!important}
+  main{padding:12px 10px!important}
+}
+@media(max-width:400px){
+  .turni-grid{grid-template-columns:56px repeat(7,minmax(64px,1fr))!important;min-width:510px!important}
+}
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
@@ -3032,6 +3052,9 @@ function renderTurniGrid(){
   grid.innerHTML='';
   const today=fmtShort(new Date());
 
+  // Reset scroll a 0
+  const turniWrapEl = grid.parentElement;
+  if(turniWrapEl) turniWrapEl.scrollLeft=0;
   // Header
   const th0=doc.createElement('div'); th0.className='turni-th'; th0.textContent='TURNO'; grid.appendChild(th0);
   GIORNI.forEach((g,i)=>{
