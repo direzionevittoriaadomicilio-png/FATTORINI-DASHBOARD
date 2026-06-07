@@ -233,6 +233,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 .shift-ser .turni-add-btn{border-color:#3b82f6;color:#2563eb}
 .shift-ser .turni-add-btn:hover{background:#dbeafe;border-color:#1d4ed8}
 
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .hidden{display:none!important}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:10px}
@@ -651,18 +652,18 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
     </div>
 
     <!-- POPUP aggiungi fattorino a turno -->
-    <div id="turniPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center">
-      <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:12px;padding:20px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.15)">
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;margin-bottom:4px" id="popupTitle">Aggiungi fattorino</div>
-        <div style="font-size:11px;color:var(--mut);margin-bottom:14px" id="popupSubtitle">—</div>
-        <div class="field" style="margin-bottom:10px">
-          <label>Fattorino</label>
-          <select class="inp" id="popupDriver" style="font-size:12px"></select>
+    <div id="turniPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closePopup()">
+      <div style="background:var(--surf);border-radius:18px 18px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;box-shadow:0 -4px 32px rgba(0,0,0,.2);animation:slideUp .2s ease">
+        <div style="width:40px;height:4px;background:var(--brd2);border-radius:4px;margin:0 auto 16px"></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;margin-bottom:4px" id="popupTitle">Aggiungi fattorino</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:18px" id="popupSubtitle">—</div>
+        <div class="field" style="margin-bottom:20px">
+          <label style="font-size:12px;margin-bottom:6px;display:block">Seleziona fattorino</label>
+          <select class="inp" id="popupDriver" style="font-size:16px;padding:12px;height:auto;-webkit-appearance:auto"></select>
         </div>
-
-        <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button onclick="closePopup()" style="background:var(--surf2);border:1px solid var(--brd2);border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer">Annulla</button>
-          <button onclick="confirmAddToShift()" style="background:var(--acc);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;font-weight:700">✓ Aggiungi</button>
+        <div style="display:flex;gap:10px">
+          <button onclick="closePopup()" style="flex:1;background:var(--surf2);border:1px solid var(--brd2);border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:13px;cursor:pointer">Annulla</button>
+          <button onclick="confirmAddToShift()" style="flex:2;background:var(--acc);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;font-weight:700">✓ Aggiungi</button>
         </div>
       </div>
     </div>
@@ -3079,7 +3080,9 @@ function renderTurniGrid(){
           ph.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;border:1.5px dashed var(--brd2);background:rgba(0,0,0,.02);font-size:9px;color:var(--brd2);margin:1px;cursor:pointer';
           ph.textContent='+';
           ph.title='Slot atteso';
-          ph.onclick=(e)=>{e.stopPropagation();openShiftPopup(wk,g,shift.id,gi,si);};
+          const _phHandler=(e)=>{e.preventDefault();e.stopPropagation();openShiftPopup(wk,g,shift.id,gi,si);};
+      ph.addEventListener('click',_phHandler);
+      ph.addEventListener('touchend',_phHandler,{passive:false});
           cell.appendChild(ph);
         }
       } else {
