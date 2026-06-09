@@ -222,7 +222,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 .turni-cell{padding:5px;min-height:52px;cursor:pointer;transition:background .12s}
 
 /* Chip fattorini */
-.drv-chip{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:3px 7px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;margin:2px;white-space:nowrap;cursor:default;border:1.5px solid transparent}
+.drv-chip{display:inline-flex;align-items:center;gap:3px;border-radius:5px;padding:3px 7px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;margin:2px;white-space:nowrap;cursor:default;border:1.5px solid transparent;max-width:100%;overflow:hidden}
 .drv-chip .chip-del{cursor:pointer;color:rgba(0,0,0,.25);font-size:11px;line-height:1;padding:0 2px;margin-left:2px}
 .drv-chip .chip-del:hover{color:var(--acc3)}
 
@@ -1210,6 +1210,24 @@ function getTurnoType(dayOrds, cutHour){
   }
 }
 
+// Calcola compenso sera in base al mezzo e agli orari degli ordini
+function getTurnoCompSera(mezzo, serOrds, cutHour, tariffe){
+  if(!tariffe||!serOrds||!serOrds.length) return 0;
+  const isPropr = mezzo==='Auto propria';
+  const hours = serOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
+  if(!hours.length) return 0;
+  const firstSerHour = Math.min(...hours);
+  // pomSera = inizia prima delle 19 (17-19), solaSera = inizia dopo le 19
+  // Usa pomPr/pomAz se configurati, altrimenti ricade su serPr/serAz
+  if(firstSerHour < 19){
+    const pom = isPropr ? (tariffe.pomPr||0) : (tariffe.pomAz||0);
+    const ser = isPropr ? (tariffe.serPr||0) : (tariffe.serAz||0);
+    return pom > 0 ? pom : ser; // se pom non configurato, usa tariffa sera
+  } else {
+    return isPropr ? (tariffe.serPr||0) : (tariffe.serAz||0);
+  }
+}
+
 // Calcola compenso turno in base al tipo turno e al mezzo usato
 function getTurnoComp(turnoType, mezzoMat, mezzoSer, turnoTariffe){
   if(!turnoTariffe||!turnoType) return 0;
@@ -1280,11 +1298,35 @@ function computeMonth(name,mk){
   else if(e.mode==='mese') compBase=e.importo;
   else if(e.mode==='consegna') compBase=totC*e.importo;
   else if(e.mode==='turno'){
-    // Per ogni giorno calcola turno type e compenso
+    // Per ogni giorno calcola compenso separatamente per mattina e sera
     days.forEach(day=>{
-      const turnoType=getTurnoType(day.dayOrds, s.cutHour);
       const mz=D[name]?.mezzo?.[day.ds]||{};
-      const comp=getTurnoComp(turnoType, mz.mat||'—', mz.ser||'—', e.turno||{});
+      const tariffe=e.turno||{};
+      let comp=0;
+      let turnoType=null;
+
+      if(day.hasMat && day.hasSer){
+        // Lavora sia mattina che sera: calcola entrambi
+        const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
+        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
+        const matType=getTurnoType(matOrds, s.cutHour);
+        const serType=getTurnoType(serOrds, 99); // forza sera
+        const compMat=getTurnoComp(matType, mz.mat||'—', mz.mat||'—', tariffe);
+        const compSer=getTurnoCompSera(mz.ser||'—', serOrds, s.cutHour, tariffe);
+        comp=compMat+compSer;
+        turnoType='both';
+      } else if(day.hasMat){
+        // Solo mattina
+        const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
+        turnoType=getTurnoType(matOrds, s.cutHour);
+        comp=getTurnoComp(turnoType, mz.mat||'—', mz.mat||'—', tariffe);
+      } else if(day.hasSer){
+        // Solo sera
+        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
+        comp=getTurnoCompSera(mz.ser||'—', serOrds, s.cutHour, tariffe);
+        turnoType='solaSera';
+      }
+
       compBase+=comp;
       day.turnoType=turnoType;
       day.turnoComp=comp;
@@ -2911,6 +2953,14 @@ const SHIFTS = [
 let curWeekOffset = 0;
 let popupCtx = null;
 
+// Abbrevia nome per chip turni (es. "Martino Salerno" → "Martino S.")
+function shortName(name){
+  if(!name) return '';
+  const parts = name.trim().split(' ');
+  if(parts.length===1 || parts[0].length>=10) return parts[0].substring(0,10);
+  return parts[0] + ' ' + parts[parts.length-1][0] + '.';
+}
+
 // Colori per fattorino — 20 hue distanziati, assegnati in ordine alfabetico (no duplicati)
 const DRIVER_HUES = [220,0,142,35,270,185,330,160,50,200,310,90,15,240,170,60,300,110,25,250];
 let _driverColorMap = {};
@@ -3090,7 +3140,7 @@ function renderTurniGrid(){
         chip.className='drv-chip';
         chip.style.cssText='background:'+dc.bg+';border-color:'+dc.border+';color:'+dc.text;
         chip.innerHTML=
-          '<b>'+slot.name+'</b>'+
+          '<b title="'+slot.name+'">'+shortName(slot.name)+'</b>'+
           '<span class="chip-del" onclick="removeFromShift(\'' + wk + '\',\'' + g + '\',\'' + shift.id + '\',' + idx + ');event.stopPropagation()">✕</span>';
         cell.appendChild(chip);
       });
