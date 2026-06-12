@@ -881,7 +881,7 @@ function parseRows(rows){
     if(!D[name]) D[name]={
       orders:[],
       mezzo:{},
-      settings:{kmThresh:5,kmMax:50,cutHour:14},
+      settings:{kmThresh:5,kmMax:50,cutHour:15},
       econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}
     };
 
@@ -1012,7 +1012,7 @@ function isFuoriPaese(o, s){
   // Tutti gli altri: fuori paese se fee > 4.90
   return o.fee > FP_FEE_SOGLIA;
 }
-function getShift(o,ch){if(o.timeHour===null)return null;return o.timeHour<ch?'mat':'ser'}
+function getShift(o,ch){if(o.timeHour===null||o.timeHour===undefined)return null;return o.timeHour<=(ch+0.25)?'mat':'ser'}
 function activeOrders(name){return (D[name]?.orders||[]).filter(o=>!o.deleted)}
 function getMonths(name){return[...new Set(activeOrders(name).map(o=>o.monthKey))].sort()}
 function getDays(name,mk){return[...new Set(activeOrders(name).filter(o=>o.monthKey===mk).map(o=>o.dateStr))].sort((a,b)=>parseDateStr(a)-parseDateStr(b))}
@@ -1155,7 +1155,7 @@ function saveSettings(){
   const s=D[cur].settings;
   s.kmThresh=parseFloat(doc.getElementById('cfgKmThresh').value)||5;
   s.kmMax=parseFloat(doc.getElementById('cfgKmMax').value)||50;
-  s.cutHour=parseFloat(doc.getElementById('cfgCutHour').value)||14;
+  s.cutHour=parseFloat(doc.getElementById('cfgCutHour').value)||15;
   closeSettPanel();
   renderDriver();
   autoSaveToLocalStorage();
@@ -1203,7 +1203,7 @@ function getTurnoType(dayOrds, cutHour){
   const hours = dayOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
   if(!hours.length) return null;
   const firstHour = Math.min(...hours);
-  if(firstHour < cutHour){ // turno mattina (prima delle 14)
+  if(firstHour <= (cutHour+0.25)){ // turno mattina (fino alle 15:15)
     return firstHour < 11 ? 'matIntera' : 'mezzoMat';
   } else { // turno sera
     return firstHour < 19 ? 'pomSera' : 'solaSera'; // pomSera = 17-19, solaSera = 19+
@@ -2183,7 +2183,7 @@ function exportExcel(){
       const rows = [['FATTORINO','DATA','GIORNO','TURNO','N° ORDINE','RITIRO DA','CONSEGNA A','KM','F.PAESE','PAGAMENTO','TOTALE €','TAR.K €','FEE €','STATUS','NOTE']];
       Object.keys(D).sort().forEach(name=>{
         const cfg = D[name].settings||{};
-        const ch = cfg.cutHour||14;
+        const ch = cfg.cutHour||15;
         activeOrders(name).sort((a,b)=>a.date-b.date).forEach(o=>{
           try{
             const shift = getShift(o,ch);
@@ -2374,7 +2374,7 @@ function deserializeD(raw){
         });
         return m;
       })(),
-      settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:14},
+      settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:15},
       econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
       acconti: raw[name].acconti || [],
       standby: raw[name].standby === true,
@@ -2669,6 +2669,9 @@ function initApp(){
     doc.getElementById('upWrap').classList.remove('hidden');
     doc.getElementById('dash').classList.add('hidden');
   }
+  // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
+  Object.values(D).forEach(d=>{ if(d.settings && d.settings.cutHour===14) d.settings.cutHour=15; });
+  if(Object.keys(D).length) { autoSaveToLocalStorage(); }
 }
 
 // On page load: check if already authenticated this session
