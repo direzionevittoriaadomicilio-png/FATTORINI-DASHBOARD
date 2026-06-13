@@ -624,7 +624,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           <th>Cons. tot.</th><th>F.paese</th><th>Bonus★</th>
           <th>🌅 Mat</th><th>🌙 Sera</th>
           <th>Attese</th><th>Extra</th><th>Bonus €</th>
-          <th>💵 Cash €</th><th>💳 Tar.K Cash €</th><th>💳 Tar.K Card €</th><th>💳 Tar.K Tot €</th><th>Cons. totali</th><th>Compenso €</th>
+          <th>💵 Cash €</th><th>💳 Tar.K Card €</th><th>Cons. totali</th><th>Compenso €</th>
         </tr></thead>
         <tbody id="globalMonthBody"></tbody>
         </table></div>
@@ -2070,9 +2070,7 @@ function renderGlobal(){
       <td style="color:${ms.extra>0?'var(--grn)':'var(--dim)'}">+${ms.extra.toFixed(1)}</td>
       <td style="color:${ms.bonus>0?'var(--grn)':'var(--dim)'}">${ms.bonus>0?'€'+ms.bonus.toFixed(2):'—'}</td>
       <td style="color:var(--cash)">${ms.totCash!==0?'<span style="color:'+(ms.totCash<0?'var(--acc3)':'var(--cash)')+'">€'+ms.totCash.toFixed(2)+'</span>':'—'}</td>
-      <td><b style="color:var(--cash)">€${(ms.totIncassoCash||0).toFixed(2)}</b></td>
       <td><b style="color:var(--acc)">€${(ms.totIncassoCard||0).toFixed(2)}</b></td>
-      <td><b>€${((ms.totIncassoCash||0)+(ms.totIncassoCard||0)+(ms.totIncassoNa||0)).toFixed(2)}</b></td>
       <td>€${ms.totFee.toFixed(2)}</td>
       <td style="color:var(--pur);font-weight:600">€${ms.compTot.toFixed(2)}</td>`;
     mBody.appendChild(tr);
@@ -2092,9 +2090,7 @@ function renderGlobal(){
     <td style="color:${mTotEx>0?'var(--grn)':'var(--dim)'}">+${mTotEx.toFixed(1)}</td>
     <td style="color:${mTotBn>0?'var(--grn)':'var(--dim)'}">${mTotBn>0?'€'+mTotBn.toFixed(2):'—'}</td>
     <td style="color:var(--cash)">${mTotCash!==0?'<span style="color:'+(mTotCash<0?'var(--acc3)':'var(--cash)')+'">€'+mTotCash.toFixed(2)+'</span>':'—'}</td>
-    <td><b style="color:var(--cash)">€${mTotIncassoCash.toFixed(2)}</b></td>
     <td><b style="color:var(--acc)">€${mTotIncassoCard.toFixed(2)}</b></td>
-    <td><b>€${(mTotIncassoCash+mTotIncassoCard+mTotIncassoNa).toFixed(2)}</b></td>
     <td>€${mTotFee.toFixed(2)}</td>
     <td style="color:var(--pur);font-weight:600">€${mTotComp.toFixed(2)}</td>`;
   mBody.appendChild(mTot);
