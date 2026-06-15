@@ -739,7 +739,10 @@ const GIT=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','S
 let MEZZI=['—','Auto aziendale','Ford','Citroen','Scooter','Moto','Auto propria','Bici','Altro'];
 const MEZZI_KEY='fattorini_mezzi_v1';
 function loadMezzi(){ try{ const s=localStorage.getItem(MEZZI_KEY); if(s){ const m=JSON.parse(s); if(Array.isArray(m)&&m.length) MEZZI=m; } }catch(e){} }
-function saveMezzi(){ try{ localStorage.setItem(MEZZI_KEY,JSON.stringify(MEZZI)); }catch(e){} }
+function saveMezzi(){
+  try{ localStorage.setItem(MEZZI_KEY,JSON.stringify(MEZZI)); }catch(e){}
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+}
 loadMezzi();
 const COLORS=['#c8ff47','#47b8ff','#ff9f47','#5eea8d','#ff6b6b','#c47bff','#ffd447'];
 
@@ -798,7 +801,7 @@ function loadFile(file){
       if(cloudConnected && fbRef){
         cloudSaving = true;
         updateCloudStatus('saving');
-        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{})})
+        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])})
           .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
           .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
       } else {
@@ -2732,6 +2735,7 @@ function connectToFirebase(cfg){
       if(noLocalData || remoteAt>localAt+2000){
         D=deserializeD(remote.data);
         if(remote.turni && typeof TURNI!=='undefined') TURNI=remote.turni;
+        if(remote.mezzi && Array.isArray(remote.mezzi) && remote.mezzi.length){ MEZZI=remote.mezzi; saveMezzi(); }
         if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
         autoSaveToLocalStorage();
         renderSidebar();
@@ -2775,7 +2779,7 @@ function cloudSave(showFeedback){
   cloudSaving=false;
   cloudSaving=true;
   updateCloudStatus('saving');
-  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{})})
+  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])})
     .then(()=>{
       cloudSaving=false;
       updateCloudStatus('synced');
