@@ -2734,7 +2734,15 @@ function connectToFirebase(cfg){
       const noLocalData = !Object.keys(D).length && localAt===0;
       if(noLocalData || remoteAt>localAt+2000){
         D=deserializeD(remote.data);
-        if(remote.turni && typeof TURNI!=='undefined') TURNI=remote.turni;
+        if(remote.turni && typeof TURNI!=='undefined'){
+          TURNI=remote.turni;
+          // Salva in localStorage e aggiorna la griglia se è visibile
+          if(typeof saveTurni==='function') saveTurni();
+          const vt=document.getElementById('viewTurni');
+          if(vt && !vt.classList.contains('hidden') && typeof renderTurni==='function'){
+            renderTurni();
+          }
+        }
         if(remote.mezzi && Array.isArray(remote.mezzi) && remote.mezzi.length){ MEZZI=remote.mezzi; saveMezzi(); }
         if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
         autoSaveToLocalStorage();
@@ -3051,6 +3059,22 @@ function selectTurni(){
   // Carica e renderizza
   try{ loadTurni(); initDriverColors(); }catch(e){ showToast('loadTurni err: '+e.message); return; }
   try{ renderTurni(); }catch(e){ showToast('renderTurni err: '+e.message); return; }
+  // Se TURNI vuoto e Firebase connesso, scarica dal cloud
+  if(Object.keys(TURNI||{}).length===0){
+    try{
+      if(typeof fbRef!=='undefined'&&fbRef){
+        fbRef.once('value').then(snap=>{
+          const d=snap.val();
+          if(d&&d.turni&&Object.keys(d.turni).length){
+            TURNI=d.turni;
+            if(typeof saveTurni==='function') saveTurni();
+            renderTurni();
+            showToast('✓ Turni sincronizzati');
+          }
+        }).catch(()=>{});
+      }
+    }catch(e){}
+  }
 }
 function navigateWeek(dir){ curWeekOffset+=dir; renderTurni(); }
 function goToCurrentWeek(){ curWeekOffset=0; renderTurni(); }
