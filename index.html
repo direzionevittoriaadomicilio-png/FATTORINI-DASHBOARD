@@ -801,7 +801,11 @@ function loadFile(file){
       if(cloudConnected && fbRef){
         cloudSaving = true;
         updateCloudStatus('saving');
-        fbRef.set({savedAt:new Date().toISOString(), data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])})
+        (()=>{
+          const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
+          const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+          if(localOrds>0) fbRef.set(payload);
+        })()
           .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
           .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
       } else {
@@ -2787,7 +2791,11 @@ function cloudSave(showFeedback){
   cloudSaving=false;
   cloudSaving=true;
   updateCloudStatus('saving');
-  fbRef.set({savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])})
+  (()=>{
+          const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
+          const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+          if(localOrds>0) fbRef.set(payload);
+        })()
     .then(()=>{
       cloudSaving=false;
       updateCloudStatus('synced');
@@ -3602,6 +3610,28 @@ function confirmMerge(){
   autoSaveToLocalStorage();
   if(typeof debouncedCloudSave==='function') debouncedCloudSave();
   showToast('✓ '+from+' unito in '+into+' — '+(D[into]?activeOrders(into).length:'?')+' ordini totali');
+}
+
+
+// ── BACKUP AUTOMATICO ──
+function autoBackupJson(){
+  try{
+    const payload = JSON.stringify({
+      savedAt: new Date().toISOString(),
+      data: serializeD(D),
+      turni: TURNI||{},
+      mezzi: MEZZI||[]
+    });
+    const blob = new Blob([payload], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = 'backup_fattorini_'+date+'.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  }catch(e){ console.error('Backup error:', e); }
 }
 
 </script>
