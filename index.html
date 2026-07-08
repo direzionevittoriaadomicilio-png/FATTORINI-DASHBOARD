@@ -804,7 +804,7 @@ function loadFile(file){
         (()=>{
           const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
           const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
-          if(localOrds>0) fbRef.set(payload);
+          return localOrds>0 ? fbRef.set(payload) : Promise.resolve();
         })()
           .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
           .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
@@ -2794,7 +2794,7 @@ function cloudSave(showFeedback){
   (()=>{
           const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
           const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
-          if(localOrds>0) fbRef.set(payload);
+          return localOrds>0 ? fbRef.set(payload) : Promise.resolve();
         })()
     .then(()=>{
       cloudSaving=false;
