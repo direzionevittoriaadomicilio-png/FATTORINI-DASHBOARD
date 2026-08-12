@@ -1206,10 +1206,10 @@ function mkSel(current,onChange){
 
 // ── COMPUTE MONTH ──
 // Determina il tipo di turno in base all'orario del primo ordine del giorno
-// Ricava turno (mat/ser/both/null) dai turni settimanali pianificati
+// Ricava i turni specifici del fattorino per una data dai turni pianificati
+// Ritorna: { slots: ['09-14','17-22',...], hasMat, hasSer } o null se non trovato
 function getShiftFromTurni(driverName, dateStr){
   if(!TURNI || !driverName || !dateStr) return null;
-  // Calcola weekKey dalla data
   const parts = dateStr.split('/');
   if(parts.length!==3) return null;
   const d = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
@@ -1218,22 +1218,30 @@ function getShiftFromTurni(driverName, dateStr){
   const jan4 = new Date(y,0,4);
   const w = Math.ceil(((d-jan4)/86400000+(jan4.getDay()||7))/7);
   const wk = y+'-W'+String(w).padStart(2,'0');
-  // Giorno settimana
   const giorni = ['dom','lun','mar','mer','gio','ven','sab'];
   const g = giorni[d.getDay()];
   const wkData = TURNI[wk];
   if(!wkData || !wkData[g]) return null;
   const dayData = wkData[g];
-  // Turni mattina
+  const allSlots = ['09-14','11-14','17-22','18-22','19-23'];
   const matSlots = ['09-14','11-14'];
-  // Turni sera
   const serSlots = ['17-22','18-22','19-23'];
-  const inMat = matSlots.some(sid=>(dayData[sid]||[]).some(slot=>slot.name===driverName));
-  const inSer = serSlots.some(sid=>(dayData[sid]||[]).some(slot=>slot.name===driverName));
-  if(inMat && inSer) return 'both';
-  if(inMat) return 'mat';
-  if(inSer) return 'ser';
-  return null; // non trovato nei turni
+  const assignedSlots = allSlots.filter(sid=>(dayData[sid]||[]).some(s=>s.name===driverName));
+  if(!assignedSlots.length) return null;
+  return {
+    slots: assignedSlots,
+    hasMat: assignedSlots.some(s=>matSlots.includes(s)),
+    hasSer: assignedSlots.some(s=>serSlots.includes(s))
+  };
+}
+
+// Mappa slot turno → tipo tariffa
+function slotToTurnoType(slotId){
+  if(slotId==='09-14') return 'matIntera';
+  if(slotId==='11-14') return 'mezzoMat';
+  if(slotId==='17-22'||slotId==='18-22') return 'pomSera';
+  if(slotId==='19-23') return 'solaSera';
+  return null;
 }
 
 function getTurnoType(dayOrds, cutHour){
@@ -1316,10 +1324,10 @@ function computeMonth(name,mk){
     // Prima controlla i turni pianificati, poi fallback sull'orario
     const shiftFromTurni = getShiftFromTurni(name, ds);
     let hasMat, hasSer;
-    if(shiftFromTurni==='both'){ hasMat=true; hasSer=true; }
-    else if(shiftFromTurni==='mat'){ hasMat=true; hasSer=false; }
-    else if(shiftFromTurni==='ser'){ hasMat=false; hasSer=true; }
-    else {
+    if(shiftFromTurni){
+      hasMat = shiftFromTurni.hasMat;
+      hasSer  = shiftFromTurni.hasSer;
+    } else {
       // Fallback: usa orario ordini
       hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
       hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
@@ -1352,34 +1360,50 @@ function computeMonth(name,mk){
   else if(e.mode==='mese') compBase=e.importo;
   else if(e.mode==='consegna') compBase=totC*e.importo;
   else if(e.mode==='turno'){
-    // Per ogni giorno calcola compenso usando i turni pianificati come riferimento
     days.forEach(day=>{
       const mz=D[name]?.mezzo?.[day.ds]||{};
       const tariffe=e.turno||{};
       let comp=0;
       let turnoType=null;
+      const sft=getShiftFromTurni(name, day.ds);
 
-      if(day.hasMat && day.hasSer){
-        // Lavora sia mattina che sera
-        // Per la mattina: determina tipo dal primo ordine mattina
-        const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
-        const matType=matOrds.length ? getTurnoType(matOrds, s.cutHour) : 'matIntera';
-        const compMat=getTurnoComp(matType, mz.mat||'—', mz.mat||'—', tariffe);
-        // Per la sera: usa tutti gli ordini non-mattina
-        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
-        const compSer=getTurnoCompSera(mz.ser||'—', serOrds, s.cutHour, tariffe);
-        comp=compMat+compSer;
-        turnoType='both';
-      } else if(day.hasMat){
-        // Solo mattina — tipo da orario ordini
-        const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
-        turnoType=matOrds.length ? getTurnoType(matOrds, s.cutHour) : 'matIntera';
-        comp=getTurnoComp(turnoType, mz.mat||'—', mz.mat||'—', tariffe);
-      } else if(day.hasSer){
-        // Solo sera
-        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
-        comp=getTurnoCompSera(mz.ser||'—', day.dayOrds, s.cutHour, tariffe);
-        turnoType='solaSera';
+      if(sft && sft.slots.length){
+        // Calcola compenso per ogni slot assegnato nei turni
+        sft.slots.forEach(slotId=>{
+          const tipo=slotToTurnoType(slotId);
+          if(!tipo) return;
+          const isMat=slotId==='09-14'||slotId==='11-14';
+          const mezzo=isMat?(mz.mat||'—'):(mz.ser||'—');
+          const isPropr=mezzo==='Auto propria';
+          if(tipo==='matIntera')
+            comp+= isPropr?(tariffe.matPr||0):(tariffe.matAz||0);
+          else if(tipo==='mezzoMat')
+            comp+= isPropr?(tariffe.mezzoMatPr||0):(tariffe.mezzoMatAz||0);
+          else if(tipo==='pomSera'){
+            const p=isPropr?(tariffe.pomPr||0):(tariffe.pomAz||0);
+            const sv=isPropr?(tariffe.serPr||0):(tariffe.serAz||0);
+            comp+= p>0?p:sv;
+          } else if(tipo==='solaSera')
+            comp+= isPropr?(tariffe.serPr||0):(tariffe.serAz||0);
+        });
+        turnoType=sft.hasMat&&sft.hasSer?'both':sft.hasMat?'matIntera':'solaSera';
+      } else {
+        // Fallback orario
+        if(day.hasMat && day.hasSer){
+          const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
+          const matType=matOrds.length?getTurnoType(matOrds,s.cutHour):'matIntera';
+          comp+=getTurnoComp(matType,mz.mat||'—',mz.mat||'—',tariffe);
+          const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
+          comp+=getTurnoCompSera(mz.ser||'—',serOrds,s.cutHour,tariffe);
+          turnoType='both';
+        } else if(day.hasMat){
+          const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
+          turnoType=matOrds.length?getTurnoType(matOrds,s.cutHour):'matIntera';
+          comp=getTurnoComp(turnoType,mz.mat||'—',mz.mat||'—',tariffe);
+        } else if(day.hasSer){
+          comp=getTurnoCompSera(mz.ser||'—',day.dayOrds,s.cutHour,tariffe);
+          turnoType='solaSera';
+        }
       }
 
       compBase+=comp;
