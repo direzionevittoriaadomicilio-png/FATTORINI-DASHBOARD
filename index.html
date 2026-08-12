@@ -801,13 +801,14 @@ function loadFile(file){
       if(cloudConnected && fbRef){
         cloudSaving = true;
         updateCloudStatus('saving');
-        (()=>{
-          const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
-          const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
-          return localOrds>0 ? fbRef.set(payload) : Promise.resolve();
-        })()
+        const _localOrds1=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+        // Non caricare se locale è vuoto o ha pochi dati
+        if(_localOrds1===0){ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti'); return; }
+        const _payload1={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
+        const _promise1=fbRef.set(_payload1);
+        _promise1
           .then(()=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('synced'); showToast('☁️ '+aggiunti+' ordini aggiunti · sincronizzato'); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';} })
-          .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+err.message); });
+          .catch(err=>{ cloudSaving=false; cloudPaused=false; updateCloudStatus('error'); showToast('✓ '+aggiunti+' ordini aggiunti · errore cloud: '+(err?err.message:'')); });
       } else {
         cloudPaused = false;
         showToast('✓ '+aggiunti+' ordini aggiunti da '+file.name); if(doc.getElementById('loadStatus')){doc.getElementById('loadStatus').textContent='✓ '+aggiunti+' ordini';}
@@ -1205,6 +1206,36 @@ function mkSel(current,onChange){
 
 // ── COMPUTE MONTH ──
 // Determina il tipo di turno in base all'orario del primo ordine del giorno
+// Ricava turno (mat/ser/both/null) dai turni settimanali pianificati
+function getShiftFromTurni(driverName, dateStr){
+  if(!TURNI || !driverName || !dateStr) return null;
+  // Calcola weekKey dalla data
+  const parts = dateStr.split('/');
+  if(parts.length!==3) return null;
+  const d = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+  if(isNaN(d)) return null;
+  const y = d.getFullYear();
+  const jan4 = new Date(y,0,4);
+  const w = Math.ceil(((d-jan4)/86400000+(jan4.getDay()||7))/7);
+  const wk = y+'-W'+String(w).padStart(2,'0');
+  // Giorno settimana
+  const giorni = ['dom','lun','mar','mer','gio','ven','sab'];
+  const g = giorni[d.getDay()];
+  const wkData = TURNI[wk];
+  if(!wkData || !wkData[g]) return null;
+  const dayData = wkData[g];
+  // Turni mattina
+  const matSlots = ['09-14','11-14'];
+  // Turni sera
+  const serSlots = ['17-22','18-22','19-23'];
+  const inMat = matSlots.some(sid=>(dayData[sid]||[]).some(slot=>slot.name===driverName));
+  const inSer = serSlots.some(sid=>(dayData[sid]||[]).some(slot=>slot.name===driverName));
+  if(inMat && inSer) return 'both';
+  if(inMat) return 'mat';
+  if(inSer) return 'ser';
+  return null; // non trovato nei turni
+}
+
 function getTurnoType(dayOrds, cutHour){
   // Prendi l'orario minimo del giorno (primo ordine)
   const hours = dayOrds.map(o=>o.timeHour).filter(h=>h!==null&&h!==undefined);
@@ -1282,8 +1313,17 @@ function computeMonth(name,mk){
     const cBonus=cInPaese+(cFuoriPaese*FP_WEIGHT);
     const c=cBonus; // usato per calcolo extra/bonus
     const cNorm=cTot; // totale reale per display
-    const hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
-    const hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
+    // Prima controlla i turni pianificati, poi fallback sull'orario
+    const shiftFromTurni = getShiftFromTurni(name, ds);
+    let hasMat, hasSer;
+    if(shiftFromTurni==='both'){ hasMat=true; hasSer=true; }
+    else if(shiftFromTurni==='mat'){ hasMat=true; hasSer=false; }
+    else if(shiftFromTurni==='ser'){ hasMat=false; hasSer=true; }
+    else {
+      // Fallback: usa orario ordini
+      hasMat=dayOrds.some(o=>getShift(o,s.cutHour)==='mat');
+      hasSer=dayOrds.some(o=>getShift(o,s.cutHour)==='ser');
+    }
     if(hasMat)daysWithMat++;
     if(hasSer)daysWithSer++;
     totDays++;
@@ -1312,7 +1352,7 @@ function computeMonth(name,mk){
   else if(e.mode==='mese') compBase=e.importo;
   else if(e.mode==='consegna') compBase=totC*e.importo;
   else if(e.mode==='turno'){
-    // Per ogni giorno calcola compenso separatamente per mattina e sera
+    // Per ogni giorno calcola compenso usando i turni pianificati come riferimento
     days.forEach(day=>{
       const mz=D[name]?.mezzo?.[day.ds]||{};
       const tariffe=e.turno||{};
@@ -1320,24 +1360,25 @@ function computeMonth(name,mk){
       let turnoType=null;
 
       if(day.hasMat && day.hasSer){
-        // Lavora sia mattina che sera: calcola entrambi
+        // Lavora sia mattina che sera
+        // Per la mattina: determina tipo dal primo ordine mattina
         const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
-        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
-        const matType=getTurnoType(matOrds, s.cutHour);
-        const serType=getTurnoType(serOrds, 99); // forza sera
+        const matType=matOrds.length ? getTurnoType(matOrds, s.cutHour) : 'matIntera';
         const compMat=getTurnoComp(matType, mz.mat||'—', mz.mat||'—', tariffe);
+        // Per la sera: usa tutti gli ordini non-mattina
+        const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
         const compSer=getTurnoCompSera(mz.ser||'—', serOrds, s.cutHour, tariffe);
         comp=compMat+compSer;
         turnoType='both';
       } else if(day.hasMat){
-        // Solo mattina
+        // Solo mattina — tipo da orario ordini
         const matOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='mat');
-        turnoType=getTurnoType(matOrds, s.cutHour);
+        turnoType=matOrds.length ? getTurnoType(matOrds, s.cutHour) : 'matIntera';
         comp=getTurnoComp(turnoType, mz.mat||'—', mz.mat||'—', tariffe);
       } else if(day.hasSer){
         // Solo sera
         const serOrds=day.dayOrds.filter(o=>getShift(o,s.cutHour)==='ser');
-        comp=getTurnoCompSera(mz.ser||'—', serOrds, s.cutHour, tariffe);
+        comp=getTurnoCompSera(mz.ser||'—', day.dayOrds, s.cutHour, tariffe);
         turnoType='solaSera';
       }
 
@@ -2775,6 +2816,9 @@ function connectToFirebase(cfg){
 }
 
 function debouncedCloudSave(){
+  // Non fare mai upload se D è vuoto
+  const _ords=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+  if(_ords===0) return;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer=setTimeout(cloudSave,700);
 }
@@ -2791,21 +2835,13 @@ function cloudSave(showFeedback){
   cloudSaving=false;
   cloudSaving=true;
   updateCloudStatus('saving');
-  (()=>{
-          const payload={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
-          const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
-          return localOrds>0 ? fbRef.set(payload) : Promise.resolve();
-        })()
-    .then(()=>{
-      cloudSaving=false;
-      updateCloudStatus('synced');
-      if(showFeedback) showToast('☁️ Dati caricati sul cloud ✓');
-    })
-    .catch(e=>{
-      cloudSaving=false;
-      updateCloudStatus('error');
-      showToast('⚠️ Errore upload: '+e.message);
-    });
+  const _localOrds2=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+  if(_localOrds2===0){ cloudSaving=false; updateCloudStatus('connected'); return; }
+  const _payload2={savedAt:new Date().toISOString(),data:serializeD(D),turni:(typeof TURNI!=='undefined'?TURNI:{}),mezzi:(typeof MEZZI!=='undefined'?MEZZI:[])};
+  const _promise2=fbRef.set(_payload2);
+  _promise2
+    .then(()=>{ cloudSaving=false; updateCloudStatus('synced'); if(showFeedback) showToast('☁️ Dati caricati sul cloud ✓'); })
+    .catch(e=>{ cloudSaving=false; updateCloudStatus('error'); showToast('⚠️ Errore upload: '+(e?e.message:'')); });
 }
 
 function updateCloudStatus(s){
@@ -3613,26 +3649,6 @@ function confirmMerge(){
 }
 
 
-// ── BACKUP AUTOMATICO ──
-function autoBackupJson(){
-  try{
-    const payload = JSON.stringify({
-      savedAt: new Date().toISOString(),
-      data: serializeD(D),
-      turni: TURNI||{},
-      mezzi: MEZZI||[]
-    });
-    const blob = new Blob([payload], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const date = new Date().toISOString().slice(0,10);
-    a.href = url;
-    a.download = 'backup_fattorini_'+date+'.json';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-  }catch(e){ console.error('Backup error:', e); }
-}
 
 </script>
 
