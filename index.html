@@ -428,6 +428,10 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
           </div>
         </div>
         <div style="display:flex;gap:8px">
+          <div id="econHistoryDiv" class="hidden" style="margin-bottom:12px;background:var(--surf2);border:1px solid var(--brd);border-radius:8px;padding:10px;max-height:200px;overflow-y:auto">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Storico condizioni</div>
+            <div id="econHistoryList"></div>
+          </div>
           <button class="btn btn-acc" onclick="saveEcon()">✓ Salva condizioni</button>
           <button class="btn btn-ghost" onclick="closeEconPanel()">Annulla</button>
         </div>
@@ -1128,6 +1132,28 @@ function updateEconLabel(){
 }
 doc.getElementById('econMode').addEventListener('change',updateEconLabel);
 function saveEcon(){
+  if(!D[cur]) return;
+  // Salva le condizioni VECCHIE nello storico con la data di fine
+  const today = new Date();
+  const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  if(!D[cur].econHistory) D[cur].econHistory=[];
+  // Aggiungi le condizioni attuali allo storico se non è la prima volta
+  if(D[cur].econ && D[cur].econ.mode){
+    const lastEntry = D[cur].econHistory[D[cur].econHistory.length-1];
+    // Evita duplicati: aggiungi solo se le condizioni sono cambiate
+    const currentStr = JSON.stringify(D[cur].econ);
+    const lastStr = lastEntry ? JSON.stringify(lastEntry.econ) : '';
+    if(currentStr !== lastStr){
+      // Determina la data di inizio delle condizioni attuali
+      const from = lastEntry ? lastEntry.to || todayStr : '2000-01-01';
+      D[cur].econHistory.push({
+        from: from,
+        to: todayStr,
+        econ: JSON.parse(JSON.stringify(D[cur].econ))
+      });
+    }
+  }
+  // Applica le nuove condizioni
   const e=D[cur].econ;
   e.mode=doc.getElementById('econMode').value;
   e.importo=parseFloat(doc.getElementById('econImporto').value)||0;
@@ -1144,10 +1170,13 @@ function saveEcon(){
   e.turno.pomPr=parseFloat(doc.getElementById('turnoPomPr').value)||0;
   e.turno.serAz=parseFloat(doc.getElementById('turnoSerAz').value)||0;
   e.turno.serPr=parseFloat(doc.getElementById('turnoSerPr').value)||0;
+  // Registra la data di inizio delle nuove condizioni
+  e.validFrom = todayStr;
   closeEconPanel();
   renderDriver();
   autoSaveToLocalStorage();
   debouncedCloudSave();
+  showToast('✓ Condizioni aggiornate dal '+todayStr);
 }
 function openSettingsPanel(){
   const s=D[cur].settings;
@@ -1289,6 +1318,26 @@ function getTurnoComp(turnoType, mezzoMat, mezzoSer, turnoTariffe){
   return map[turnoType]||0;
 }
 
+// Ritorna le condizioni economiche valide per una data specifica
+function getEconForDate(name, dateStr){
+  if(!D[name]) return defaultEcon();
+  const hist = D[name].econHistory||[];
+  if(!hist.length) return D[name].econ||defaultEcon();
+  // dateStr formato DD/MM/YYYY → converte in YYYY-MM-DD per confronto
+  const parts = dateStr.split('/');
+  if(parts.length!==3) return D[name].econ||defaultEcon();
+  const iso = parts[2]+'-'+parts[1].padStart(2,'0')+'-'+parts[0].padStart(2,'0');
+  // Cerca l'ultima entry dello storico dove from <= iso <= to
+  let result = D[name].econ||defaultEcon(); // default: condizioni attuali
+  for(const entry of hist){
+    if(entry.from <= iso && (!entry.to || iso < entry.to)){
+      result = entry.econ;
+      break;
+    }
+  }
+  return result;
+}
+
 function computeMonth(name,mk){
   const d=D[name];
   const s=d.settings;
@@ -1362,7 +1411,9 @@ function computeMonth(name,mk){
   else if(e.mode==='turno'){
     days.forEach(day=>{
       const mz=D[name]?.mezzo?.[day.ds]||{};
-      const tariffe=e.turno||{};
+      const eDayRaw=getEconForDate(name, day.ds); // condizioni del giorno specifico
+      const eDay=eDayRaw||e;
+      const tariffe=eDay.turno||e.turno||{};
       let comp=0;
       let turnoType=null;
       const sft=getShiftFromTurni(name, day.ds);
@@ -2431,6 +2482,7 @@ function serializeD(data){
       mezzo: mezzoSafe,
       settings: data[name].settings,
       econ: data[name].econ,
+      econHistory: data[name].econHistory||[],
       acconti: data[name].acconti || [],
       standby: data[name].standby || false,
       orders: data[name].orders.map(o=>({
@@ -2457,6 +2509,7 @@ function deserializeD(raw){
       })(),
       settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:15},
       econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
+      econHistory: raw[name].econHistory||[],
       acconti: raw[name].acconti || [],
       standby: raw[name].standby === true,
       orders: (raw[name].orders||[]).map(o=>{
@@ -3673,6 +3726,35 @@ function confirmMerge(){
 }
 
 
+
+
+function toggleEconHistory(){
+  const div=doc.getElementById('econHistoryDiv');
+  if(!div) return;
+  const hidden=div.classList.toggle('hidden');
+  if(!hidden) renderEconHistory();
+}
+function renderEconHistory(){
+  if(!cur||!D[cur]) return;
+  const list=doc.getElementById('econHistoryList');
+  if(!list) return;
+  const hist=D[cur].econHistory||[];
+  if(!hist.length){ list.innerHTML='<div style="font-size:11px;color:var(--dim)">Nessuna modifica registrata</div>'; return; }
+  list.innerHTML=[...hist].reverse().map(h=>{
+    const e=h.econ||{};
+    const from=h.from?h.from.split('-').reverse().join('/'):'—';
+    const to=h.to?h.to.split('-').reverse().join('/'):'oggi';
+    const desc=e.mode==='turno'?
+      `Mat.Az €${e.turno?.matAz||0} / Mat.Pr €${e.turno?.matPr||0} · Sera €${e.turno?.serPr||0}`:
+      e.mode==='giornata'?`€${e.importo}/giorno`:
+      e.mode==='mese'?`€${e.importo}/mese`:
+      `A consegna`;
+    return `<div style="font-size:10px;padding:5px 0;border-bottom:1px solid var(--brd)">
+      <span style="font-family:'DM Mono',monospace;color:var(--mut)">${from} → ${to}</span>
+      <span style="margin-left:8px;color:var(--txt)">${desc}</span>
+    </div>`;
+  }).join('');
+}
 
 </script>
 
