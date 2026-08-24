@@ -328,6 +328,9 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
       <span>Riepilogo totale</span>
     </button>
     <div style="height:1px;background:var(--brd);margin:4px 0"></div>
+    <button onclick="addManualDriver()" style="width:100%;margin-bottom:6px;background:none;border:1px dashed var(--brd2);border-radius:8px;padding:6px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);display:flex;align-items:center;justify-content:center;gap:4px" title="Aggiungi fattorino manualmente">
+      <span style="font-size:14px">+</span> Nuovo fattorino
+    </button>
     <div id="drvList"><div style="color:var(--dim);font-size:11px;padding:8px">Carica un file Excel</div></div>
   </aside>
 
@@ -3551,7 +3554,25 @@ function renderAccontiMonthPills(){
   pills.innerHTML='';
   months.forEach(mk=>{
     const p=doc.createElement('button');
-    p.className='pill'+(mk===curAccontiMon?' on':'');
+    const isSelected = mk===curAccontiMon;
+    p.className='pill'+(isSelected?' on':'');
+    // Calcola saldo del mese per colorare la pill
+    let compenso=0;
+    try{ compenso=computeMonth(cur,mk).compTot||0; }catch(e){}
+    const accontiMese=(D[cur].acconti||[]).filter(a=>a.data&&a.data.startsWith(mk)).reduce((s,a)=>s+(a.importo||0),0);
+    const saldo=compenso-accontiMese;
+    if(!isSelected){
+      if(compenso>0 && saldo<=0){
+        // Saldato — verde
+        p.style.cssText='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.5);color:#15803d;font-weight:700';
+      } else if(compenso>0 && accontiMese>0 && saldo>0){
+        // Parzialmente pagato — arancio
+        p.style.cssText='background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.4);color:#b45309;font-weight:700';
+      } else if(compenso>0 && accontiMese===0){
+        // Non pagato — rosso
+        p.style.cssText='background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.35);color:#b91c1c;font-weight:700';
+      }
+    }
     p.textContent=mlabel(mk);
     p.onclick=()=>{curAccontiMon=mk;renderAccontiMonthPills();renderAccontiList();};
     pills.appendChild(p);
@@ -3754,6 +3775,27 @@ function renderEconHistory(){
       <span style="margin-left:8px;color:var(--txt)">${desc}</span>
     </div>`;
   }).join('');
+}
+
+
+// ── AGGIUNGI FATTORINO MANUALE ──
+function addManualDriver(){
+  const name = prompt('Nome del fattorino:','');
+  if(!name || !name.trim()) return;
+  const n = name.trim();
+  if(D[n]){ showToast('⚠️ '+n+' esiste già'); return; }
+  D[n] = {
+    orders:[], mezzo:{},
+    settings:{kmThresh:5,kmMax:50,cutHour:15},
+    econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',
+          turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}},
+    acconti:[], econHistory:[], standby:false
+  };
+  renderSidebar();
+  selectDriver(n);
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==='function') debouncedCloudSave();
+  showToast('✓ '+n+' aggiunto');
 }
 
 </script>
