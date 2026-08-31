@@ -414,11 +414,19 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
 
         <div class="grid2" style="margin-bottom:12px">
           <div class="field">
-            <label>Soglia cons. mattina (per bonus)</label>
+            <label>Soglia 🌅 Mattina intera 09-14</label>
             <input class="inp" type="number" id="econSogliaMat" value="12.5" step="0.5">
           </div>
           <div class="field">
-            <label>Soglia cons. sera (per bonus)</label>
+            <label>Soglia ½ Mezza mattina 11-14</label>
+            <input class="inp" type="number" id="econSogliaMezzoMat" value="7" step="0.5">
+          </div>
+          <div class="field">
+            <label>Soglia 🌙 Pomeriggio+Sera 17-22</label>
+            <input class="inp" type="number" id="econSogliaPomSera" value="20" step="0.5">
+          </div>
+          <div class="field">
+            <label>Soglia 🌙 Solo sera 19-23</label>
             <input class="inp" type="number" id="econSogliaSer" value="14" step="0.5">
           </div>
           <div class="field">
@@ -897,7 +905,7 @@ function parseRows(rows){
       orders:[],
       mezzo:{},
       settings:{kmThresh:5,kmMax:50,cutHour:15},
-      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}
+      econ:{mode:'giornata',importo:0,sogliaMat:12.5,sogliaMezzoMat:7,sogliaPomSera:20,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}
     };
 
     const dateStr=fmtDate(dateObj);
@@ -1104,8 +1112,10 @@ function openEconPanel(){
   doc.getElementById('econDriverName').textContent=cur;
   doc.getElementById('econMode').value=e.mode;
   doc.getElementById('econImporto').value=e.importo;
-  doc.getElementById('econSogliaMat').value=e.sogliaMat;
-  doc.getElementById('econSogliaSer').value=e.sogliaSer;
+  doc.getElementById('econSogliaMat').value=e.sogliaMat||12.5;
+  doc.getElementById('econSogliaMezzoMat').value=e.sogliaMezzoMat||7;
+  doc.getElementById('econSogliaPomSera').value=e.sogliaPomSera||20;
+  doc.getElementById('econSogliaSer').value=e.sogliaSer||14;
   doc.getElementById('econBonusEuro').value=e.bonusEuro;
   doc.getElementById('econNote').value=e.note||'';
   // Turno tariffe
@@ -1161,6 +1171,8 @@ function saveEcon(){
   e.mode=doc.getElementById('econMode').value;
   e.importo=parseFloat(doc.getElementById('econImporto').value)||0;
   e.sogliaMat=parseFloat(doc.getElementById('econSogliaMat').value)||12.5;
+  e.sogliaMezzoMat=parseFloat(doc.getElementById('econSogliaMezzoMat').value)||7;
+  e.sogliaPomSera=parseFloat(doc.getElementById('econSogliaPomSera').value)||20;
   e.sogliaSer=parseFloat(doc.getElementById('econSogliaSer').value)||14;
   e.bonusEuro=parseFloat(doc.getElementById('econBonusEuro').value)||1;
   e.note=doc.getElementById('econNote').value;
@@ -1402,7 +1414,26 @@ function computeMonth(name,mk){
   });
 
   // Bonus logic
-  const attesa=daysWithMat*e.sogliaMat+daysWithSer*e.sogliaSer;
+  // Calcola attesa con 4 soglie basate sui turni pianificati
+  let nMatIntera=0,nMezzoMat=0,nPomSera=0,nSolaSera=0;
+  days.forEach(day=>{
+    const sft=getShiftFromTurni(name,day.ds);
+    if(sft&&sft.slots.length){
+      sft.slots.forEach(sid=>{
+        if(sid==='09-14') nMatIntera++;
+        else if(sid==='11-14') nMezzoMat++;
+        else if(sid==='17-22'||sid==='18-22') nPomSera++;
+        else if(sid==='19-23') nSolaSera++;
+      });
+    } else {
+      if(day.hasMat) nMatIntera++;
+      if(day.hasSer) nSolaSera++;
+    }
+  });
+  const attesa = nMatIntera*(e.sogliaMat||12.5)
+               + nMezzoMat*(e.sogliaMezzoMat||7)
+               + nPomSera*(e.sogliaPomSera||20)
+               + nSolaSera*(e.sogliaSer||14);
   const extra=Math.max(0,totCBonus-attesa); // usa totale pesato per bonus
   const bonus=extra*e.bonusEuro;
 
@@ -1499,9 +1530,9 @@ function renderDriver(){
   doc.getElementById('stCSub').textContent=`in paese: ${aC-aFP} · f.p.: ${aFP}`;
   doc.getElementById('stFP').textContent=aFP;
   doc.getElementById('stMat').textContent=aMat;
-  doc.getElementById('stMatSub').textContent=`soglia ${e.sogliaMat}/giorno`;
+  doc.getElementById('stMatSub').textContent=`mat ${e.sogliaMat||12.5} · ½mat ${e.sogliaMezzoMat||7}`;
   doc.getElementById('stSer').textContent=aSer;
-  doc.getElementById('stSerSub').textContent=`soglia ${e.sogliaSer}/giorno`;
+  doc.getElementById('stSerSub').textContent=`pom ${e.sogliaPomSera||20} · sera ${e.sogliaSer||14}`;
   doc.getElementById('stExtra').textContent=aExtra>0?'+'+aExtra.toFixed(1):0;
   doc.getElementById('stTick').textContent=aTick;
   doc.getElementById('stCash').textContent='€'+aCash.toFixed(2);
@@ -1636,7 +1667,22 @@ function renderWeekly(){
 
   Object.keys(byWeek).sort((a,b)=>a-b).forEach(wk=>{
     const wd=byWeek[wk];
-    const wAtt=wd.reduce((a,d)=>{let x=0;if(d.hasMat)x+=e.sogliaMat;if(d.hasSer)x+=e.sogliaSer;return a+x},0);
+    const wAtt=wd.reduce((a,d)=>{
+      let x=0;
+      const wsft=getShiftFromTurni(name,d.ds);
+      if(wsft&&wsft.slots.length){
+        wsft.slots.forEach(sid=>{
+          if(sid==='09-14') x+=(e.sogliaMat||12.5);
+          else if(sid==='11-14') x+=(e.sogliaMezzoMat||7);
+          else if(sid==='17-22'||sid==='18-22') x+=(e.sogliaPomSera||20);
+          else if(sid==='19-23') x+=(e.sogliaSer||14);
+        });
+      } else {
+        if(d.hasMat) x+=(e.sogliaMat||12.5);
+        if(d.hasSer) x+=(e.sogliaSer||14);
+      }
+      return a+x;
+    },0);
     const wC=wd.reduce((a,d)=>a+(d.cTot||d.cNorm||d.c),0); // totale reale
     const wFP=wd.reduce((a,d)=>a+(d.cFuoriPaese||d.fp||0),0); // fuori paese reale
     const wCBonus=wd.reduce((a,d)=>a+(d.cBonus||d.c),0); // pesato per bonus
@@ -1690,7 +1736,18 @@ function renderDaily(){
   let rC=0,rFP=0,rAt=0,rEx=0,rBn=0,rCO=0,rCa=0,rFee=0,rCmp=0,rTick=0;
 
   ms.days.forEach(day=>{
-    const att=(day.hasMat?e.sogliaMat:0)+(day.hasSer?e.sogliaSer:0);
+    const _dsft=getShiftFromTurni(name,day.ds);
+    let att=0;
+    if(_dsft&&_dsft.slots.length){
+      _dsft.slots.forEach(sid=>{
+        if(sid==='09-14') att+=(e.sogliaMat||12.5);
+        else if(sid==='11-14') att+=(e.sogliaMezzoMat||7);
+        else if(sid==='17-22'||sid==='18-22') att+=(e.sogliaPomSera||20);
+        else if(sid==='19-23') att+=(e.sogliaSer||14);
+      });
+    } else {
+      att=(day.hasMat?(e.sogliaMat||12.5):0)+(day.hasSer?(e.sogliaSer||14):0);
+    }
     const ext=Math.max(0,day.c-att),bon=ext*e.bonusEuro;
     let cmpBase=0;
     if(e.mode==='giornata')cmpBase=e.importo;
@@ -2387,6 +2444,7 @@ function exportExcel(){
               const wd = byWeek[wn];
               const e = ms.e||{};
               const wM=wd.filter(d=>d.hasMat).length, wS=wd.filter(d=>d.hasSer).length;
+              // Attesa settimanale con 4 soglie (semplificato: usa mat+sera)
               const wAtt=wM*(e.sogliaMat||12.5)+wS*(e.sogliaSer||14);
               const wC=wd.reduce((a,d)=>a+n(d.cTot||d.c),0);
               const wFP=wd.reduce((a,d)=>a+n(d.cFuoriPaese||d.fp),0);
@@ -2511,7 +2569,7 @@ function deserializeD(raw){
         return m;
       })(),
       settings: raw[name].settings||{kmThresh:5,kmMax:50,cutHour:15},
-      econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
+      econ: Object.assign({mode:'giornata',importo:0,sogliaMat:12.5,sogliaMezzoMat:7,sogliaPomSera:20,sogliaSer:14,bonusEuro:1,note:'',turno:{matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0}}, raw[name].econ||{}),
       econHistory: raw[name].econHistory||[],
       acconti: raw[name].acconti || [],
       standby: raw[name].standby === true,
