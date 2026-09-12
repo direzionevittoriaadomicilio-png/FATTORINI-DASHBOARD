@@ -1416,6 +1416,40 @@ function computeMonth(name,mk){
   // Bonus logic
   // Calcola attesa con 4 soglie basate sui turni pianificati
   let nMatIntera=0,nMezzoMat=0,nPomSera=0,nSolaSera=0;
+  // Calcola compenso da turni per i giorni SENZA ordini (modalità A turno)
+  if(e.mode==='turno'){
+    const [_mkY,_mkM]=mk.split('-').map(Number);
+    const _daysInMonth=new Date(_mkY,_mkM,0).getDate();
+    const _turniDays=new Set(days.map(d=>d.ds));
+    for(let _g=1;_g<=_daysInMonth;_g++){
+      const _ds=`${String(_g).padStart(2,'0')}/${String(_mkM).padStart(2,'0')}/${_mkY}`;
+      if(_turniDays.has(_ds)) continue;
+      const _sft=getShiftFromTurni(name,_ds);
+      if(!_sft||!_sft.slots.length) continue;
+      const _mz=D[name]?.mezzo?.[_ds]||{};
+      const _tar=e.turno||{};
+      let _comp=0;
+      _sft.slots.forEach(_sid=>{
+        const _isMat=_sid==='09-14'||_sid==='11-14';
+        const _mzzo=_isMat?(_mz.mat||'—'):(_mz.ser||'—');
+        const _pr=_mzzo==='Auto propria';
+        if(_sid==='09-14'){_comp+=_pr?(_tar.matPr||0):(_tar.matAz||0);nMatIntera++;}
+        else if(_sid==='11-14'){_comp+=_pr?(_tar.mezzoMatPr||0):(_tar.mezzoMatAz||0);nMezzoMat++;}
+        else if(_sid==='17-22'||_sid==='18-22'){
+          const _p=_pr?(_tar.pomPr||0):(_tar.pomAz||0);
+          _comp+=_p>0?_p:(_pr?(_tar.serPr||0):(_tar.serAz||0));
+          nPomSera++;
+        }
+        else if(_sid==='19-23'){_comp+=_pr?(_tar.serPr||0):(_tar.serAz||0);nSolaSera++;}
+      });
+      if(_comp>0){
+        compBase+=_comp;
+        daysWithMat+=_sft.hasMat?1:0;
+        daysWithSer+=_sft.hasSer?1:0;
+        totDays++;
+      }
+    }
+  }
   days.forEach(day=>{
     const sft=getShiftFromTurni(name,day.ds);
     if(sft&&sft.slots.length){
@@ -2863,6 +2897,13 @@ function initApp(){
   if(!restored){
     doc.getElementById('upWrap').classList.remove('hidden');
     doc.getElementById('dash').classList.add('hidden');
+  }
+  // Ripristina condizioni Martino Salerno se perse nel merge
+  const _ms=D['Martino Salerno'];
+  if(_ms && (!_ms.econ||!_ms.econ.mode||_ms.econ.mode===''||_ms.econ.mode==='undefined')){
+    _ms.econ={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
+    autoSaveToLocalStorage();
+    console.log('[FIX] Condizioni Martino Salerno ripristinate');
   }
   // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
   Object.values(D).forEach(d=>{ if(d.settings && d.settings.cutHour===14) d.settings.cutHour=15; });
