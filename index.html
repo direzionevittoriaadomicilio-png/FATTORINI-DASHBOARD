@@ -2898,16 +2898,22 @@ function initApp(){
     doc.getElementById('upWrap').classList.remove('hidden');
     doc.getElementById('dash').classList.add('hidden');
   }
-  // Ripristina condizioni Martino Salerno se perse nel merge
+  // Ripristina condizioni Martino Salerno — azzera storico errato e reimpostia tariffe
   const _ms=D['Martino Salerno'];
   if(_ms){
+    const _correctEcon={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
+    // Controlla se le tariffe sono sbagliate (0) o lo storico ha voci errate
     const _t=(_ms.econ&&_ms.econ.turno)||{};
     const _tarSum=(_t.matAz||0)+(_t.matPr||0)+(_t.serAz||0)+(_t.serPr||0);
-    if(!_ms.econ||!_ms.econ.mode||_ms.econ.mode===''||_tarSum===0){
-      _ms.econ={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
+    const _hasWrongHistory=(_ms.econHistory||[]).some(h=>{
+      const ht=(h.econ&&h.econ.turno)||{};
+      return ((ht.matAz||0)+(ht.matPr||0)+(ht.serAz||0)+(ht.serPr||0))===0;
+    });
+    if(!_ms.econ||!_ms.econ.mode||_tarSum===0||_hasWrongHistory){
+      _ms.econ=_correctEcon;
+      _ms.econHistory=[]; // azzera storico errato
       autoSaveToLocalStorage();
       if(typeof debouncedCloudSave==='function') debouncedCloudSave();
-      console.log('[FIX] Condizioni Martino Salerno ripristinate, tariffe iniettate');
     }
   }
   // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
