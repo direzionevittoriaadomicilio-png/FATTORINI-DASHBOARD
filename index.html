@@ -444,6 +444,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
             <div id="econHistoryList"></div>
           </div>
           <button class="btn btn-acc" onclick="saveEcon()">✓ Salva condizioni</button>
+          <button class="btn btn-ghost" onclick="resetEconMartino()" style="display:none" id="btnResetMartino">🔄 Ripristina tariffe</button>
           <button class="btn btn-ghost" onclick="closeEconPanel()">Annulla</button>
         </div>
       </div>
@@ -1107,6 +1108,9 @@ function selectDriver(name){
 
 // ── PANELS ──
 function openEconPanel(){
+  const btnR=doc.getElementById('btnResetMartino');
+  if(btnR) btnR.style.display=(cur==='Martino Salerno'?'inline-flex':'none');
+
   const e=D[cur].econ;
   if(!e.turno) e.turno={matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0};
   doc.getElementById('econDriverName').textContent=cur;
@@ -3909,6 +3913,17 @@ function addManualDriver(){
   showToast('✓ '+n+' aggiunto');
 }
 
+
+function resetEconMartino(){
+  if(!D[cur]) return;
+  D[cur].econ={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
+  D[cur].econHistory=[];
+  openEconPanel();
+  autoSaveToLocalStorage();
+  if(typeof debouncedCloudSave==="function") debouncedCloudSave();
+  renderDriver();
+  showToast("✓ Condizioni ripristinate correttamente");
+}
 </script>
 
 
