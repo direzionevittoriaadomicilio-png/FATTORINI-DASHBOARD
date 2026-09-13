@@ -444,7 +444,7 @@ tbody tr:hover td{background:rgba(255,255,255,.01)}
             <div id="econHistoryList"></div>
           </div>
           <button class="btn btn-acc" onclick="saveEcon()">✓ Salva condizioni</button>
-          <button class="btn btn-ghost" onclick="resetEconMartino()" style="display:none" id="btnResetMartino">🔄 Ripristina tariffe</button>
+
           <button class="btn btn-ghost" onclick="closeEconPanel()">Annulla</button>
         </div>
       </div>
@@ -1108,8 +1108,6 @@ function selectDriver(name){
 
 // ── PANELS ──
 function openEconPanel(){
-  const btnR=doc.getElementById('btnResetMartino');
-  if(btnR) btnR.style.display=(cur==='Martino Salerno'?'inline-flex':'none');
 
   const e=D[cur].econ;
   if(!e.turno) e.turno={matAz:0,matPr:0,mezzoMatAz:0,mezzoMatPr:0,pomAz:0,pomPr:0,serAz:0,serPr:0};
@@ -1150,27 +1148,6 @@ function updateEconLabel(){
 doc.getElementById('econMode').addEventListener('change',updateEconLabel);
 function saveEcon(){
   if(!D[cur]) return;
-  // Salva le condizioni VECCHIE nello storico con la data di fine
-  const today = new Date();
-  const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-  if(!D[cur].econHistory) D[cur].econHistory=[];
-  // Aggiungi le condizioni attuali allo storico se non è la prima volta
-  if(D[cur].econ && D[cur].econ.mode){
-    const lastEntry = D[cur].econHistory[D[cur].econHistory.length-1];
-    // Evita duplicati: aggiungi solo se le condizioni sono cambiate
-    const currentStr = JSON.stringify(D[cur].econ);
-    const lastStr = lastEntry ? JSON.stringify(lastEntry.econ) : '';
-    if(currentStr !== lastStr){
-      // Determina la data di inizio delle condizioni attuali
-      const from = lastEntry ? lastEntry.to || todayStr : '2000-01-01';
-      D[cur].econHistory.push({
-        from: from,
-        to: todayStr,
-        econ: JSON.parse(JSON.stringify(D[cur].econ))
-      });
-    }
-  }
-  // Applica le nuove condizioni
   const e=D[cur].econ;
   e.mode=doc.getElementById('econMode').value;
   e.importo=parseFloat(doc.getElementById('econImporto').value)||0;
@@ -1189,13 +1166,11 @@ function saveEcon(){
   e.turno.pomPr=parseFloat(doc.getElementById('turnoPomPr').value)||0;
   e.turno.serAz=parseFloat(doc.getElementById('turnoSerAz').value)||0;
   e.turno.serPr=parseFloat(doc.getElementById('turnoSerPr').value)||0;
-  // Registra la data di inizio delle nuove condizioni
-  e.validFrom = todayStr;
   closeEconPanel();
   renderDriver();
   autoSaveToLocalStorage();
   debouncedCloudSave();
-  showToast('✓ Condizioni aggiornate dal '+todayStr);
+  showToast('✓ Condizioni salvate');
 }
 function openSettingsPanel(){
   const s=D[cur].settings;
@@ -1337,26 +1312,6 @@ function getTurnoComp(turnoType, mezzoMat, mezzoSer, turnoTariffe){
   return map[turnoType]||0;
 }
 
-// Ritorna le condizioni economiche valide per una data specifica
-function getEconForDate(name, dateStr){
-  if(!D[name]) return defaultEcon();
-  const hist = D[name].econHistory||[];
-  if(!hist.length) return D[name].econ||defaultEcon();
-  // dateStr formato DD/MM/YYYY → converte in YYYY-MM-DD per confronto
-  const parts = dateStr.split('/');
-  if(parts.length!==3) return D[name].econ||defaultEcon();
-  const iso = parts[2]+'-'+parts[1].padStart(2,'0')+'-'+parts[0].padStart(2,'0');
-  // Cerca l'ultima entry dello storico dove from <= iso <= to
-  let result = D[name].econ||defaultEcon(); // default: condizioni attuali
-  for(const entry of hist){
-    if(entry.from <= iso && (!entry.to || iso < entry.to)){
-      result = entry.econ;
-      break;
-    }
-  }
-  return result;
-}
-
 function computeMonth(name,mk){
   const d=D[name];
   const s=d.settings;
@@ -1420,40 +1375,7 @@ function computeMonth(name,mk){
   // Bonus logic
   // Calcola attesa con 4 soglie basate sui turni pianificati
   let nMatIntera=0,nMezzoMat=0,nPomSera=0,nSolaSera=0;
-  // Calcola compenso da turni per i giorni SENZA ordini (modalità A turno)
-  if(e.mode==='turno'){
-    const [_mkY,_mkM]=mk.split('-').map(Number);
-    const _daysInMonth=new Date(_mkY,_mkM,0).getDate();
-    const _turniDays=new Set(days.map(d=>d.ds));
-    for(let _g=1;_g<=_daysInMonth;_g++){
-      const _ds=`${String(_g).padStart(2,'0')}/${String(_mkM).padStart(2,'0')}/${_mkY}`;
-      if(_turniDays.has(_ds)) continue;
-      const _sft=getShiftFromTurni(name,_ds);
-      if(!_sft||!_sft.slots.length) continue;
-      const _mz=D[name]?.mezzo?.[_ds]||{};
-      const _tar=e.turno||{};
-      let _comp=0;
-      _sft.slots.forEach(_sid=>{
-        const _isMat=_sid==='09-14'||_sid==='11-14';
-        const _mzzo=_isMat?(_mz.mat||'—'):(_mz.ser||'—');
-        const _pr=_mzzo==='Auto propria';
-        if(_sid==='09-14'){_comp+=_pr?(_tar.matPr||0):(_tar.matAz||0);nMatIntera++;}
-        else if(_sid==='11-14'){_comp+=_pr?(_tar.mezzoMatPr||0):(_tar.mezzoMatAz||0);nMezzoMat++;}
-        else if(_sid==='17-22'||_sid==='18-22'){
-          const _p=_pr?(_tar.pomPr||0):(_tar.pomAz||0);
-          _comp+=_p>0?_p:(_pr?(_tar.serPr||0):(_tar.serAz||0));
-          nPomSera++;
-        }
-        else if(_sid==='19-23'){_comp+=_pr?(_tar.serPr||0):(_tar.serAz||0);nSolaSera++;}
-      });
-      if(_comp>0){
-        compBase+=_comp;
-        daysWithMat+=_sft.hasMat?1:0;
-        daysWithSer+=_sft.hasSer?1:0;
-        totDays++;
-      }
-    }
-  }
+
   days.forEach(day=>{
     const sft=getShiftFromTurni(name,day.ds);
     if(sft&&sft.slots.length){
@@ -1483,9 +1405,7 @@ function computeMonth(name,mk){
   else if(e.mode==='turno'){
     days.forEach(day=>{
       const mz=D[name]?.mezzo?.[day.ds]||{};
-      const eDayRaw=getEconForDate(name, day.ds); // condizioni del giorno specifico
-      const eDay=eDayRaw||e;
-      const tariffe=eDay.turno||e.turno||{};
+      const tariffe=e.turno||{};
       let comp=0;
       let turnoType=null;
       const sft=getShiftFromTurni(name, day.ds);
@@ -2902,25 +2822,6 @@ function initApp(){
     doc.getElementById('upWrap').classList.remove('hidden');
     doc.getElementById('dash').classList.add('hidden');
   }
-  // Ripristina condizioni Martino Salerno se non sono 'turno' con tariffe corrette
-  const _ms=D['Martino Salerno'];
-  if(_ms){
-    const _t=(_ms.econ&&_ms.econ.turno)||{};
-    const _tarSum=(_t.matAz||0)+(_t.matPr||0)+(_t.serAz||0)+(_t.serPr||0);
-    const _modeWrong=!_ms.econ||!_ms.econ.mode||_ms.econ.mode!=='turno';
-    const _tariffeWrong=_tarSum<50;
-    const _hasWrongHistory=(_ms.econHistory||[]).some(h=>{
-      const ht=(h.econ&&h.econ.turno)||{};
-      return ((ht.matAz||0)+(ht.matPr||0)+(ht.serAz||0)+(ht.serPr||0))<50;
-    });
-    if(_modeWrong||_tariffeWrong||_hasWrongHistory){
-      _ms.econ={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
-      _ms.econHistory=[];
-      autoSaveToLocalStorage();
-      if(typeof debouncedCloudSave==='function') debouncedCloudSave();
-      console.log('[FIX] Martino Salerno: condizioni ripristinate a turno');
-    }
-  }
     // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
   Object.values(D).forEach(d=>{ if(d.settings && d.settings.cutHour===14) d.settings.cutHour=15; });
   if(Object.keys(D).length) { autoSaveToLocalStorage(); }
@@ -3913,17 +3814,6 @@ function addManualDriver(){
   showToast('✓ '+n+' aggiunto');
 }
 
-
-function resetEconMartino(){
-  if(!D[cur]) return;
-  D[cur].econ={"mode": "turno", "importo": 33.33, "sogliaMat": 12.5, "sogliaMezzoMat": 7, "sogliaPomSera": 20, "sogliaSer": 14, "bonusEuro": 1, "note": "", "turno": {"matAz": 25, "matPr": 30, "mezzoMatAz": 15, "mezzoMatPr": 20, "pomAz": 30, "pomPr": 35, "serAz": 25, "serPr": 33.333}};
-  D[cur].econHistory=[];
-  openEconPanel();
-  autoSaveToLocalStorage();
-  if(typeof debouncedCloudSave==="function") debouncedCloudSave();
-  renderDriver();
-  showToast("✓ Condizioni ripristinate correttamente");
-}
 </script>
 
 
