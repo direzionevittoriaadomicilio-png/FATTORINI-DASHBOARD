@@ -2972,7 +2972,8 @@ function forcePullFromCloud(){
       doc.getElementById('dash').classList.remove('hidden');
       if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
     }
-    showToast('☁️ Dati scaricati dal cloud — '+keys.length+' fattorini');
+    const totOrds=Object.values(D).reduce((s,d)=>s+(d.orders||[]).length,0);
+    showToast('☁️ Scaricati: '+keys.length+' fattorini, '+totOrds+' ordini totali');
   }).catch(e=>showToast('⚠️ Errore scaricamento: '+e.message));
 }
 
