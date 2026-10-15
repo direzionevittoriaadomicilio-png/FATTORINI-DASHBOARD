@@ -2865,24 +2865,21 @@ function connectToFirebase(cfg){
     const key=cfg.workspace.trim().replace(/[^a-zA-Z0-9_-]/g,'_').toLowerCase();
     fbRef=fbDb.ref('fattorini_ws/'+key);
     fbRef.on('value',snapshot=>{
-      const hasLocalData = Object.keys(D).length > 0;
-      if(hasLocalData && (cloudSaving||cloudPaused)) return;
+      if(cloudSaving||cloudPaused) return;
       const remote=snapshot.val();
       if(!remote||!remote.data) return;
-      const remoteAt=remote.savedAt?new Date(remote.savedAt).getTime():0;
-      let localAt=0;
-      try{const lr=localStorage.getItem(LS_KEY);if(lr)localAt=new Date(JSON.parse(lr).savedAt).getTime();}catch(e){}
-      const noLocalData = !Object.keys(D).length && localAt===0;
-      if(noLocalData || remoteAt>localAt+2000){
+      // Confronto per numero ordini — più affidabile dei timestamp
+      const remoteOrds=Object.values(remote.data).reduce((s,d)=>s+(d.orders||[]).length,0);
+      const localOrds=Object.values(D||{}).reduce((s,d)=>s+(d.orders||[]).length,0);
+      const noLocalData = localOrds===0;
+      if(noLocalData || remoteOrds>localOrds){
+        // Il cloud ha più dati — scarica
         D=deserializeD(remote.data);
         if(remote.turni && typeof TURNI!=='undefined'){
           TURNI=remote.turni;
-          // Salva in localStorage e aggiorna la griglia se è visibile
           if(typeof saveTurni==='function') saveTurni();
           const vt=document.getElementById('viewTurni');
-          if(vt && !vt.classList.contains('hidden') && typeof renderTurni==='function'){
-            renderTurni();
-          }
+          if(vt && !vt.classList.contains('hidden') && typeof renderTurni==='function') renderTurni();
         }
         if(remote.mezzi && Array.isArray(remote.mezzi) && remote.mezzi.length){ MEZZI=remote.mezzi; saveMezzi(); }
         if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
@@ -2894,7 +2891,10 @@ function connectToFirebase(cfg){
           doc.getElementById('dash').classList.remove('hidden');
           if(!cur||!D[cur]) selectDriver(keys[0]); else renderDriver();
         }
-        showToast(noLocalData?'☁️ Dati caricati dal cloud':'☁️ Dati aggiornati da un altro dispositivo');
+        showToast(noLocalData?'☁️ Dati caricati dal cloud ('+remoteOrds+' ordini)':'☁️ Aggiornato: '+remoteOrds+' ordini dal cloud');
+      } else if(localOrds>remoteOrds && localOrds>0){
+        // Il locale ha più dati — carica sul cloud in automatico
+        setTimeout(()=>{ if(!cloudSaving) cloudSave(); },1500);
       }
     });
     cloudConnected=true;
