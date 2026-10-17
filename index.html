@@ -2703,29 +2703,28 @@ function loadSession(file){
 const LS_KEY = 'fattorini_session_v1';
 
 function autoSaveToLocalStorage(){
+  // ☁️ Firebase è SEMPRE aggiornato, indipendentemente da localStorage
+  if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
+
+  // localStorage è solo un backup locale — se fallisce, Firebase salva comunque
   try {
     const payload = { version:1, savedAt: new Date().toISOString(), data: serializeD(D) };
     const serialized = JSON.stringify(payload);
     localStorage.setItem(LS_KEY, serialized);
-    // ☁️ Sync cloud (debounced)
-    if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
-    // Show green dot
-    const dot = doc.getElementById('autoSaveDot');
-    if(dot){
-      dot.style.display = 'flex';
-      const circle = doc.getElementById('autoSaveDotCircle');
-      const label = doc.getElementById('autoSaveDotLabel');
-      if(circle) circle.style.background = '#16a34a';
-      if(label) label.textContent = 'salvato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
-      clearTimeout(dot._t);
-      dot._t = setTimeout(()=>{ if(circle) circle.style.background = '#9ca3af'; }, 3000);
-    }
   } catch(e){
-    console.warn('localStorage non disponibile:', e);
-    // Mostra il toast solo se Firebase non è connesso — altrimenti il cloud è il backup
-    if(typeof fbRef === 'undefined' || !fbRef) {
-      showToast('⚠️ Salvataggio automatico non disponibile in questo browser');
-    }
+    console.warn('localStorage non disponibile (Firebase salva comunque):', e);
+  }
+
+  // Show green dot
+  const dot = doc.getElementById('autoSaveDot');
+  if(dot){
+    dot.style.display = 'flex';
+    const circle = doc.getElementById('autoSaveDotCircle');
+    const label = doc.getElementById('autoSaveDotLabel');
+    if(circle) circle.style.background = '#16a34a';
+    if(label) label.textContent = 'salvato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    clearTimeout(dot._t);
+    dot._t = setTimeout(()=>{ if(circle) circle.style.background = '#9ca3af'; }, 3000);
   }
 }
 
