@@ -2722,7 +2722,10 @@ function autoSaveToLocalStorage(){
     }
   } catch(e){
     console.warn('localStorage non disponibile:', e);
-    showToast('⚠️ Salvataggio automatico non disponibile in questo browser');
+    // Mostra il toast solo se Firebase non è connesso — altrimenti il cloud è il backup
+    if(typeof fbRef === 'undefined' || !fbRef) {
+      showToast('⚠️ Salvataggio automatico non disponibile in questo browser');
+    }
   }
 }
 
