@@ -2702,9 +2702,9 @@ function loadSession(file){
 // ── AUTO-SAVE localStorage ──
 const LS_KEY = 'fattorini_session_v1';
 
-function autoSaveToLocalStorage(){
-  // ☁️ Firebase è SEMPRE aggiornato, indipendentemente da localStorage
-  if(typeof debouncedCloudSave === 'function') debouncedCloudSave();
+function autoSaveToLocalStorage(skipCloud){
+  // ☁️ Firebase aggiornato — tranne quando i dati arrivano già dal cloud (evita loop)
+  if(!skipCloud && typeof debouncedCloudSave === 'function') debouncedCloudSave();
 
   // localStorage è solo un backup locale — se fallisce, Firebase salva comunque
   try {
@@ -2777,15 +2777,7 @@ function showToast(msg){
 
 
 
-// ── AUTO-LOAD AL AVVIO ──
-window.addEventListener('load', ()=>{
-  const restored = loadFromLocalStorage();
-  if(!restored){
-    doc.getElementById('upWrap').classList.remove('hidden');
-    doc.getElementById('dash').classList.add('hidden');
-  }
-  initCloudFromSaved();
-});
+// ── AUTO-LOAD AL AVVIO ── (gestito da initApp via secondo listener)
 
 // ═══════════════════════════════════════════════════════════
 // ── LOGIN ──
@@ -2814,19 +2806,18 @@ function setNewPassword(newPwd){
 }
 
 function initApp(){
-  // Init cloud from saved config
-  initCloudFromSaved();
-  // Carica turni dal localStorage subito (non solo quando si apre la scheda Turni)
+  // 1. Prima carica turni e dati locali
   if(typeof loadTurni === 'function') loadTurni();
-  // Load localStorage session
   const restored = loadFromLocalStorage();
   if(!restored){
     doc.getElementById('upWrap').classList.remove('hidden');
     doc.getElementById('dash').classList.add('hidden');
   }
-    // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
+  // Migrazione: aggiorna cutHour da 14 a 15 per tutti i fattorini esistenti
   Object.values(D).forEach(d=>{ if(d.settings && d.settings.cutHour===14) d.settings.cutHour=15; });
-  if(Object.keys(D).length) { autoSaveToLocalStorage(); }
+  // 2. SOLO DOPO connette Firebase — così D è già popolato quando arriva il listener
+  //    e non viene sovrascritto erroneamente con dati vuoti o vecchi
+  initCloudFromSaved();
 }
 
 // On page load: check if already authenticated this session
@@ -2885,7 +2876,7 @@ function connectToFirebase(cfg){
         }
         if(remote.mezzi && Array.isArray(remote.mezzi) && remote.mezzi.length){ MEZZI=remote.mezzi; saveMezzi(); }
         if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
-        autoSaveToLocalStorage();
+        autoSaveToLocalStorage(true); // skipCloud=true: dati già scaricati dal cloud, non ri-uploadare
         renderSidebar();
         const keys=Object.keys(D);
         if(keys.length){
@@ -2966,7 +2957,7 @@ function forcePullFromCloud(){
     if(!remote||!remote.data){ showToast('ℹ️ Nessun dato trovato sul cloud'); return; }
     D=deserializeD(remote.data);
     if(cur && D[cur]) curMon=getMonths(cur).slice(-1)[0]||null;
-    autoSaveToLocalStorage();
+    autoSaveToLocalStorage(true); // skipCloud: dati già dal cloud, non ri-uploadare
     renderSidebar();
     const keys=Object.keys(D);
     if(keys.length){
