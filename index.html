@@ -1246,9 +1246,9 @@ function getShiftFromTurni(driverName, dateStr){
   const wkData = TURNI[wk];
   if(!wkData || !wkData[g]) return null;
   const dayData = wkData[g];
-  const allSlots = ['09-14','11-14','17-22','18-22','19-23'];
+  const allSlots = ['09-14','11-14','17-22','18-22','18-23','19-23'];
   const matSlots = ['09-14','11-14'];
-  const serSlots = ['17-22','18-22','19-23'];
+  const serSlots = ['17-22','18-22','18-23','19-23'];
   const assignedSlots = allSlots.filter(sid=>(dayData[sid]||[]).some(s=>s.name===driverName));
   if(!assignedSlots.length) return null;
   return {
@@ -1262,7 +1262,7 @@ function getShiftFromTurni(driverName, dateStr){
 function slotToTurnoType(slotId){
   if(slotId==='09-14') return 'matIntera';
   if(slotId==='11-14') return 'mezzoMat';
-  if(slotId==='17-22'||slotId==='18-22') return 'pomSera';
+  if(slotId==='17-22'||slotId==='18-22'||slotId==='18-23') return 'pomSera';
   if(slotId==='19-23') return 'solaSera';
   return null;
 }
@@ -1382,7 +1382,7 @@ function computeMonth(name,mk){
       sft.slots.forEach(sid=>{
         if(sid==='09-14') nMatIntera++;
         else if(sid==='11-14') nMezzoMat++;
-        else if(sid==='17-22'||sid==='18-22') nPomSera++;
+        else if(sid==='17-22'||sid==='18-22'||sid==='18-23') nPomSera++;
         else if(sid==='19-23') nSolaSera++;
       });
     } else {
@@ -1632,7 +1632,7 @@ function renderWeekly(){
         wsft.slots.forEach(sid=>{
           if(sid==='09-14') x+=(e.sogliaMat||12.5);
           else if(sid==='11-14') x+=(e.sogliaMezzoMat||7);
-          else if(sid==='17-22'||sid==='18-22') x+=(e.sogliaPomSera||20);
+          else if(sid==='17-22'||sid==='18-22'||sid==='18-23') x+=(e.sogliaPomSera||20);
           else if(sid==='19-23') x+=(e.sogliaSer||14);
         });
       } else {
@@ -1700,7 +1700,7 @@ function renderDaily(){
       _dsft.slots.forEach(sid=>{
         if(sid==='09-14') att+=(e.sogliaMat||12.5);
         else if(sid==='11-14') att+=(e.sogliaMezzoMat||7);
-        else if(sid==='17-22'||sid==='18-22') att+=(e.sogliaPomSera||20);
+        else if(sid==='17-22'||sid==='18-22'||sid==='18-23') att+=(e.sogliaPomSera||20);
         else if(sid==='19-23') att+=(e.sogliaSer||14);
       });
     } else {
@@ -3104,6 +3104,8 @@ const SHIFTS = [
 
   {id:'18-22', label:'Dom. pom.',  time:'18:00–22:00', cls:'chip-pom', mat:false,
    attesi:{lun:0,mar:0,mer:0,gio:0,ven:0,sab:0,dom:1}},
+  {id:'18-23', label:'Pom+Sera',   time:'18:00–23:00', cls:'chip-pom', mat:false,
+   attesi:{lun:1,mar:1,mer:1,gio:1,ven:0,sab:0,dom:0}},
   {id:'19-23', label:'Sera',       time:'19:00–23:00', cls:'chip-pom', mat:false,
    attesi:{lun:1,mar:1,mer:1,gio:1,ven:2,sab:5,dom:5}},
 ];
