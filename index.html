@@ -921,7 +921,8 @@ function parseRows(rows){
     //   * 1/2 = 1.5 ticket, 1 consegna
     let ticketCount = 0;
     let ticketConsegne = 0;
-    if(orderNumRaw.includes('*')){
+    const isStarEuro = orderNumRaw.trim().toUpperCase() === '*€';
+    if(!isStarEuro && orderNumRaw.includes('*')){
       const halfMatch = orderNumRaw.match(/\*\s*1\s*\/\s*2/);
       const doubleMatch = orderNumRaw.match(/\*{2,}/) || (orderNumRaw.match(/\*/g)||[]).length >= 2;
       if(halfMatch){
@@ -979,7 +980,7 @@ function parseRows(rows){
 
   // Aggiunge i nuovi ordini (deduplicazione per numero ordine reale)
   _newOrders.forEach(({name,order})=>{
-    const isRealOrderNum = order.orderNum && !order.isTicket && order.orderNum !== '€ NS' && !isNaN(order.orderNum);
+    const isRealOrderNum = order.orderNum && !order.isTicket && order.orderNum !== '€ NS' && order.orderNum !== '*€' && !isNaN(order.orderNum);
     // Doppia consegna: stesso ordine, stesso indirizzo, ma tariffa K=0 sul secondo → entrambe contate
     // Duplicato vero: stesso ordine + stessa data + stessa tariffa K → salta (upload stesso file)
     const exists = isRealOrderNum && D[name].orders.some(o=>
@@ -1026,7 +1027,7 @@ function vKm(km,mx){return km>0&&km<=mx}
 const FP_FEE_SOGLIA = 4.90;
 function isNsOrder(o){ 
   const n=(o.orderNum||'').trim().toUpperCase();
-  return n==='NS'||n==='€ NS'||n==='€NS';
+  return n==='NS'||n==='€ NS'||n==='€NS'||n==='*€';
 }
 function isFuoriPaese(o, s){
   if(o.isTicket || isNsOrder(o)){
@@ -2537,7 +2538,8 @@ function deserializeD(raw){
         // Ricalcola ticket da orderNum
         const oNum = o.orderNum || '';
         let ticketCount = 0, ticketConsegne = 0;
-        if(oNum.includes('*')){
+        const isStarEuro2 = oNum.trim().toUpperCase() === '*€';
+        if(!isStarEuro2 && oNum.includes('*')){
           const halfMatch = oNum.match(/\*\s*1\s*\/\s*2/);
           const numStars = (oNum.match(/\*/g)||[]).length;
           if(halfMatch){ ticketCount=1.5; ticketConsegne=1; }
